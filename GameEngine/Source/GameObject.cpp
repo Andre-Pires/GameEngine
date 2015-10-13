@@ -1,10 +1,11 @@
-﻿#include "GameObject.h"
+#include "GameObject.h"
 #include "Matrix4f.h"
 #include "Vector4f.h"
 #include "MatrixFactory.h"
 
 GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
 {
+	hasBeenModified = true;
 	this->bufferObjects = buffer;
 	this->scene = scene;
 
@@ -18,18 +19,24 @@ GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, i
 	memcpy(this->Indices, Indices, indicesSize * sizeof(GLubyte));
 
 	this->Vertices = new Vertex[verticesCount];
-	this->Indices = new GLubyte[indicesCount]{ 0,1,2,1,3,2 };
+	this->Indices = new GLubyte[indicesCount];
 
 	for (int i = 0; i < verticesCount; i++)
 	{
 		memcpy(Vertices[i].XYZW, Vertices[i].XYZW, 4 * sizeof(GLfloat));
 		memcpy(Vertices[i].RGBA, Vertices[i].RGBA, 4 * sizeof(GLfloat));
 	}
+
+	memcpy(this->Indices, Indices, 4 * sizeof(GLubyte));
+
+	VboId = bufferObjects->getVboId();
+	VaoId = bufferObjects->getVaoId();
 }
 
 //used by inheriting object
 GameObject::GameObject(BufferObjects* buffer, Scene* scene)
 {
+	hasBeenModified = true;
 	this->bufferObjects = buffer;
 	this->scene = scene;
 	VboId = bufferObjects->getVboId();
@@ -38,7 +45,11 @@ GameObject::GameObject(BufferObjects* buffer, Scene* scene)
 
 void GameObject::draw()
 {
-	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
+	if (hasBeenModified)
+	{
+		bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
+		hasBeenModified = false;
+	}
 
 	scene->draw(indicesCount, VaoId);
 }
@@ -51,6 +62,7 @@ void GameObject::translate(Vector3f translation)
 	{
 		memcpy(Vertices[i].XYZW, (translateMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
 	}
+	hasBeenModified = true;
 }
 
 void GameObject::rotate(float angle, Vector3f rotation)
@@ -62,6 +74,7 @@ void GameObject::rotate(float angle, Vector3f rotation)
 	{
 		memcpy(Vertices[i].XYZW, (rotateMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
 	}
+	hasBeenModified = true;
 }
 
 void GameObject::scale(Vector3f scale)
@@ -72,6 +85,7 @@ void GameObject::scale(Vector3f scale)
 	{
 		memcpy(Vertices[i].XYZW, (scaleMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
 	}
+	hasBeenModified = true;
 }
 
 void GameObject::shear(float shearX, float shearY)
@@ -82,26 +96,12 @@ void GameObject::shear(float shearX, float shearY)
 	{
 		memcpy(Vertices[i].XYZW, (shearMat *Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
 	}
-}
-
-std::ostream& GameObject::operator<<(std::ostream& stream)
-{
-	for (int i = 0; i < verticesCount; i++)
-	{
-		stream << std::endl
-			<< "[ "
-			<< Vertices[i].XYZW[0] << " ,"
-			<< Vertices[i].XYZW[1] << " ,"
-			<< Vertices[i].XYZW[2] << " ,"
-			<< Vertices[i].XYZW[3] << " ] \n";
-	}
-	stream << std::endl;
-	return stream;
+	hasBeenModified = true;
 }
 
 void GameObject::changeColor(Color color)
 {
-	GLfloat * colorToUse = new GLfloat[4];
+	GLfloat * colorToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
 
 	switch (color)
 	{
@@ -139,11 +139,27 @@ void GameObject::changeColor(Color color)
 	{
 		memcpy(Vertices[i].RGBA, colorToUse, 4 * sizeof(GLfloat));
 	}
+	hasBeenModified = true;
 }
 
 void GameObject::clearObjectFromBuffer()
 {
 	bufferObjects->destroyBufferObjects(VboId, VaoId);
+}
+
+std::ostream& GameObject::operator<<(std::ostream& stream)
+{
+	for (int i = 0; i < verticesCount; i++)
+	{
+		stream << std::endl
+			<< "[ "
+			<< Vertices[i].XYZW[0] << " ,"
+			<< Vertices[i].XYZW[1] << " ,"
+			<< Vertices[i].XYZW[2] << " ,"
+			<< Vertices[i].XYZW[3] << " ] \n";
+	}
+	stream << std::endl;
+	return stream;
 }
 
 std::ostream& operator<< (std::ostream& stream, GameObject object)

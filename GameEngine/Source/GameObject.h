@@ -13,6 +13,7 @@ protected:
 	GLubyte *Indices;
 	int indicesCount;
 	int verticesCount;
+	bool hasBeenModified;
 
 	//Usados apenas como forma de nomear os diferentes buffers
 	GLuint VaoId;
@@ -22,6 +23,7 @@ public:
 
 	GameObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
 	void draw();
+	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);
 	void scale(Vector3f scale);

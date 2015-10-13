@@ -99,12 +99,6 @@ Matrix4f MatrixFactory::Rotation4(float angle, Vector3f axis)
 
 	R = I + (sin(radians) * A) + (1 - cos(radians)) * A2;
 
-	cout << "radians 180: " << radians << endl;
-	cout << "sin 180: " << sin(radians) << endl;
-	cout << "cos 180: " << cos(radians) << endl;
-	cout << "A: " << A << endl;
-	cout << "A2: " << A2 << endl;
-
 	return Mat3to4(R);
 }
 
