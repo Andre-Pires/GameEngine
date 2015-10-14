@@ -3,9 +3,10 @@
 #include "Utilities.h"
 #include "BufferObjects.h"
 #include "Shader.h"
+#include "Matrix4f.h"
 
 class Scene
 {
 public:
-	void draw(int vertices, GLuint vao);
+	void draw(int vertices, GLuint vao, Matrix4f transform);
 };

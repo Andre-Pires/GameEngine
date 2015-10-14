@@ -31,38 +31,37 @@ GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, i
 
 	VboId = bufferObjects->getVboId();
 	VaoId = bufferObjects->getVaoId();
+
+	updateBuffer();
 }
 
 //used by inheriting object
 GameObject::GameObject(BufferObjects* buffer, Scene* scene)
 {
-	hasBeenModified = true;
 	this->bufferObjects = buffer;
 	this->scene = scene;
 	VboId = bufferObjects->getVboId();
 	VaoId = bufferObjects->getVaoId();
+
+	transformations = MatrixFactory::Identity4();
 }
 
 void GameObject::draw()
 {
-	if (hasBeenModified)
-	{
-		bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
-		hasBeenModified = false;
-	}
+	scene->draw(indicesCount, VaoId, transformations);
+}
 
-	scene->draw(indicesCount, VaoId);
+void GameObject::updateBuffer()
+{
+	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
 }
 
 void GameObject::translate(Vector3f translation)
 {
 	Vector4f vec;
 	Matrix4f translateMat = MatrixFactory::Translation4(translation);
-	for (int i = 0; i < verticesCount; i++)
-	{
-		memcpy(Vertices[i].XYZW, (translateMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
-	}
-	hasBeenModified = true;
+
+	transformations = translateMat * transformations;
 }
 
 void GameObject::rotate(float angle, Vector3f rotation)
@@ -70,33 +69,21 @@ void GameObject::rotate(float angle, Vector3f rotation)
 	Vector4f vec;
 	Matrix4f rotateMat = MatrixFactory::Rotation4(angle, rotation);
 
-	for (int i = 0; i < verticesCount; i++)
-	{
-		memcpy(Vertices[i].XYZW, (rotateMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
-	}
-	hasBeenModified = true;
+	transformations = rotateMat * transformations;
 }
 
 void GameObject::scale(Vector3f scale)
 {
 	Vector4f vec;
 	Matrix4f scaleMat = MatrixFactory::Scale4(scale);
-	for (int i = 0; i < verticesCount; i++)
-	{
-		memcpy(Vertices[i].XYZW, (scaleMat * Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
-	}
-	hasBeenModified = true;
+	transformations = scaleMat * transformations;
 }
 
 void GameObject::shear(float shearX, float shearY)
 {
 	Vector4f vec;
 	Matrix4f shearMat = MatrixFactory::Shear4(shearX, shearY);
-	for (int i = 0; i < verticesCount; i++)
-	{
-		memcpy(Vertices[i].XYZW, (shearMat *Vector4f(Vertices[i].XYZW)).getVector(), 4 * sizeof(GLfloat));
-	}
-	hasBeenModified = true;
+	transformations = shearMat * transformations;
 }
 
 void GameObject::changeColor(Color color)
@@ -139,7 +126,8 @@ void GameObject::changeColor(Color color)
 	{
 		memcpy(Vertices[i].RGBA, colorToUse, 4 * sizeof(GLfloat));
 	}
-	hasBeenModified = true;
+
+	updateBuffer();
 }
 
 void GameObject::clearObjectFromBuffer()

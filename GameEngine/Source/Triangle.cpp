@@ -20,4 +20,6 @@ Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GameObject(buffer, sce
 		memcpy(Vertices[i].XYZW, tempVertices[i].XYZW, 4 * sizeof(GLfloat));
 		memcpy(Vertices[i].RGBA, tempVertices[i].RGBA, 4 * sizeof(GLfloat));
 	}
+
+	updateBuffer();
 }

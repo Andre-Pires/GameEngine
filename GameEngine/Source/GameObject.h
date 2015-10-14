@@ -14,6 +14,7 @@ protected:
 	int indicesCount;
 	int verticesCount;
 	bool hasBeenModified;
+	Matrix4f transformations;
 
 	//Usados apenas como forma de nomear os diferentes buffers
 	GLuint VaoId;

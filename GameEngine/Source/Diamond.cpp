@@ -23,4 +23,6 @@ Diamond::Diamond(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene
 	}
 
 	this->rotate(45, Vector3f(0, 0, 1));
+
+	updateBuffer();
 }
