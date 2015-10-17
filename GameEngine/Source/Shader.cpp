@@ -47,7 +47,10 @@ void Shader::createShaderProgram()
 	glLinkProgram(ProgramId);
 
 	//"binda" uma uniform location, do programa criado, a um atributo (matrix) que vamos usar
-	UniformId = glGetUniformLocation(ProgramId, "Matrix");
+	UniformId = glGetUniformLocation(ProgramId, "ModelMatrix");
+
+	UboId = glGetUniformBlockIndex(ProgramId, "SharedMatrices");
+	glUniformBlockBinding(ProgramId, UboId, UBO_BP);
 
 	Utilities::checkOpenGLError("ERROR: Could not create shaders.");
 }

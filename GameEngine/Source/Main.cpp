@@ -30,6 +30,7 @@
 #include "Triangle.h"
 #include "Square.h"
 #include "Diamond.h"
+#include "Camera.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -39,10 +40,12 @@
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
+float ratio = 1.33;
 
 BufferObjects * bufferObjects;
 Shader  * shader;
 Scene * scene;
+Camera * camera;
 
 GameObject * triangle[5];
 GameObject * square;
@@ -62,51 +65,51 @@ void createTangram()
 	//head
 	diamond = new Diamond(bufferObjects, scene);
 	diamond->scale(Vector3f(0.5357, 0.5357, 1.0));
-	diamond->translate(Vector3f(0.1, 0.375, 0.0));
+	diamond->translate(Vector3f(0.0, 0.375, 0.0));
 	diamond->changeColor(YELLOW);
 
 	//right ear
 	triangle[0]->scale(Vector3f(0.5357, 0.5357, 1.0));
 	triangle[0]->rotate(-45, Vector3f(0.0, 0.0, 1.0));
-	triangle[0]->translate(Vector3f(0.1, 0.75, 0.0));
+	triangle[0]->translate(Vector3f(0.0, 0.75, 0.0));
 	triangle[0]->changeColor(RED);
 
 	//left ear
 	triangle[1]->scale(Vector3f(0.5357, 0.5357, 1.0));
 	triangle[1]->rotate(135, Vector3f(0.0, 0.0, 1.0));
-	triangle[1]->translate(Vector3f(0.1, 0.75, 0.0));
+	triangle[1]->translate(Vector3f(0.0, 0.75, 0.0));
 	triangle[1]->changeColor(RED);
 
 	//neck
-	triangle[2]->scale(Vector3f(0.5, 0.5, 1.0));
+	triangle[2]->scale(Vector3f(0.7653, 0.7653, 1.0));
 	triangle[2]->rotate(-45, Vector3f(0.0, 0.0, 1.0));
-	triangle[2]->translate(Vector3f(-0.045, 0.225, 0.0));
+	triangle[2]->translate(Vector3f(-0.145, 0.225, 0.0));
 	triangle[2]->changeColor(GREEN);
 
 	//body
-	triangle[3]->scale(Vector3f(0.75, 0.75, 1.0));
+	triangle[3]->scale(Vector3f(1.0714, 1.0714, 1.0));
 	triangle[3]->rotate(135, Vector3f(0.0, 0.0, 1.0));
-	triangle[3]->translate(Vector3f(0.397, 0.15, 0.0));
+	triangle[3]->translate(Vector3f(0.505, 0.12, 0.0));
 	triangle[3]->changeColor(BLUE);
 
 	//legs
-	triangle[4]->scale(Vector3f(0.75, 0.75, 1.0));
+	triangle[4]->scale(Vector3f(1.0714, 1.0714, 1.0));
 	triangle[4]->rotate(90, Vector3f(0.0, 0.0, 1.0));
-	triangle[4]->translate(Vector3f(0.4, -0.225, 0.0));
+	triangle[4]->translate(Vector3f(0.505, -0.42, 0.0));
 	triangle[4]->changeColor(PURPLE);
 
 	//tail
 	square = new Square(bufferObjects, scene);
 	square->scale(Vector3f(0.5357, 0.3745, 1));
-	square->shear(1.25, 0);
-	square->translate(Vector3f(0.4, -0.225, 0));
+	square->shear(1.2, 0);
+	square->translate(Vector3f(0.505, -0.42, 0));
 	square->changeColor(ORANGE);
 
-	debugTriangle = new Triangle(bufferObjects, scene);
-	debugTriangle->scale(Vector3f(1, 1, 1.0));
-	//debugTriangle->translate(Vector3f(0.5, 0.5, 0));
-	//debugTriangle->rotate(90, Vector3f(0.0, 0.0, 1.0));
+	//debugTriangle = new Triangle(bufferObjects, scene);
+	//debugTriangle->scale(Vector3f(1, 1, 1.0));
 	//debugTriangle->shear(0, 1.25);
+	//debugTriangle->rotate(90, Vector3f(0.0, 0.0, 1.0));
+	//debugTriangle->translate(Vector3f(0.5, 0.5, 0));
 	//debugTriangle->changeColor(ORANGE);
 }
 
@@ -122,22 +125,29 @@ void createProgram()
 	//creating new scene object for further drawing
 	scene = new Scene();
 
+	camera = new Camera(bufferObjects, scene);
+
+	camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	//camera->ortho(-2, 2, -2, 2, 1.0f, 10.0f);
+
 	//creating our figure's objects
 	createTangram();
 }
 
 void drawScene()
 {
+	camera->updateCamera();
+
 	for (int i = 0; i < 5; i++)
 	{
-		//triangle[i]->draw();
+		triangle[i]->draw();
 	}
 
-	//square->draw();
+	square->draw();
 
-	//diamond->draw();
+	diamond->draw();
 
-	debugTriangle->draw();
+	//debugTriangle->draw();
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -183,6 +193,13 @@ void reshape(int w, int h)
 {
 	WinX = w;
 	WinY = h;
+
+	if (WinY == 0)
+		WinY = 1;
+	ratio = WinX * 1.0 / WinY;
+
+	camera->perspective(30, ratio, 1, 10);
+
 	glViewport(0, 0, WinX, WinY);
 }
 

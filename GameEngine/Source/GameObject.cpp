@@ -5,7 +5,6 @@
 
 GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
 {
-	hasBeenModified = true;
 	this->bufferObjects = buffer;
 	this->scene = scene;
 
