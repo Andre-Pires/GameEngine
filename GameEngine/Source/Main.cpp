@@ -17,6 +17,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 #include "Vector3f.h"
 #include "Vector2f.h"
 #include "Matrix3f.h"
@@ -46,6 +48,20 @@ BufferObjects * bufferObjects;
 Shader  * shader;
 Scene * scene;
 Camera * camera;
+
+// Camera Position
+float eyeX = 0;
+float eyeY = 0;
+float eyeZ = 5;
+float centerX, centerY, centerZ = 0;
+CameraType cameraType = ORTHOGRAPHIC;
+
+// Mouse Tracking Variables
+int startX, startY, tracking = 0;
+
+// Camera Spherical Coordinates
+float alpha = -43.0f, beta = 48.0f;
+float r = 5.25f;
 
 GameObject * triangle[5];
 GameObject * square;
@@ -127,15 +143,27 @@ void createProgram()
 
 	camera = new Camera(bufferObjects, scene);
 
-	camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-	//camera->ortho(-2, 2, -2, 2, 1.0f, 10.0f);
-
 	//creating our figure's objects
 	createTangram();
 }
 
 void drawScene()
 {
+	if (cameraType == ORTHOGRAPHIC) {
+		camera->ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
+	}
+	else if (cameraType == PERSPECTIVE) {
+		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
+		// set the camera using a function similar to gluLookAt
+		camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	}
+
+	else if (cameraType == CONTROLLED_PERSP) {
+		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
+		// set the camera using a function similar to gluLookAt
+		camera->lookAt(Vector3f(eyeX, eyeY, eyeZ), Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+	}
+
 	camera->updateCamera();
 
 	for (int i = 0; i < 5; i++)
@@ -161,6 +189,132 @@ void clearObjectsFromBuffer()
 
 	square->clearObjectFromBuffer();
 	diamond->clearObjectFromBuffer();
+}
+
+/*********************************************************/
+/*                                                       */
+/*                        KEYBOARD                       */
+/*                                                       */
+
+void processKeys(unsigned char key, int xx, int yy)
+{
+	switch (key) {
+	case '1':
+		cameraType = ORTHOGRAPHIC;
+		break;
+
+	case '2':
+		cameraType = PERSPECTIVE;
+		break;
+
+	case '3':
+		cameraType = CONTROLLED_PERSP;
+		break;
+	case 'p':
+	case 'P':
+		if (cameraType == ORTHOGRAPHIC || cameraType == PERSPECTIVE)
+		{
+			cameraType = CONTROLLED_PERSP;
+		}
+		else if (cameraType == CONTROLLED_PERSP)
+		{
+			cameraType = ORTHOGRAPHIC;
+		}
+		break;
+
+	case 'w':
+	case 'W':
+		centerY += 0.5;
+		break;
+
+	case 'a':
+	case 'A':
+		centerX -= 0.5;
+		break;
+
+	case 's':
+	case 'S':
+		centerY -= 0.5;
+		break;
+	case 'd':
+	case 'D':
+		centerX += 0.5;
+		break;
+	}
+}
+
+/*********************************************************/
+/*                                                       */
+/*                         MOUSE                         */
+/*                                                       */
+
+void processMouseButtons(int button, int state, int xx, int yy)
+{
+	// start tracking the mouse
+	if (state == GLUT_DOWN) {
+		startX = xx;
+		startY = yy;
+		if (button == GLUT_LEFT_BUTTON)
+			tracking = 1;
+		else if (button == GLUT_RIGHT_BUTTON)
+			tracking = 2;
+	}
+
+	//stop tracking the mouse
+	else if (state == GLUT_UP) {
+		if (tracking == 1) {
+			alpha -= (xx - startX);
+			beta += (yy - startY);
+		}
+		else if (tracking == 2) {
+			r += (yy - startY) * 0.01f;
+			if (r < 0.1f)
+				r = 0.1f;
+		}
+		tracking = 0;
+	}
+}
+
+// Track mouse motion while buttons are pressed
+
+void processMouseMotion(int xx, int yy)
+{
+	if (cameraType == CONTROLLED_PERSP)
+	{
+		int deltaX, deltaY;
+		float alphaAux, betaAux;
+		float rAux;
+
+		deltaX = -xx + startX;
+		deltaY = yy - startY;
+
+		// left mouse button: move camera
+		if (tracking == 1) {
+			alphaAux = alpha + deltaX;
+			betaAux = beta + deltaY;
+
+			if (betaAux > 85.0f)
+				betaAux = 85.0f;
+			else if (betaAux < -85.0f)
+				betaAux = -85.0f;
+			rAux = r;
+		}
+		// right mouse button: zoom
+		else if (tracking == 2) {
+			alphaAux = alpha;
+			betaAux = beta;
+			rAux = r + (deltaY * 0.01f);
+			if (rAux < 0.1f)
+				rAux = 0.1f;
+		}
+
+		eyeX = rAux * sin(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
+		eyeZ = rAux * cos(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
+		eyeY = rAux *   						       sin(betaAux * 3.14f / 180.0f);
+
+		//  not using an idle func
+		glutPostRedisplay();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////// CALLBACKs
@@ -591,6 +745,9 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
+	glutKeyboardFunc(processKeys);
+	glutMouseFunc(processMouseButtons);
+	glutMotionFunc(processMouseMotion);
 	createProgram();
 	setupCallbacks();
 }

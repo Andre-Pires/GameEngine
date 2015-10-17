@@ -42,8 +42,11 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 	this->View = rotation * translation;
 }
 
+//clears the view matrix when running
 void Camera::ortho(float left, float right, float bottom, float top, float nearp, float farp)
 {
+	this->View = MatrixFactory::Identity4();
+
 	Vector3f translateToOrigin = Vector3f(-(left + right) / 2, -(top + bottom) / 2, -(nearp + farp) / 2);
 
 	Vector3f scaleToNormalized = Vector3f(2 / (right - left), 2 / (top - bottom), 2 / (farp - nearp));

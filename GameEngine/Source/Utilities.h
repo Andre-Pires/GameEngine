@@ -25,7 +25,7 @@ const GLfloat yellow[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
 const GLfloat black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK };
-
+enum CameraType { ORTHOGRAPHIC, PERSPECTIVE, CONTROLLED_PERSP };
 class Utilities
 {
 public:
