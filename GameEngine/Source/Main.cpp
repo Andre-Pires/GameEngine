@@ -63,9 +63,14 @@ int startX, startY, tracking = 0;
 float alpha = -43.0f, beta = 48.0f;
 float r = 5.25f;
 
-GameObject * triangle[5];
-GameObject * square;
-GameObject * diamond;
+//TODO switch to more generic type when shadeColor is removed
+//GameObject * triangle[5];
+//GameObject * square;
+//GameObject * diamond
+
+Triangle * triangle[5];
+Square * square;
+Diamond * diamond;
 
 GameObject * debugTriangle;
 
@@ -80,49 +85,57 @@ void createTangram()
 
 	//head
 	diamond = new Diamond(bufferObjects, scene);
-	diamond->scale(Vector3f(0.5357, 0.5357, 1.0));
-	diamond->translate(Vector3f(0.0, 0.375, 0.0));
+	diamond->scale(Vector3f(0.5, 0.5, 0.5));
+	diamond->translate(Vector3f(0.0, 0.5, 0.0));
 	diamond->changeColor(YELLOW);
 
 	//right ear
-	triangle[0]->scale(Vector3f(0.5357, 0.5357, 1.0));
-	triangle[0]->rotate(-45, Vector3f(0.0, 0.0, 1.0));
-	triangle[0]->translate(Vector3f(0.0, 0.75, 0.0));
+	triangle[0]->scale(Vector3f(0.5, 0.5, 0.4));
+	triangle[0]->rotate(-135, Vector3f(0.0, 0.0, 1.0));
+	triangle[0]->translate(Vector3f(0.35, 1.55, 0.0));
 	triangle[0]->changeColor(RED);
 
 	//left ear
-	triangle[1]->scale(Vector3f(0.5357, 0.5357, 1.0));
-	triangle[1]->rotate(135, Vector3f(0.0, 0.0, 1.0));
-	triangle[1]->translate(Vector3f(0.0, 0.75, 0.0));
+	triangle[1]->scale(Vector3f(0.5, 0.5, 0.4));
+	triangle[1]->rotate(45, Vector3f(0.0, 0.0, 1.0));
+	triangle[1]->translate(Vector3f(-0.35, 0.85, 0.0));
 	triangle[1]->changeColor(RED);
 
 	//neck
-	triangle[2]->scale(Vector3f(0.7653, 0.7653, 1.0));
-	triangle[2]->rotate(-45, Vector3f(0.0, 0.0, 1.0));
-	triangle[2]->translate(Vector3f(-0.145, 0.225, 0.0));
+	triangle[2]->scale(Vector3f(0.7143, 0.7143, 0.4));
+	triangle[2]->rotate(-135, Vector3f(0.0, 0.0, 1.0));
+	triangle[2]->translate(Vector3f(0.25, 0.75, 0.0));
 	triangle[2]->changeColor(GREEN);
 
 	//body
-	triangle[3]->scale(Vector3f(1.0714, 1.0714, 1.0));
-	triangle[3]->rotate(135, Vector3f(0.0, 0.0, 1.0));
-	triangle[3]->translate(Vector3f(0.505, 0.12, 0.0));
+	triangle[3]->scale(Vector3f(1, 1, 0.6));
+	triangle[3]->rotate(45, Vector3f(0.0, 0.0, 1.0));
+	triangle[3]->translate(Vector3f(0.25, -0.65, 0.0));
 	triangle[3]->changeColor(BLUE);
 
 	//legs
-	triangle[4]->scale(Vector3f(1.0714, 1.0714, 1.0));
-	triangle[4]->rotate(90, Vector3f(0.0, 0.0, 1.0));
-	triangle[4]->translate(Vector3f(0.505, -0.42, 0.0));
+	triangle[4]->scale(Vector3f(1, 1, 0.4));
+	triangle[4]->rotate(0, Vector3f(0.0, 0.0, 1.0));
+	triangle[4]->translate(Vector3f(-0.05, -0.95, 0.0));
 	triangle[4]->changeColor(PURPLE);
 
 	//tail
 	square = new Square(bufferObjects, scene);
-	square->scale(Vector3f(0.5357, 0.3745, 1));
-	square->shear(1.2, 0);
-	square->translate(Vector3f(0.505, -0.42, 0));
+	square->scale(Vector3f(0.7143, 0.5, 0.6));
+	square->shear(1.15, 0);
+	square->translate(Vector3f(0.95, -0.95, 0));
 	square->changeColor(ORANGE);
 
+	//TODO - Remove after this lab
+	square->shadeColor();
+	diamond->shadeColor();
+	for (int i = 0; i < 5; i++)
+	{
+		triangle[i]->shadeColor();
+	}
+
 	//debugTriangle = new Triangle(bufferObjects, scene);
-	//debugTriangle->scale(Vector3f(1, 1, 1.0));
+	//debugTriangle->scale(Vector3f(0.7653, 0.7653, 0.7653));
 	//debugTriangle->shear(0, 1.25);
 	//debugTriangle->rotate(90, Vector3f(0.0, 0.0, 1.0));
 	//debugTriangle->translate(Vector3f(0.5, 0.5, 0));
@@ -150,7 +163,7 @@ void createProgram()
 void drawScene()
 {
 	if (cameraType == ORTHOGRAPHIC) {
-		camera->ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
+		camera->ortho(-2.0f + centerX, 2.0f + centerX, -2.0f + centerY, 2.0f + centerY, -2.0f, 2.0f);
 	}
 	else if (cameraType == PERSPECTIVE) {
 		camera->perspective(45.0f, ratio, 0.1f, 100.0f);

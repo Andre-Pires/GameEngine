@@ -8,4 +8,5 @@ private:
 	static const int INDEX_SIZE = 3;
 public:
 	Triangle(BufferObjects* buffer, Scene* scene);
+	void shadeColor();
 };

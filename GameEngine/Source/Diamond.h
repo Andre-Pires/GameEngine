@@ -6,4 +6,5 @@ class Diamond : public GameObject
 {
 public:
 	Diamond(BufferObjects* buffer, Scene* scene);
+	void shadeColor();
 };

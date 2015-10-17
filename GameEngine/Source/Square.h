@@ -5,4 +5,5 @@ class Square : public GameObject
 {
 public:
 	Square(BufferObjects* buffer, Scene* scene);
+	void shadeColor();
 };
