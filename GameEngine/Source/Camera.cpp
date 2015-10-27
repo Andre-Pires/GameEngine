@@ -9,11 +9,16 @@ Camera::Camera(BufferObjects* buffer, Scene* scene)
 
 	this->View = MatrixFactory::Identity4();
 	this->Projection = MatrixFactory::Identity4();
+
+	CameraChanged = true;
 }
 
 void Camera::updateCamera()
 {
-	bufferObjects->updateCamera(cameraVboId, View, Projection);
+	if (CameraChanged)
+	{
+		bufferObjects->updateCamera(cameraVboId, View, Projection);
+	}
 }
 
 void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
@@ -40,6 +45,27 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 	Matrix4f translation = MatrixFactory::Translation4(-eye);
 
 	this->View = rotation * translation;
+
+	CameraChanged = true;
+}
+
+void Camera::quaternionLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f up)
+{
+	Vector3f view = Vector3f(1, 0, 0);
+
+	Vector3f side = Vector3f(0, 1, 0);
+
+	Quaternion verticalRotation = Quaternion::FromAngleAxis(rotationY, view);
+
+	Quaternion horizontalRotation = Quaternion::FromAngleAxis(-rotationX, side);
+
+	Quaternion rotation = verticalRotation * horizontalRotation;
+
+	Matrix4f translation = MatrixFactory::Translation4(-eye);
+
+	this->View = translation * rotation.ToMatrix4();
+
+	CameraChanged = true;
 }
 
 //clears the view matrix when running
@@ -60,6 +86,8 @@ void Camera::ortho(float left, float right, float bottom, float top, float nearp
 	result.setValue(3, 3, -result(3, 3));
 
 	this->Projection = result;
+
+	CameraChanged = true;
 }
 
 // maximum angle possible for the fov is 180
@@ -77,4 +105,6 @@ void Camera::perspective(float fov, float ratio, float nearp, float farp)
 		0, 0, (nearp + farp) / (nearp - farp), -1,
 		0, 0, (2 * farp * nearp) / (nearp - farp), 0
 	});
+
+	CameraChanged = true;
 }

@@ -23,6 +23,7 @@
     <ClCompile Include="Source\Diamond.cpp" />
     <ClCompile Include="Source\GameObject.cpp" />
     <ClCompile Include="Source\BufferObjects.cpp" />
+    <ClCompile Include="Source\Quaternions.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Matrix2f.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="Source\Diamond.h" />
     <ClInclude Include="Source\GameObject.h" />
     <ClInclude Include="Source\BufferObjects.h" />
+    <ClInclude Include="Source\Quaternions.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\Matrix2f.h" />
     <ClInclude Include="Source\Matrix3f.h" />

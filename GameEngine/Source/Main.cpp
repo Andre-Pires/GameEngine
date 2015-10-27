@@ -1,17 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 //
-// Assignment 1 consists in the following:
-//
-// - Download the libraries: Glew and FreeGlut for your system.
-// - Create a project to compile, link and run the code provided in this section in your favourite programming environment (course will use VS2015).
-// - Update your graphics drivers to their latest versions.
-// - Verify what OpenGL contexts your computer can support, a minimum of OpenGL 3.3 support is required for this course.
-//
-// Further suggestions to verify your understanding of the concepts explored:
-//
-// - Change the program so display is called at 60 FPS.
-//
-// (c)2013-15 by Carlos Martinho
+// (c)2015 by André Pires
 //
 ///////////////////////////////////////////////////////////////////////
 
@@ -55,13 +44,15 @@ float eyeY = 0;
 float eyeZ = 5;
 float centerX, centerY, centerZ = 0;
 CameraType cameraType = ORTHOGRAPHIC;
+GimbalLockState gimbalState = GIMBAL_LOCK_OFF;
 
 // Mouse Tracking Variables
 int startX, startY, tracking = 0;
 
 // Camera Spherical Coordinates
-float alpha = -43.0f, beta = 48.0f;
+float alpha = 0.0f, beta = 0.0f;
 float r = 5.25f;
+float rotateX, rotateY = 0.0f;
 
 //TODO switch to more generic type when shadeColor is removed
 //GameObject * triangle[5];
@@ -160,24 +151,48 @@ void createProgram()
 	createTangram();
 }
 
-void drawScene()
+void updateCamera()
 {
 	if (cameraType == ORTHOGRAPHIC) {
 		camera->ortho(-2.0f + centerX, 2.0f + centerX, -2.0f + centerY, 2.0f + centerY, -2.0f, 2.0f);
 	}
 	else if (cameraType == PERSPECTIVE) {
 		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
-		// set the camera using a function similar to gluLookAt
-		camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+
+		if (gimbalState == GIMBAL_LOCK_ON)
+		{
+			// set the camera using a function similar to gluLookAt
+			camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+		}
+		else if (gimbalState == GIMBAL_LOCK_OFF)
+		{
+			camera->quaternionLookAt(0, 0, Vector3f(0, 0, 5), Vector3f(0, 1, 0));
+		}
 	}
 
 	else if (cameraType == CONTROLLED_PERSP) {
 		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
 		// set the camera using a function similar to gluLookAt
-		camera->lookAt(Vector3f(eyeX, eyeY, eyeZ), Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+
+		if (gimbalState == GIMBAL_LOCK_ON)
+		{
+			// set the camera using a function similar to gluLookAt
+			camera->lookAt(Vector3f(eyeX, eyeY, eyeZ), Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+		}
+		else if (gimbalState == GIMBAL_LOCK_OFF)
+		{
+			camera->quaternionLookAt(rotateX, rotateY, Vector3f(0, 0, 5), Vector3f(0, 1, 0));
+		}
 	}
 
 	camera->updateCamera();
+}
+
+void drawScene()
+{
+	if (cameraType == CONTROLLED_PERSP) {
+		updateCamera();
+	}
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -214,44 +229,65 @@ void processKeys(unsigned char key, int xx, int yy)
 	switch (key) {
 	case '1':
 		cameraType = ORTHOGRAPHIC;
+		updateCamera();
+		cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
 		break;
 
 	case '2':
 		cameraType = PERSPECTIVE;
+		updateCamera();
+		cout << "Camera status: " << endl << " - Perspective camera active." << endl;
 		break;
 
 	case '3':
 		cameraType = CONTROLLED_PERSP;
+		updateCamera();
+		cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
 		break;
 	case 'p':
 	case 'P':
 		if (cameraType == ORTHOGRAPHIC || cameraType == PERSPECTIVE)
 		{
 			cameraType = CONTROLLED_PERSP;
+			cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
 		}
 		else if (cameraType == CONTROLLED_PERSP)
 		{
 			cameraType = ORTHOGRAPHIC;
+			cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
+		}
+		updateCamera();
+		break;
+	case 'c':
+	case 'C':
+		if (gimbalState == GIMBAL_LOCK_ON)
+		{
+			gimbalState = GIMBAL_LOCK_OFF;
+			cout << "Gimbal status: " << endl << " - Camera isn't gimbal locked." << endl;
+		}
+		else if (gimbalState == GIMBAL_LOCK_OFF)
+		{
+			gimbalState = GIMBAL_LOCK_ON;
+			cout << "Gimbal status: " << endl << " - Camera is gimbal locked." << endl;
 		}
 		break;
-
 	case 'w':
 	case 'W':
-		centerY += 0.5;
+		centerY += 0.25;
 		break;
 
 	case 'a':
 	case 'A':
-		centerX -= 0.5;
+		centerX -= 0.25;
 		break;
 
 	case 's':
 	case 'S':
-		centerY -= 0.5;
+		centerY -= 0.25;
 		break;
 	case 'd':
 	case 'D':
-		centerX += 0.5;
+		centerX += 0.25;
 		break;
 	}
 }
@@ -286,13 +322,15 @@ void processMouseButtons(int button, int state, int xx, int yy)
 		}
 		tracking = 0;
 	}
+
+	updateCamera();
 }
 
 // Track mouse motion while buttons are pressed
 
 void processMouseMotion(int xx, int yy)
 {
-	if (cameraType == CONTROLLED_PERSP)
+	if (cameraType == CONTROLLED_PERSP && tracking != 0)
 	{
 		int deltaX, deltaY;
 		float alphaAux, betaAux;
@@ -300,6 +338,10 @@ void processMouseMotion(int xx, int yy)
 
 		deltaX = -xx + startX;
 		deltaY = yy - startY;
+
+		// being used by quaternions to rotate camera
+		rotateX = alpha + deltaX;
+		rotateY = beta + deltaY;
 
 		// left mouse button: move camera
 		if (tracking == 1) {
@@ -365,7 +407,7 @@ void reshape(int w, int h)
 		WinY = 1;
 	ratio = WinX * 1.0 / WinY;
 
-	camera->perspective(30, ratio, 1, 10);
+	updateCamera();
 
 	glViewport(0, 0, WinX, WinY);
 }

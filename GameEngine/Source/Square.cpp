@@ -67,11 +67,18 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene)
 //TODO - used only for this lab and makes no sense, should be removed afterwards
 void Square::shadeColor()
 {
-	for (int i = 12; i < verticesCount; i++)
+	float shadeStrength = 0.3;
+	int faceStep = 0;
+	for (int i = 12; i < verticesCount; i++, faceStep++)
 	{
-		Vertices[i].RGBA[0] -= 0.3;
-		Vertices[i].RGBA[1] -= 0.3;
-		Vertices[i].RGBA[2] -= 0.3;
+		if (faceStep == 6)
+		{
+			shadeStrength += 0.15;
+			faceStep = 0;
+		}
+		Vertices[i].RGBA[0] -= shadeStrength;
+		Vertices[i].RGBA[1] -= shadeStrength;
+		Vertices[i].RGBA[2] -= shadeStrength;
 	};
 
 	updateBuffer();
