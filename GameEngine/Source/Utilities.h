@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 #define DEGREES_TO_RADIANS 0.01745329251994329547
 #define RADIANS_TO_DEGREES 57.29577951308232185913
@@ -25,16 +26,19 @@ const GLfloat pink[4] = { 1.0f, 0.0f, 0.6f, 1.0f };
 const GLfloat red[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 const GLfloat purple[4] = { 0.4f, 0.0f, 0.6f, 1.0f };
 const GLfloat yellow[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
+const GLfloat brown[4] = { 0.627451f, 0.321569f, 0.176471f, 1.0f };
 const GLfloat black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK };
+enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK, BROWN };
 enum CameraType { ORTHOGRAPHIC, PERSPECTIVE, CONTROLLED_PERSP };
 enum GimbalLockState { GIMBAL_LOCK_ON, GIMBAL_LOCK_OFF };
+enum AnimationState { ANIMATION_STANDARD, ANIMATION_REVERSE, ANIMATION_OFF, ANIMATION_ON };
 class Utilities
 {
 public:
 
 	static bool isOpenGLError();
 	static void checkOpenGLError(std::string error);
+	static float lerp(float val1, float val2, float ratio);
 	static GLchar* loadFile(char* path);
 };

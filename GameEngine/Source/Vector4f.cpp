@@ -189,6 +189,10 @@ Vector4f Vector4f::Normalize() {
 	return Vector4f(vector.x / length, vector.y / length, vector.z / length, 1);
 }
 
+Vector4f Vector4f::lerp(Vector4f& A, Vector4f& B, float t) {
+	return A*t + B*(1.0f - t);
+}
+
 std::ostream& Vector4f::operator<<(std::ostream& stream)
 {
 	Vector4f vector = *this;

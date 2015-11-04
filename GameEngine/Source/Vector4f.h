@@ -27,6 +27,7 @@ public:
 	float Dot(const Vector4f vector2);
 	float Norm();
 	Vector4f Normalize();
+	static Vector4f lerp(Vector4f& A, Vector4f& B, float t);
 	std::ostream& operator<<(std::ostream& stream);
 	friend std::ostream& operator<<(std::ostream& stream, Vector4f vector);
 };

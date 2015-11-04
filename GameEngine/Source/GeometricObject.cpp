@@ -115,6 +115,9 @@ void GeometricObject::changeColor(Color color)
 	case PURPLE:
 		memcpy(colorToUse, purple, sizeof(GLfloat) * 4);
 		break;
+	case BROWN:
+		memcpy(colorToUse, brown, sizeof(GLfloat) * 4);
+		break;
 	case BLACK:
 		memcpy(colorToUse, black, sizeof(GLfloat) * 4);
 		break;

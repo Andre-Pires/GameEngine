@@ -1,6 +1,6 @@
 ﻿#include "SceneGraphNode.h"
 
-// standard node - with parent and draw content
+//standard node - with parent and draw content
 SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object)
 {
 	this->parent = parent;
@@ -30,27 +30,22 @@ void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
 	this->childNodes.push_back(sceneGraphNode);
 }
 
-void SceneGraphNode::draw()
+void SceneGraphNode::draw(Matrix4f parentTransformations)
 {
+	Matrix4f finalTransformation;
+
+	if (parentTransformations != MatrixFactory::Identity4())
+		finalTransformation = parentTransformations * this->transformations;
+	else
+		finalTransformation = this->transformations;
+
 	if (object != NULL)
-		object->draw(this->transformations);
+		object->draw(finalTransformation);
 
 	int i = 0;
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{
-		(*it)->drawChildren(this->transformations);
-	}
-}
-
-void SceneGraphNode::drawChildren(Matrix4f parentTransformations)
-{
-	if (object != NULL)
-		object->draw(parentTransformations * this->transformations);
-
-	int i = 0;
-	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
-	{
-		(*it)->drawChildren(parentTransformations * this->transformations);
+		(*it)->draw(finalTransformation);
 	}
 }
 
@@ -79,4 +74,14 @@ void SceneGraphNode::clearBuffer()
 	{
 		(*it)->clearBuffer();
 	}
+}
+
+void SceneGraphNode::clearTransformations()
+{
+	this->transformations = MatrixFactory::Identity4();
+}
+
+Matrix4f SceneGraphNode::getTransformationsMatrix()
+{
+	return this->transformations;
 }

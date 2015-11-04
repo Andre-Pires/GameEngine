@@ -181,6 +181,10 @@ float Vector3f::Quadrance() {
 	return (pow(vector.x, 2) + pow(vector.y, 2) + pow(vector.z, 2));
 }
 
+Vector3f Vector3f::lerp(Vector3f& A, Vector3f& B, float t) {
+	return A*t + B*(1.0f - t);
+}
+
 std::ostream& Vector3f::operator<<(std::ostream& stream)
 {
 	Vector3f vector = *this;

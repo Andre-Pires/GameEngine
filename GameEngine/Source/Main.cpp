@@ -26,6 +26,8 @@
 #include "..\Dependencies\freeglut\freeglut.h"
 
 #define CAPTION "Game Engine"
+#define ANIMATION_RATE 1000 / 60
+#define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
 
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
@@ -53,8 +55,15 @@ float alpha = 0.0f, beta = 0.0f;
 float r = 5.25f;
 float rotateX, rotateY, zoom = 0.0f;
 
+//animation state
+float interpolationRatio = 0.0f;
+float interpolationStep = ANIMATION_RATE;
+AnimationState animationState = ANIMATION_REVERSE;
+AnimationState animationActive = ANIMATION_OFF;
+
 SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
+SceneGraphNode* tangramParts[7];
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
@@ -62,168 +71,115 @@ void createTangram()
 {
 	tangramNode = new SceneGraphNode(sceneGraph);
 
-	///NOTE: linhas com as posições finais
-	//	//head
-	//	GeometricObject * diamond = new Diamond(bufferObjects, scene);
-	//	diamond->scale(Vector3f(0.5, 0.5, 0.5));
-	//	diamond->translate(Vector3f(0.0, 0.5, 0.0));
-	//	diamond->changeColor(YELLOW);
-	//	diamond->shadeColor();
-	//	tangramNode->add(new SceneGraphNode(sceneGraph, diamond));
-	//
-	//	//right ear
-	//	{
-	//		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-	//		triangle->scale(Vector3f(0.5, 0.5, 0.4));
-	//		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
-	//		triangle->translate(Vector3f(0.35, 1.55, 0.0));
-	//		triangle->changeColor(RED);
-	//		triangle->shadeColor();
-	//		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
-	//	}
-	//
-	//	//left ear
-	//	{
-	//		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-	//		triangle->scale(Vector3f(0.5, 0.5, 0.4));
-	//		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
-	//		triangle->translate(Vector3f(-0.35, 0.85, 0.0));
-	//		triangle->changeColor(RED);
-	//		triangle->shadeColor();
-	//		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
-	//	}
-	//
-	//	//neck
-	//	{
-	//		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-	//		triangle->scale(Vector3f(0.7143, 0.7143, 0.4));
-	//		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
-	//		triangle->translate(Vector3f(0.25, 0.75, 0.0));
-	//		triangle->changeColor(GREEN);
-	//		triangle->shadeColor();
-	//		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
-	//	}
-	//
-	//	//body
-	//	{
-	//		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-	//		triangle->scale(Vector3f(1, 1, 0.6));
-	//		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
-	//		triangle->translate(Vector3f(0.25, -0.65, 0.0));
-	//		triangle->changeColor(BLUE);
-	//		triangle->shadeColor();
-	//		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
-	//	}
-	//
-	//	//legs
-	//	{
-	//		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-	//		triangle->scale(Vector3f(1, 1, 0.4));
-	//		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
-	//		triangle->translate(Vector3f(-0.05, -0.95, 0.0));
-	//		triangle->changeColor(PURPLE);
-	//		triangle->shadeColor();
-	//		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
-	//	}
-	//
-	//	//tail
-	//	GeometricObject * square = new Square(bufferObjects, scene);
-	//	square->scale(Vector3f(0.7143, 0.5, 0.6));
-	//	square->shear(1.15, 0);
-	//	square->translate(Vector3f(0.95, -0.95, 0));
-	//	square->changeColor(ORANGE);
-	//	square->shadeColor();
-	//	tangramNode->add(new SceneGraphNode(sceneGraph, square));
-	//
-	//	sceneGraph->add(tangramNode);
-	///NOTE: linhas com as posições finais
-
+	///NOTE: linhas com as posições iniciais
 	//head
-	GeometricObject* diamond = new Diamond(bufferObjects, scene);
+	GeometricObject * diamond = new Diamond(bufferObjects, scene);
 	diamond->scale(Vector3f(0.5, 0.5, 0.5));
-	diamond->translate(Vector3f(0.36, -1.15, 0.0));
+	diamond->translate(Vector3f(0.0, 0.5, 0.0));
 	diamond->changeColor(YELLOW);
 	diamond->shadeColor();
-	tangramNode->add(new SceneGraphNode(sceneGraph, diamond));
+	tangramParts[0] = new SceneGraphNode(sceneGraph, diamond);
+	tangramNode->add(tangramParts[0]);
 
 	//right ear
 	{
-		GeometricObject* triangle = new Triangle(bufferObjects, scene);
+		GeometricObject * triangle = new Triangle(bufferObjects, scene);
 		triangle->scale(Vector3f(0.5, 0.5, 0.4));
 		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.7143, -0.09, 0.0));
+		triangle->translate(Vector3f(0.35, 1.55, 0.0));
 		triangle->changeColor(RED);
 		triangle->shadeColor();
-		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
+		tangramParts[1] = new SceneGraphNode(sceneGraph, triangle);
+		tangramNode->add(tangramParts[1]);
 	}
 
 	//left ear
 	{
-		GeometricObject* triangle = new Triangle(bufferObjects, scene);
+		GeometricObject * triangle = new Triangle(bufferObjects, scene);
 		triangle->scale(Vector3f(0.5, 0.5, 0.4));
-		triangle->rotate(135, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.36, -1.15, 0.0));
+		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
+		triangle->translate(Vector3f(-0.35, 0.85, 0.0));
 		triangle->changeColor(RED);
 		triangle->shadeColor();
-		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
+		tangramParts[2] = new SceneGraphNode(sceneGraph, triangle);
+		tangramNode->add(tangramParts[2]);
 	}
 
 	//neck
 	{
-		GeometricObject* triangle = new Triangle(bufferObjects, scene);
+		GeometricObject * triangle = new Triangle(bufferObjects, scene);
 		triangle->scale(Vector3f(0.7143, 0.7143, 0.4));
-		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.0, -1.5, 0.0));
+		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
+		triangle->translate(Vector3f(0.25, 0.75, 0.0));
 		triangle->changeColor(GREEN);
 		triangle->shadeColor();
-		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
+		tangramParts[3] = new SceneGraphNode(sceneGraph, triangle);
+		tangramNode->add(tangramParts[3]);
 	}
 
 	//body
 	{
-		GeometricObject* triangle = new Triangle(bufferObjects, scene);
+		GeometricObject * triangle = new Triangle(bufferObjects, scene);
 		triangle->scale(Vector3f(1, 1, 0.6));
 		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(-0.7, -1.5, 0.0));
+		triangle->translate(Vector3f(0.25, -0.65, 0.0));
 		triangle->changeColor(BLUE);
 		triangle->shadeColor();
-		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
+		tangramParts[4] = new SceneGraphNode(sceneGraph, triangle);
+		tangramNode->add(tangramParts[4]);
 	}
 
 	//legs
 	{
-		GeometricObject* triangle = new Triangle(bufferObjects, scene);
+		GeometricObject * triangle = new Triangle(bufferObjects, scene);
 		triangle->scale(Vector3f(1, 1, 0.4));
-		triangle->rotate(-45, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(-0.7, -0.09, 0.0));
+		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
+		triangle->translate(Vector3f(-0.05, -0.95, 0.0));
 		triangle->changeColor(PURPLE);
 		triangle->shadeColor();
-		tangramNode->add(new SceneGraphNode(sceneGraph, triangle));
+		tangramParts[5] = new SceneGraphNode(sceneGraph, triangle);
+		tangramNode->add(tangramParts[5]);
 	}
 
 	//tail
-	GeometricObject* square = new Square(bufferObjects, scene);
+	GeometricObject * square = new Square(bufferObjects, scene);
 	square->scale(Vector3f(0.71, 0.35, 0.6));
 	square->shear(1.0, 0);
-	square->translate(Vector3f(-0.7, -1.5, 0));
+	square->translate(Vector3f(0.95, -0.95, 0));
 	square->changeColor(ORANGE);
 	square->shadeColor();
-	tangramNode->add(new SceneGraphNode(sceneGraph, square));
+	tangramParts[6] = new SceneGraphNode(sceneGraph, square);
+	tangramNode->add(tangramParts[6]);
 
 	sceneGraph->add(tangramNode);
+	///NOTE: linhas com as posições iniciais
 
 	//ground
 	GeometricObject* ground = new Plane(bufferObjects, scene);
 	ground->scale(Vector3f(5.0, 5.0, 1.0));
 	ground->translate(Vector3f(-2.5, -2.5, -1.01));
+	ground->changeColor(BROWN);
 	sceneGraph->add(new SceneGraphNode(sceneGraph, ground));
 }
 
-//interpolation : alpha * x + (1 - alpha) * y
+//interpolation : ratio * x + (1 - ratio) * y
 void interpolateTangram(float ratio)
 {
-	//TODO: figure out way to interpolate
-	sceneGraph->rotate(ratio * 0 + (1 - ratio) * -135, Vector3f(0.0, 0.0, 1.0));
+	for (int i = 0; i < 7; i++)
+	{
+		tangramParts[i]->clearTransformations();
+	}
+
+	tangramParts[0]->translate(Vector3f::lerp(Vector3f(0.36, -1.15, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[1]->translate(Vector3f::lerp(Vector3f(0.36, -1.15, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[2]->rotate(Utilities::lerp(90, 0, ratio), Vector3f(0.0, 0.0, 1.0));
+	tangramParts[2]->translate(Vector3f::lerp(Vector3f(1.2, -0.305, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[3]->rotate(135 * ratio + (1 - ratio) * 0, Vector3f(0.0, 0.0, 1.0));
+	tangramParts[3]->translate(Vector3f::lerp(Vector3f(0.705, -0.65, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[4]->translate(Vector3f::lerp(Vector3f(-0.95, -0.35, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[5]->rotate(Utilities::lerp(-45, 0, ratio), Vector3f(0.0, 0.0, 1.0));
+	tangramParts[5]->translate(Vector3f::lerp(Vector3f(0.0, 1.05, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
+	tangramParts[6]->translate(Vector3f::lerp(Vector3f(-1.65, -0.05, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
 }
 
 void createProgram()
@@ -244,6 +200,31 @@ void createProgram()
 
 	//creating our figure's objects
 	createTangram();
+}
+
+void animationTimer(int value)
+{
+	if (animationActive != ANIMATION_OFF)
+	{
+		if (abs(interpolationRatio - 1.0f) < slackThreshold && ANIMATION_STANDARD == animationState)
+		{
+			animationActive = ANIMATION_OFF;
+			interpolationStep = -ANIMATION_STEP;
+		}
+		else if (abs(interpolationRatio - 0.0f) < slackThreshold && ANIMATION_REVERSE == animationState)
+		{
+			animationActive = ANIMATION_OFF;
+			interpolationStep = ANIMATION_STEP;
+		}
+		else
+		{
+			interpolationRatio += interpolationStep;
+
+			interpolateTangram(interpolationRatio);
+		}
+	}
+
+	glutTimerFunc(ANIMATION_RATE, animationTimer, 0);
 }
 
 void updateCamera()
@@ -382,7 +363,19 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'i':
 	case 'I':
-		interpolateTangram(0.25);
+		if (animationState == ANIMATION_REVERSE)
+		{
+			animationState = ANIMATION_STANDARD;
+			interpolationStep = ANIMATION_STEP;
+		}
+		else
+		{
+			animationState = ANIMATION_REVERSE;
+			interpolationStep = -ANIMATION_STEP;
+		}
+
+		animationActive = ANIMATION_ON;
+		break;
 	}
 }
 
@@ -557,6 +550,7 @@ void setupCallbacks()
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0, timer, 0);
 	glutTimerFunc(0, timedRedisplay, 0);
+	glutTimerFunc(0, animationTimer, 0);
 }
 
 void setupOpenGL()

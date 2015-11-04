@@ -20,6 +20,9 @@ void Utilities::checkOpenGLError(std::string error) {
 		exit(EXIT_FAILURE);
 	}
 }
+float Utilities::lerp(float val1, float val2, float ratio) {
+	return ratio * val1 + (1 - ratio) * val2;
+}
 
 GLchar* Utilities::loadFile(char* fileName) {
 	std::string fileLine, result;
