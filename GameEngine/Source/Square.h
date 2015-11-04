@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "GeometricObject.h"
 
-class Square : public GameObject
+class Square : public GeometricObject
 {
 public:
 	Square(BufferObjects* buffer, Scene* scene);
-	void shadeColor();
+	void shadeColor() override;
 };

@@ -1,9 +1,9 @@
-#include "GameObject.h"
+#include "GeometricObject.h"
 #include "Matrix4f.h"
 #include "Vector4f.h"
 #include "MatrixFactory.h"
 
-GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
+GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
 {
 	this->bufferObjects = buffer;
 	this->scene = scene;
@@ -35,7 +35,7 @@ GameObject::GameObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, i
 }
 
 //used by inheriting object
-GameObject::GameObject(BufferObjects* buffer, Scene* scene)
+GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene)
 {
 	this->bufferObjects = buffer;
 	this->scene = scene;
@@ -45,17 +45,17 @@ GameObject::GameObject(BufferObjects* buffer, Scene* scene)
 	transformations = MatrixFactory::Identity4();
 }
 
-void GameObject::draw()
+void GeometricObject::draw(Matrix4f parentNodeTransformations)
 {
-	scene->draw(indicesCount, VaoId, transformations);
+	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations);
 }
 
-void GameObject::updateBuffer()
+void GeometricObject::updateBuffer()
 {
 	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
 }
 
-void GameObject::translate(Vector3f translation)
+void GeometricObject::translate(Vector3f translation)
 {
 	Vector4f vec;
 	Matrix4f translateMat = MatrixFactory::Translation4(translation);
@@ -63,7 +63,7 @@ void GameObject::translate(Vector3f translation)
 	transformations = translateMat * transformations;
 }
 
-void GameObject::rotate(float angle, Vector3f rotation)
+void GeometricObject::rotate(float angle, Vector3f rotation)
 {
 	Vector4f vec;
 	Matrix4f rotateMat = MatrixFactory::Rotation4(angle, rotation);
@@ -71,21 +71,21 @@ void GameObject::rotate(float angle, Vector3f rotation)
 	transformations = rotateMat * transformations;
 }
 
-void GameObject::scale(Vector3f scale)
+void GeometricObject::scale(Vector3f scale)
 {
 	Vector4f vec;
 	Matrix4f scaleMat = MatrixFactory::Scale4(scale);
 	transformations = scaleMat * transformations;
 }
 
-void GameObject::shear(float shearX, float shearY)
+void GeometricObject::shear(float shearX, float shearY)
 {
 	Vector4f vec;
 	Matrix4f shearMat = MatrixFactory::Shear4(shearX, shearY);
 	transformations = shearMat * transformations;
 }
 
-void GameObject::changeColor(Color color)
+void GeometricObject::changeColor(Color color)
 {
 	GLfloat * colorToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
 
@@ -129,12 +129,18 @@ void GameObject::changeColor(Color color)
 	updateBuffer();
 }
 
-void GameObject::clearObjectFromBuffer()
+void GeometricObject::clearObjectFromBuffer()
 {
 	bufferObjects->destroyBufferObjects(VboId, VaoId);
 }
 
-std::ostream& GameObject::operator<<(std::ostream& stream)
+void GeometricObject::shadeColor()
+{
+	//not implemented
+	return;
+}
+
+std::ostream& GeometricObject::operator<<(std::ostream& stream)
 {
 	for (int i = 0; i < verticesCount; i++)
 	{
@@ -149,7 +155,7 @@ std::ostream& GameObject::operator<<(std::ostream& stream)
 	return stream;
 }
 
-std::ostream& operator<< (std::ostream& stream, GameObject object)
+std::ostream& operator<< (std::ostream& stream, GeometricObject object)
 {
 	for (int i = 0; i < object.verticesCount; i++)
 	{

@@ -1,6 +1,6 @@
 ﻿#include "Square.h"
 
-Square::Square(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene)
+Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
 {
 	//number of vertices and indexes needed to draw square
 	this->indicesCount = 36;
@@ -64,7 +64,6 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene)
 	updateBuffer();
 }
 
-//TODO - used only for this lab and makes no sense, should be removed afterwards
 void Square::shadeColor()
 {
 	float shadeStrength = 0.3;

@@ -1,6 +1,6 @@
 ﻿#include "Diamond.h"
 
-Diamond::Diamond(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene)
+Diamond::Diamond(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
 {
 	//number of vertices and indexes needed to draw a diamond
 	this->indicesCount = 36;
@@ -60,13 +60,11 @@ Diamond::Diamond(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene
 		memcpy(Vertices[i].XYZW, tempVertices[i].XYZW, 4 * sizeof(GLfloat));
 		memcpy(Vertices[i].RGBA, tempVertices[i].RGBA, 4 * sizeof(GLfloat));
 	}
-
 	this->rotate(45, Vector3f(0, 0, 1));
 
 	updateBuffer();
 }
 
-//TODO - used only for this lab and makes no sense, should be removed afterwards
 void Diamond::shadeColor()
 {
 	float shadeStrength = 0.3;

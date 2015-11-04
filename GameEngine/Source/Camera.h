@@ -23,8 +23,8 @@ public:
 	Camera(BufferObjects* buffer, Scene* scene);
 	void updateCamera();
 	void lookAt(Vector3f eye, Vector3f center, Vector3f up);
-	void quaternionLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f up);
+	void rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f center, Vector3f up);
+	void quaternionLookAt(float rotationX, float rotationY, float zoom, Vector3f eye, Vector3f center, Vector3f up);
 	void ortho(float left, float right, float bottom, float top, float nearp, float farp);
 	void perspective(float fov, float ratio, float nearp, float farp);
-	void toggleCameraMode();
 };

@@ -4,7 +4,7 @@
 #include "Utilities.h"
 #include "Matrix4f.h"
 
-class GameObject
+class GeometricObject
 {
 protected:
 	BufferObjects * bufferObjects;
@@ -18,11 +18,11 @@ protected:
 	//Usados apenas como forma de nomear os diferentes buffers
 	GLuint VaoId;
 	GLuint *VboId;
-	GameObject(BufferObjects* buffer, Scene* scene);
+	GeometricObject(BufferObjects* buffer, Scene* scene);
 public:
 
-	GameObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
-	void draw();
+	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
+	void draw(Matrix4f parentNodeTransformations);
 	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);
@@ -30,6 +30,7 @@ public:
 	void shear(float shearX, float shearY);
 	void changeColor(Color color);
 	void clearObjectFromBuffer();
+	virtual void shadeColor();
 	ostream& operator<<(std::ostream& stream);
-	friend ostream& operator<< (ostream& stream, GameObject object);
+	friend ostream& operator<< (ostream& stream, GeometricObject object);
 };

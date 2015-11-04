@@ -90,11 +90,6 @@ Matrix4f MatrixFactory::Rotation4(float angle, Vector3f axis)
 
 	Matrix3f R;
 
-	if (angle > 180)
-	{
-		angle -= 180;
-	}
-
 	float radians = (angle * PI) / 180;
 
 	R = I + (sin(radians) * A) + (1 - cos(radians)) * A2;

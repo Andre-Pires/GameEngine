@@ -1,6 +1,6 @@
 ﻿#include "Triangle.h"
 
-Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GameObject(buffer, scene)
+Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
 {
 	//number of vertices and indexes needed to draw triangle
 	this->indicesCount = 24;
@@ -49,7 +49,6 @@ Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GameObject(buffer, sce
 	updateBuffer();
 }
 
-//TODO - used only for this lab and makes no sense, should be removed afterwards
 void Triangle::shadeColor()
 {
 	float shadeStrength = 0.3;

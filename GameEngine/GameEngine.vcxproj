@@ -21,8 +21,9 @@
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\Diamond.cpp" />
-    <ClCompile Include="Source\GameObject.cpp" />
+    <ClCompile Include="Source\GeometricObject.cpp" />
     <ClCompile Include="Source\BufferObjects.cpp" />
+    <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Quaternions.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\Main.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="Source\Matrix3f.cpp" />
     <ClCompile Include="Source\Matrix4f.cpp" />
     <ClCompile Include="Source\MatrixFactory.cpp" />
+    <ClCompile Include="Source\SceneGraphNode.cpp" />
     <ClCompile Include="Source\Shader.cpp" />
     <ClCompile Include="Source\Square.cpp" />
     <ClCompile Include="Source\Triangle.cpp" />
@@ -41,14 +43,16 @@
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\Diamond.h" />
-    <ClInclude Include="Source\GameObject.h" />
+    <ClInclude Include="Source\GeometricObject.h" />
     <ClInclude Include="Source\BufferObjects.h" />
+    <ClInclude Include="Source\Plane.h" />
     <ClInclude Include="Source\Quaternions.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\Matrix2f.h" />
     <ClInclude Include="Source\Matrix3f.h" />
     <ClInclude Include="Source\Matrix4f.h" />
     <ClInclude Include="Source\MatrixFactory.h" />
+    <ClInclude Include="Source\SceneGraphNode.h" />
     <ClInclude Include="Source\Shader.h" />
     <ClInclude Include="Source\Square.h" />
     <ClInclude Include="Source\Triangle.h" />
@@ -117,7 +121,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
+    <SourcePath>$(VC_SourcePath)\Source;</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -168,6 +173,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Dependencies\glew;Dependencies\freeglut</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

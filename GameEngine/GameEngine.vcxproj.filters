@@ -45,9 +45,6 @@
     <ClCompile Include="Source\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\BufferObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,6 +64,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Quaternions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GeometricObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SceneGraphNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,9 +104,6 @@
     <ClInclude Include="Source\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\BufferObjects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,6 +123,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Quaternions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeometricObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SceneGraphNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

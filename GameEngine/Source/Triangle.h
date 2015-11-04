@@ -1,12 +1,9 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "GeometricObject.h"
 
-class Triangle : public GameObject
+class Triangle : public GeometricObject
 {
-private:
-	static const int VERTEX_SIZE = 3;
-	static const int INDEX_SIZE = 3;
 public:
 	Triangle(BufferObjects* buffer, Scene* scene);
-	void shadeColor();
+	void shadeColor() override;
 };

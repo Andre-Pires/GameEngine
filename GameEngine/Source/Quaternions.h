@@ -32,5 +32,4 @@ public:
 	bool operator==(const Quaternion& qtrn1);
 	ostream& operator<<(ostream& stream);
 	friend ostream& operator<<(ostream& stream, const Quaternion& qtrn);
-	void PrintAngleAxis(const std::string& s, const Quaternion& qtrn);
 };

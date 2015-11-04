@@ -12,7 +12,6 @@ class BufferObjects
 private:
 	BufferObjects();
 	static BufferObjects * instance;
-	
 
 public:
 	static BufferObjects* getInstance();

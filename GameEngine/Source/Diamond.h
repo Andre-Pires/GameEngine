@@ -1,10 +1,10 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "GeometricObject.h"
 #include "Vector3f.h"
 
-class Diamond : public GameObject
+class Diamond : public GeometricObject
 {
 public:
 	Diamond(BufferObjects* buffer, Scene* scene);
-	void shadeColor();
+	void shadeColor() override;
 };

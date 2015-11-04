@@ -33,7 +33,7 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 
 	Vector3f u = side.Cross(view);
 
-	// the minuses are due to opengl's norm of an inverted z
+	//the minuses are due to opengl's norm of an inverted z
 	Matrix4f rotation = Matrix4f(
 		new float[16]{
 		side.x, u.x, -view.x, 0,
@@ -49,19 +49,50 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 	CameraChanged = true;
 }
 
-void Camera::quaternionLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f up)
+void Camera::rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f center, Vector3f up)
 {
-	Vector3f view = Vector3f(1, 0, 0);
+	Vector3f view = center - eye;
 
-	Vector3f side = Vector3f(0, 1, 0);
+	view = view.Normalize();
 
-	Quaternion verticalRotation = Quaternion::FromAngleAxis(rotationY, view);
+	Vector3f side = view.Cross(up);
 
-	Quaternion horizontalRotation = Quaternion::FromAngleAxis(-rotationX, side);
+	side = side.Normalize();
+
+	Vector3f u = side.Cross(view);
+
+	Matrix4f rotationMatX = MatrixFactory::Rotation4(rotationY, side);
+
+	Matrix4f rotationMatY = MatrixFactory::Rotation4(-rotationX, u);
+
+	Matrix4f rotation = rotationMatX * rotationMatY;
+
+	Matrix4f translation = MatrixFactory::Translation4(-eye);
+
+	this->View = translation * rotation;
+
+	CameraChanged = true;
+}
+
+void Camera::quaternionLookAt(float rotationX, float rotationY, float zoom, Vector3f eye, Vector3f center, Vector3f up)
+{
+	Vector3f view = center - eye;
+
+	view = view.Normalize();
+
+	Vector3f side = view.Cross(up);
+
+	side = side.Normalize();
+
+	Vector3f u = side.Cross(view);
+
+	Quaternion verticalRotation = Quaternion::FromAngleAxis(rotationY, side);
+
+	Quaternion horizontalRotation = Quaternion::FromAngleAxis(-rotationX, u);
 
 	Quaternion rotation = verticalRotation * horizontalRotation;
 
-	Matrix4f translation = MatrixFactory::Translation4(-eye);
+	Matrix4f translation = MatrixFactory::Translation4(-Vector3f(0, 0, zoom + eye.z));
 
 	this->View = translation * rotation.ToMatrix4();
 
