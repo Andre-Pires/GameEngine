@@ -1,49 +1,77 @@
 #include "Shader.h"
 #include <string>
 
-Shader * Shader::instance = 0;
-
 Shader::Shader()
 {
+	//cria o programa guardando o id do mesmo
+	ProgramId = glCreateProgram();
 }
 
-Shader * Shader::getInstance() {
-	if (instance == 0)
-	{
-		instance = new Shader();
-	}
+void Shader::addShader(GLenum shaderType, char * shaderLocation)
+{
+	//cria o shader e guarda um id para o mesmo
+	//temos de especificar o shader
+	GLuint shaderId = glCreateShader(shaderType);
+	this->shadersId[shaderType] = shaderId;
 
-	return instance;
+	//carrega o ficheiro de texto do shader
+	this->shaders[shaderId] = Utilities::loadFile(shaderLocation);
+}
+
+void Shader::addAttribute(int location, char* atributeName)
+{
+	this->shaderAttributes[location] = atributeName;
+}
+
+void Shader::addUniform(char* uniformName)
+{
+	//TODO: implement when needed
+}
+
+void Shader::addUniformBlock(GLuint location, char* blockName)
+{
+	//TODO: implement when needed
 }
 
 void Shader::createShaderProgram()
 {
-	vertexShader = Utilities::loadFile("Source/vertexShader.glsl");
-	//cria o shader e guarda um id para o mesmo
-	//temos de especificar o shader
-	VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-	//passa o id do shader, //TODO + qlq coisa, uma referencia para o shader, //TODO + qlq coisa
-	glShaderSource(VertexShaderId, 1, &vertexShader, 0);
-	//compila o shader criado
-	glCompileShader(VertexShaderId);
+	for (int i = 0; i < shaderTypes.size(); i++)
+	{
+		std::map<GLenum, GLuint>::iterator shaderId = shadersId.find(shaderTypes[i]);
 
-	fragmentShader = Utilities::loadFile("Source/fragmentShader.glsl");
+		if (shaderId != shadersId.end())
+		{
+			std::map<GLuint, char *>::iterator shader = shaders.find(shaderId->second);
 
-	//o mesmo que o de cima, mas este e o fragment
-	FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(FragmentShaderId, 1, &fragmentShader, 0);
-	glCompileShader(FragmentShaderId);
+			if (shader != shaders.end())
+			{
+				//	//passa o id do shader, -- , uma referencia para o shader, --
+				glShaderSource(shaderId->second, 1, &shader->second, 0);
 
-	//cria o programa guardando o id do mesmo
-	ProgramId = glCreateProgram();
-	//usa o id dos shaders criados para os associar ao programa
-	glAttachShader(ProgramId, VertexShaderId);
-	glAttachShader(ProgramId, FragmentShaderId);
+				//compila o shader criado
+				glCompileShader(shaderId->second);
+			}
+		}
+	}
+
+	for (int i = 0; i < shaderTypes.size(); i++)
+	{
+		std::map<GLenum, GLuint>::iterator shaderId = shadersId.find(shaderTypes[i]);
+
+		if (shaderId != shadersId.end())
+		{
+			//usa o id dos shaders criados para os associar ao programa
+			glAttachShader(ProgramId, shaderId->second);
+		}
+	}
 
 	//"binda" um dado indice, do programa criado, a um atributo que vamos usar
 	// segundo campo e o indice e o terceiro o nome do atributo
-	glBindAttribLocation(ProgramId, VERTICES, "in_Position");
-	glBindAttribLocation(ProgramId, COLORS, "in_Color");
+	for (int atribLocation = 0; atribLocation < shaderAttributes.size(); atribLocation++)
+	{
+		glBindAttribLocation(ProgramId, atribLocation, shaderAttributes[atribLocation]);
+	}
+
 	glLinkProgram(ProgramId);
 
 	//"binda" uma uniform location, do programa criado, a um atributo (matrix) que vamos usar
@@ -59,13 +87,19 @@ void Shader::destroyShaderProgram()
 {
 	//caso alguém esteja a usar o programa criado, retirá lo
 	glUseProgram(0);
-	//detachar os shaders do programa
-	glDetachShader(ProgramId, VertexShaderId);
-	glDetachShader(ProgramId, FragmentShaderId);
 
-	//apagar os shaders e finalmente o programa
-	glDeleteShader(FragmentShaderId);
-	glDeleteShader(VertexShaderId);
+	for (int i = 0; i < shaderTypes.size(); i++)
+	{
+		std::map<GLenum, GLuint>::iterator shaderId = shadersId.find(shaderTypes[i]);
+
+		if (shaderId != shadersId.end())
+		{
+			//detachar os shaders do programa
+			glDetachShader(ProgramId, shaderId->second);
+			//apagar os shaders e finalmente o programa
+			glDeleteShader(shaderId->second);
+		}
+	}
 	glDeleteProgram(ProgramId);
 
 	Utilities::checkOpenGLError("ERROR: Could not destroy shaders.");

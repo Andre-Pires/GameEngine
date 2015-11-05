@@ -3,24 +3,29 @@
 #include "Utilities.h"
 #include <iostream>
 #include <fstream>
-#define VERTICES 0
-#define COLORS 1
+#include <map>
+#include <array>
+#include <list>
+
 const GLuint UBO_BP = 0;
 
 class Shader
 {
 private:
 	//Usados apenas como forma de nomear os diferentes shaders
-	GLuint VertexShaderId, FragmentShaderId, ProgramId;
+	GLuint ProgramId;
 	GLint UniformId;
 	GLint UboId;
-	GLchar* vertexShader;
-	GLchar* fragmentShader;
-
-	static Shader * instance;
-	Shader();
+	std::map<GLenum, GLuint> shadersId;
+	std::map<GLuint, GLchar*> shaders;
+	std::array<GLenum, 3> shaderTypes = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
+	std::map<int, char *> shaderAttributes;
 public:
-	static Shader* getInstance();
+	Shader();
+	void addShader(GLenum shaderType, char* shaderLocation);
+	void addAttribute(int location, char* atributeName);
+	void addUniform(char* uniformName);
+	void addUniformBlock(GLuint location, char* blockName);
 	void createShaderProgram();
 	void destroyShaderProgram();
 	void useShaderProgram();

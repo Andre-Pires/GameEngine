@@ -11,10 +11,12 @@ private:
 	std::list<SceneGraphNode*> childNodes;
 	SceneGraphNode* parent;
 	Matrix4f transformations;
+	Shader * shader;
+	Scene * scene;
 public:
-	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object);
-	SceneGraphNode(SceneGraphNode *parent);
-	SceneGraphNode();
+	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene);
+	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
+	SceneGraphNode(Scene * scene);
 	void add(SceneGraphNode* sceneGraphNode);
 	void draw(Matrix4f parentTransformations = MatrixFactory::Identity4());
 	void translate(Vector3f translation);
@@ -22,5 +24,6 @@ public:
 	void rotate(float angle, Vector3f axis);
 	void clearBuffer();
 	void clearTransformations();
+	void setShader(Shader* shader);
 	Matrix4f getTransformationsMatrix();
 };

@@ -1,27 +1,33 @@
 ﻿#include "SceneGraphNode.h"
 
 //standard node - with parent and draw content
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene)
 {
 	this->parent = parent;
 	this->object = object;
 	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
 }
 
 //struture node - no object associated (draws childs only)
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
 {
 	this->parent = parent;
 	this->object = nullptr;
 	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
 }
 
 //root node - no parent or objects
-SceneGraphNode::SceneGraphNode()
+SceneGraphNode::SceneGraphNode(Scene * scene)
 {
 	this->parent = nullptr;
 	this->object = nullptr;
 	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
 }
 
 void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
@@ -34,10 +40,12 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 {
 	Matrix4f finalTransformation;
 
-	if (parentTransformations != MatrixFactory::Identity4())
-		finalTransformation = parentTransformations * this->transformations;
-	else
-		finalTransformation = this->transformations;
+	//if node has no shader, uses active shader in scene
+	if (shader != nullptr)
+		scene->setActiveShader(shader);
+
+	//uses identity matrix in case there's no parent tranformation (first case only)
+	finalTransformation = parentTransformations * this->transformations;
 
 	if (object != NULL)
 		object->draw(finalTransformation);
@@ -79,6 +87,11 @@ void SceneGraphNode::clearBuffer()
 void SceneGraphNode::clearTransformations()
 {
 	this->transformations = MatrixFactory::Identity4();
+}
+
+void SceneGraphNode::setShader(Shader* shader)
+{
+	this->shader = shader;
 }
 
 Matrix4f SceneGraphNode::getTransformationsMatrix()

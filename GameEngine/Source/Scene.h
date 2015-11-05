@@ -7,6 +7,9 @@
 
 class Scene
 {
+	Shader* shader;
 public:
+	Scene(Shader* shader);
 	void draw(int vertices, GLuint vao, Matrix4f transform);
+	void setActiveShader(Shader* shader);
 };

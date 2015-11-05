@@ -3,12 +3,19 @@
 #include "MatrixFactory.h"
 #include "BufferObjects.h"
 
+Scene::Scene(Shader * shader)
+{
+	this->shader = shader;
+}
+
 /////////////////////////////////////////////////////////////////////// SCENE
 
 void Scene::draw(int vertices, GLuint vao, Matrix4f transform)
 {
+	if(shader != nullptr)
+	{
+		
 	BufferObjects * obj = BufferObjects::getInstance();
-	Shader  * shader = Shader::getInstance();
 	GLint UniformId = shader->getUniformLocation();
 
 	//usar o vertex array object criado
@@ -31,4 +38,10 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f transform)
 	shader->dropShaderProgram();
 
 	Utilities::checkOpenGLError("ERROR: Could not draw scene.");
+	}
+}
+
+void Scene::setActiveShader(Shader * shader)
+{
+	this->shader = shader;
 }
