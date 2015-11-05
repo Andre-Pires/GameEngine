@@ -44,7 +44,7 @@ float eyeX = 0;
 float eyeY = 0;
 float eyeZ = 5;
 float centerX, centerY, centerZ = 0;
-CameraType cameraType = ORTHOGRAPHIC;
+CameraType cameraType = CONTROLLED_PERSP;
 GimbalLockState gimbalState = GIMBAL_LOCK_OFF;
 
 // Mouse Tracking Variables
@@ -55,7 +55,8 @@ float alpha = 0.0f, beta = 0.0f;
 float r = 5.25f;
 float rotateX, rotateY = 0.0f;
 float zoom = 3.0f;
-//animation state
+
+// Animation state
 float interpolationRatio = 0.0f;
 float interpolationStep = ANIMATION_RATE;
 AnimationState animationState = ANIMATION_REVERSE;
@@ -265,7 +266,7 @@ void updateCamera()
 {
 	if (cameraType == ORTHOGRAPHIC)
 	{
-		camera->ortho(-2.0f + centerX, 2.0f + centerX, -2.0f + centerY, 2.0f + centerY, -2.0f, 2.0f);
+		camera->ortho(-3.0f + centerX, 3.0f + centerX, -3.0f + centerY, 3.0f + centerY, -3.0f, 3.0f);
 	}
 	else if (cameraType == PERSPECTIVE)
 	{
@@ -274,11 +275,11 @@ void updateCamera()
 		if (gimbalState == GIMBAL_LOCK_ON)
 		{
 			// set the camera using a function similar to gluLookAt
-			camera->lookAt(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+			camera->lookAt(Vector3f(0, 0, 7), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 		}
 		else if (gimbalState == GIMBAL_LOCK_OFF)
 		{
-			camera->quaternionLookAt(0, 0, 0, Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+			camera->quaternionLookAt(0, 0, 0, Vector3f(0, 0, 7), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 		}
 	}
 
@@ -319,13 +320,15 @@ void createProgram()
 	shader->addShader(GL_FRAGMENT_SHADER, "Source/fragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(COLORS, "in_Color");
+	shader->addUniform("ModelMatrix");
+	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 	shader->createShaderProgram();
 
 	//generating vao
 	bufferObjects = BufferObjects::getInstance();
 
 	//creating new scene object for further drawing
-	scene = new Scene(shader);
+	scene = new Scene(shader, "ModelMatrix");
 
 	camera = new Camera(bufferObjects, scene);
 

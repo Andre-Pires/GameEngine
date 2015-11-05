@@ -18,19 +18,23 @@ void Shader::addShader(GLenum shaderType, char * shaderLocation)
 	this->shaders[shaderId] = Utilities::loadFile(shaderLocation);
 }
 
-void Shader::addAttribute(int location, char* atributeName)
+//incremental and sequential number should be used - starts at 0
+void Shader::addAttribute(GLuint location, char* atributeName)
 {
 	this->shaderAttributes[location] = atributeName;
 }
 
 void Shader::addUniform(char* uniformName)
 {
-	//TODO: implement when needed
+	//"binda" uma uniform location, do programa criado, a um atributo (matrix) que vamos usar
+	this->uniformName.push_back(uniformName);
 }
 
+//incremental and sequential number should be used - starts at 0
 void Shader::addUniformBlock(GLuint location, char* blockName)
 {
-	//TODO: implement when needed
+	this->uniformBlockName.push_back(blockName);
+	this->uniformBlockLocation[blockName] = location;
 }
 
 void Shader::createShaderProgram()
@@ -45,7 +49,7 @@ void Shader::createShaderProgram()
 
 			if (shader != shaders.end())
 			{
-				//	//passa o id do shader, -- , uma referencia para o shader, --
+				//passa o id do shader, -- , uma referencia para o shader, --
 				glShaderSource(shaderId->second, 1, &shader->second, 0);
 
 				//compila o shader criado
@@ -65,27 +69,34 @@ void Shader::createShaderProgram()
 		}
 	}
 
-	//"binda" um dado indice, do programa criado, a um atributo que vamos usar
-	// segundo campo e o indice e o terceiro o nome do atributo
 	for (int atribLocation = 0; atribLocation < shaderAttributes.size(); atribLocation++)
 	{
+		//"binda" um dado indice, do programa criado, a um atributo que vamos usar
+		// segundo campo e o indice e o terceiro o nome do atributo
 		glBindAttribLocation(ProgramId, atribLocation, shaderAttributes[atribLocation]);
 	}
 
 	glLinkProgram(ProgramId);
 
-	//"binda" uma uniform location, do programa criado, a um atributo (matrix) que vamos usar
-	UniformId = glGetUniformLocation(ProgramId, "ModelMatrix");
+	for (auto unifName = uniformName.begin(); unifName != uniformName.end(); ++unifName)
+	{
+		this->uniformId[(*unifName)] = glGetUniformLocation(ProgramId, (*unifName));
+	}
 
-	UboId = glGetUniformBlockIndex(ProgramId, "SharedMatrices");
-	glUniformBlockBinding(ProgramId, UboId, UBO_BP);
+	for (auto blockName = uniformBlockName.begin(); blockName != uniformBlockName.end(); ++blockName)
+	{
+		GLint id = glGetUniformBlockIndex(ProgramId, (*blockName));
+		GLuint location = this->uniformBlockLocation[(*blockName)];
+		this->uniformBlockId[(*blockName)] = id;
+		glUniformBlockBinding(ProgramId, id, location);
+	}
 
 	Utilities::checkOpenGLError("ERROR: Could not create shaders.");
 }
 
 void Shader::destroyShaderProgram()
 {
-	//caso alguém esteja a usar o programa criado, retirá lo
+	//caso alguém esteja a usar o programa criado, retirá-lo
 	glUseProgram(0);
 
 	for (int i = 0; i < shaderTypes.size(); i++)
@@ -116,7 +127,7 @@ void Shader::dropShaderProgram()
 	glUseProgram(0);
 }
 
-GLint Shader::getUniformLocation()
+GLint Shader::getUniformLocation(char* uniformName)
 {
-	return UniformId;
+	return this->uniformId[uniformName];
 }

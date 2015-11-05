@@ -8,8 +8,9 @@
 class Scene
 {
 	Shader* shader;
+	char * uniformName;
 public:
-	Scene(Shader* shader);
+	Scene(Shader* shader, char * uniformName);
 	void draw(int vertices, GLuint vao, Matrix4f transform);
 	void setActiveShader(Shader* shader);
 };

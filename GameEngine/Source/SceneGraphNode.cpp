@@ -50,7 +50,6 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 	if (object != NULL)
 		object->draw(finalTransformation);
 
-	int i = 0;
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{
 		(*it)->draw(finalTransformation);
@@ -77,7 +76,6 @@ void SceneGraphNode::clearBuffer()
 	if (object != NULL)
 		object->clearObjectFromBuffer();
 
-	int i = 0;
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{
 		(*it)->clearBuffer();
