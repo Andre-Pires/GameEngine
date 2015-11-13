@@ -1,4 +1,5 @@
 ﻿#include "BufferObjects.h"
+#include "Mesh.h"
 
 //Note: Buffer Objects uses the bind locations from Shader.h
 BufferObjects * BufferObjects::instance = 0;
@@ -17,7 +18,7 @@ BufferObjects * BufferObjects::getInstance() {
 }
 /////////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, Vertex * Vertices, int verticesSize, GLubyte *Indices, int indicesSize)
+void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLubyte> Indices)
 {
 	//binda o vertexArray "VaoID" para ser utilizado
 	glBindVertexArray(VaoId);
@@ -25,7 +26,7 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, Vertex * V
 		//usa o 1 buffer object para guardar os vertices e as cores
 		glBindBuffer(GL_ARRAY_BUFFER, VboId[0]);
 		//descreve o espaco a alocar como o tamanho da estrutura criada e diz que os dados sao estaticos
-		glBufferData(GL_ARRAY_BUFFER, verticesSize, Vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Vertex), Vertices.data(), GL_STATIC_DRAW);
 		//enabla um dos atributos adicionados ao vertex shader na sua criacao (neste caso o VERTICES)
 		glEnableVertexAttribArray(VERTICES);
 		//define o tamanho do atributo, o tipo, se esta normalizado, o tamanho de cada vertices na estrutura, o inicio da mesma
@@ -40,7 +41,7 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, Vertex * V
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[1]);
 
 		//descreve o espaco a alocar como o tamanho da estrutura criada e diz que os dados sao estaticos
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, Indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLubyte), Indices.data(), GL_STATIC_DRAW);
 	}
 
 	//remover todos os buffers em uso

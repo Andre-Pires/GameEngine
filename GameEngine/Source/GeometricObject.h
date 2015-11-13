@@ -3,14 +3,17 @@
 #include "BufferObjects.h"
 #include "Utilities.h"
 #include "Matrix4f.h"
+#include "Mesh.h"
 
 class GeometricObject
 {
 protected:
 	BufferObjects * bufferObjects;
 	Scene * scene;
-	Vertex * Vertices;
-	GLubyte *Indices;
+	std::vector<Vertex> Vertices;
+	std::vector <Texcoord> Texcoords;
+	std::vector <Normal> Normals;
+	std::vector <GLubyte> Indices;
 	int indicesCount;
 	int verticesCount;
 	Matrix4f transformations;
@@ -18,9 +21,11 @@ protected:
 	//Usados apenas como forma de nomear os diferentes buffers
 	GLuint VaoId;
 	GLuint *VboId;
+
 	GeometricObject(BufferObjects* buffer, Scene* scene);
 public:
 
+	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
 	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
 	void draw(Matrix4f parentNodeTransformations);
 	void updateBuffer();

@@ -50,15 +50,13 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, sc
 		{ { 0.0f, 0.0f, 1.0f, 1.0f },{ 0.9f, 0.9f, 0.0f, 1.0f } }  // 0
 	};
 
-	this->Vertices = new Vertex[verticesCount];
 	//in this case the vertices were replicated, but I'm keeping the indexes in case I want to reuse some vertices
-	this->Indices = new GLubyte[indicesCount]{
+	this->Indices = {
 		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35 };
 
 	for (int i = 0; i < verticesCount; i++)
 	{
-		memcpy(Vertices[i].XYZW, tempVertices[i].XYZW, 4 * sizeof(GLfloat));
-		memcpy(Vertices[i].RGBA, tempVertices[i].RGBA, 4 * sizeof(GLfloat));
+		this->Vertices.push_back(tempVertices[i]);
 	}
 
 	updateBuffer();

@@ -185,6 +185,11 @@ Vector3f Vector3f::lerp(Vector3f& A, Vector3f& B, float t) {
 	return A*t + B*(1.0f - t);
 }
 
+float* Vector3f::getVector()
+{
+	return new float[3]{ x,y,z };
+}
+
 std::ostream& Vector3f::operator<<(std::ostream& stream)
 {
 	Vector3f vector = *this;

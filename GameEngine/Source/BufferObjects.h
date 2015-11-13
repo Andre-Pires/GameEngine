@@ -4,6 +4,7 @@
 #include "Matrix4f.h"
 #include "MatrixFactory.h"
 #include "Shader.h"
+#include <vector>
 
 //Note: Buffer Objects uses the bind locations from Shader.h
 
@@ -15,7 +16,7 @@ private:
 
 public:
 	static BufferObjects* getInstance();
-	void createBufferObjects(GLuint * VboId, GLuint VaoId, Vertex * Vertices, int verticesSize, GLubyte *Indices, int indicesSize);
+	void createBufferObjects(GLuint* VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLubyte> Indices);
 	void createCameraBufferObjects(GLuint* camVboId);
 	void updateCamera(GLuint * VboId, Matrix4f view, Matrix4f projection);
 	void destroyBufferObjects(GLuint * VboId, GLuint VaoId);

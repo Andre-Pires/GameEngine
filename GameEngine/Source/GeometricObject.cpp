@@ -2,7 +2,9 @@
 #include "Matrix4f.h"
 #include "Vector4f.h"
 #include "MatrixFactory.h"
+#include "Mesh.h"
 
+//TODO: never been used, might have bugs
 GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
 {
 	this->bufferObjects = buffer;
@@ -12,21 +14,12 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * V
 	this->indicesCount = indicesSize;
 	this->verticesCount = verticesSize;
 
-	this->Vertices = new Vertex[verticesSize];
-	this->Indices = new GLubyte[indicesSize];
-
-	memcpy(this->Indices, Indices, indicesSize * sizeof(GLubyte));
-
-	this->Vertices = new Vertex[verticesCount];
-	this->Indices = new GLubyte[indicesCount];
+	memcpy(this->Indices.data(), Indices, indicesSize * sizeof(GLubyte));
 
 	for (int i = 0; i < verticesCount; i++)
 	{
-		memcpy(Vertices[i].XYZW, Vertices[i].XYZW, 4 * sizeof(GLfloat));
-		memcpy(Vertices[i].RGBA, Vertices[i].RGBA, 4 * sizeof(GLfloat));
+		this->Vertices.push_back(Vertices[i]);
 	}
-
-	memcpy(this->Indices, Indices, 4 * sizeof(GLubyte));
 
 	VboId = bufferObjects->getVboId();
 	VaoId = bufferObjects->getVaoId();
@@ -45,6 +38,32 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene)
 	transformations = MatrixFactory::Identity4();
 }
 
+//TODO: falta testar a questão das texturas e normais
+GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
+{
+	this->bufferObjects = buffer;
+	this->scene = scene;
+	VboId = bufferObjects->getVboId();
+	VaoId = bufferObjects->getVaoId();
+
+	transformations = MatrixFactory::Identity4();
+
+	this->Vertices = mesh.Vertices;
+	this->verticesCount = mesh.Vertices.size();
+	this->Texcoords = mesh.Texcoords;
+	this->Normals = mesh.Normals;
+	this->indicesCount = mesh.vertexIdx.size();
+
+	for (int i = 0; i < mesh.vertexIdx.size(); i++)
+	{
+		this->Indices.insert(Indices.begin(), mesh.vertexIdx[i]);
+	}
+
+	changeColor(BLUE);
+
+	updateBuffer();
+}
+
 void GeometricObject::draw(Matrix4f parentNodeTransformations)
 {
 	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations);
@@ -52,7 +71,7 @@ void GeometricObject::draw(Matrix4f parentNodeTransformations)
 
 void GeometricObject::updateBuffer()
 {
-	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, verticesCount * sizeof(Vertex), Indices, indicesCount * sizeof(GLubyte));
+	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, Indices);
 }
 
 void GeometricObject::translate(Vector3f translation)

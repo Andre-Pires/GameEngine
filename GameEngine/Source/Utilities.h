@@ -11,6 +11,8 @@
 const GLuint UBO_BP = 0;
 #define VERTICES 0
 #define COLORS 1
+#define TEXCOORDS 2
+#define NORMALS 3
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547
@@ -25,6 +27,14 @@ typedef struct {
 	GLfloat XYZW[4];
 	GLfloat RGBA[4];
 } Vertex;
+
+typedef struct {
+	GLfloat UV[2];
+} Texcoord;
+
+typedef struct {
+	GLfloat NXNYNZ[3];
+} Normal;
 
 //colors
 const GLfloat grey[4] = { 0.6f, 0.6f, 0.6f, 1.0f };

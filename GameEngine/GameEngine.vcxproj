@@ -23,6 +23,8 @@
     <ClCompile Include="Source\Diamond.cpp" />
     <ClCompile Include="Source\GeometricObject.cpp" />
     <ClCompile Include="Source\BufferObjects.cpp" />
+    <ClCompile Include="Source\Light.cpp" />
+    <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Quaternions.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
@@ -45,6 +47,8 @@
     <ClInclude Include="Source\Diamond.h" />
     <ClInclude Include="Source\GeometricObject.h" />
     <ClInclude Include="Source\BufferObjects.h" />
+    <ClInclude Include="Source\Light.h" />
+    <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\Plane.h" />
     <ClInclude Include="Source\Quaternions.h" />
     <ClInclude Include="Source\Scene.h" />

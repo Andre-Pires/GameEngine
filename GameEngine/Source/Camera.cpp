@@ -1,9 +1,10 @@
 ﻿#include "Camera.h"
 
-Camera::Camera(BufferObjects* buffer, Scene* scene)
+Camera::Camera(BufferObjects* buffer, Scene* scene, Shader * shader)
 {
 	this->bufferObjects = buffer;
 	this->scene = scene;
+	this->shader = shader;
 	this->cameraVboId = bufferObjects->getCameraVboId();
 	bufferObjects->createCameraBufferObjects(cameraVboId);
 
@@ -138,4 +139,16 @@ void Camera::perspective(float fov, float ratio, float nearp, float farp)
 	});
 
 	CameraChanged = true;
+}
+
+Matrix4f Camera::getViewMatrix()
+{
+	return this->View;
+}
+
+void Camera::updateEyeDirection(Vector3f center, Vector3f eye)
+{
+	GLint id = this->shader->getUniformLocation("eyeDirection");
+
+	glUniform3fv(id, 1, (center - eye).Normalize().getVector());
 }

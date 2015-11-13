@@ -28,6 +28,7 @@ public:
 	Vector3f Normalize();
 	float Quadrance();
 	static Vector3f lerp(Vector3f& A, Vector3f& B, float t);
+	float* getVector();
 	std::ostream& operator<<(std::ostream& stream);
 	friend std::ostream& operator<<(std::ostream& stream, Vector3f vector);
 };

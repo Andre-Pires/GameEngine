@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 //
-// (c)2015 by André Pires
+// (c)2015 by Andrï¿½ Pires
 //
 ///////////////////////////////////////////////////////////////////////
 
@@ -20,6 +20,7 @@
 #include "Diamond.h"
 #include "Camera.h"
 #include "Plane.h"
+#include "Mesh.h"
 #include "SceneGraphNode.h"
 
 #include "..\Dependencies\glew\glew.h"
@@ -66,7 +67,6 @@ SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
-
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createTangram()
@@ -157,16 +157,7 @@ void createTangram()
 
 	sceneGraph->add(tangramNode);
 
-	//NOTE: ground -- in the lab assignment it was supposed to be ground underneath the puzzle,
-	// since Prof. Martinho mencioned a table I created a table (which was the harder option).
-	// If the ground plane is preferred for evaluation, the following lines of code should be added instead:
-	//	GeometricObject* ground = new Plane(bufferObjects, scene);
-	//	ground->scale(Vector3f(10.0, 10.0, 1.0));
-	//	ground->translate(Vector3f(-5.0, -5.0, -1.01));
-	//	ground->changeColor(BROWN);
-	//	sceneGraph->add(new SceneGraphNode(sceneGraph, ground, scene));
-
-	// table - harder option to showcase
+	// table
 	tableNode = new SceneGraphNode(sceneGraph, scene);
 
 	GeometricObject * tableTop = new Square(bufferObjects, scene);
@@ -217,6 +208,11 @@ void createTangram()
 	}
 
 	sceneGraph->add(tableNode);
+
+	//	Mesh mesh = Mesh(std::string("Assets/mesh/untitled.obj"));
+	//	GeometricObject * cube = new GeometricObject(bufferObjects, scene, mesh);
+	//	cube->translate(Vector3f(0, 0, 1));
+	//	sceneGraph->add(new SceneGraphNode(sceneGraph, cube, scene));
 }
 
 //interpolation : ratio * x + (1 - ratio) * y
@@ -316,8 +312,8 @@ void createProgram()
 {
 	//creating and linking shader program with respective shaders
 	shader = new Shader();
-	shader->addShader(GL_VERTEX_SHADER, "Source/vertexShader.glsl");
-	shader->addShader(GL_FRAGMENT_SHADER, "Source/fragmentShader.glsl");
+	shader->addShader(GL_VERTEX_SHADER, "Assets/shaders/vertexShader.glsl");
+	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/fragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(COLORS, "in_Color");
 	shader->addUniform("ModelMatrix");
@@ -330,7 +326,7 @@ void createProgram()
 	//creating new scene object for further drawing
 	scene = new Scene(shader, "ModelMatrix");
 
-	camera = new Camera(bufferObjects, scene);
+	camera = new Camera(bufferObjects, scene, shader);
 
 	sceneGraph = new SceneGraphNode(scene);
 
