@@ -23,7 +23,6 @@
     <ClCompile Include="Source\Diamond.cpp" />
     <ClCompile Include="Source\GeometricObject.cpp" />
     <ClCompile Include="Source\BufferObjects.cpp" />
-    <ClCompile Include="Source\Light.cpp" />
     <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Quaternions.cpp" />
