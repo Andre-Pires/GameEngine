@@ -1,25 +1,7 @@
 ﻿#include "Utilities.h"
 #include <sstream>
+#include "Shader.h"
 
-bool Utilities::isOpenGLError() {
-	bool isError = false;
-	GLenum errCode;
-	const GLubyte *errString;
-
-	while ((errCode = glGetError()) != GL_NO_ERROR) {
-		isError = true;
-		errString = gluErrorString(errCode);
-		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
-	}
-	return isError;
-}
-
-void Utilities::checkOpenGLError(std::string error) {
-	if (isOpenGLError()) {
-		std::cerr << error << std::endl;
-		exit(EXIT_FAILURE);
-	}
-}
 float Utilities::lerp(float val1, float val2, float ratio) {
 	return ratio * val1 + (1 - ratio) * val2;
 }

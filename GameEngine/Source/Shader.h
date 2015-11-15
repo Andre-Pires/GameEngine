@@ -37,4 +37,9 @@ public:
 	void useShaderProgram();
 	void dropShaderProgram();
 	GLint getUniformLocation(char* uniformName);
+	GLint getShaderId(GLenum shader);
+	GLuint getProgramId();
+	void checkShaderError(std::string error);
+	static bool isOpenGLError();
+	static void checkGenericOpenGLError(std::string error);
 };

@@ -49,7 +49,7 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vecto
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	Utilities::checkOpenGLError("ERROR: Could not create VAOs and VBOs.");
+	Shader::checkGenericOpenGLError("ERROR: Could not create VAOs and VBOs.");
 }
 
 void BufferObjects::createCameraBufferObjects(GLuint * camVboId)
@@ -58,7 +58,7 @@ void BufferObjects::createCameraBufferObjects(GLuint * camVboId)
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(GLfloat) * 32, 0, GL_STREAM_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, UBO_BP, *camVboId);
 
-	Utilities::checkOpenGLError("ERROR: Could not create VAOs and VBOs.");
+	Shader::checkGenericOpenGLError("ERROR: Could not create VAOs and VBOs.");
 }
 
 void BufferObjects::updateCamera(GLuint * camVboId, Matrix4f view, Matrix4f projection)
@@ -68,7 +68,7 @@ void BufferObjects::updateCamera(GLuint * camVboId, Matrix4f view, Matrix4f proj
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat) * 16, sizeof(GLfloat) * 16, MatrixFactory::Mat4toGLfloat(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	Utilities::checkOpenGLError("ERROR: Problem updating camera.");
+	Shader::checkGenericOpenGLError("ERROR: Problem updating camera.");
 }
 
 void BufferObjects::destroyBufferObjects(GLuint * VboId, GLuint VaoId)
@@ -82,7 +82,7 @@ void BufferObjects::destroyBufferObjects(GLuint * VboId, GLuint VaoId)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	Utilities::checkOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
+	Shader::checkGenericOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
 }
 
 void BufferObjects::bindVao(GLuint VaoId)

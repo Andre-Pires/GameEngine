@@ -91,7 +91,7 @@ void Shader::createShaderProgram()
 		glUniformBlockBinding(ProgramId, id, location);
 	}
 
-	Utilities::checkOpenGLError("ERROR: Could not create shaders.");
+	checkShaderError("ERROR: Could not create shaders.");
 }
 
 void Shader::destroyShaderProgram()
@@ -113,7 +113,7 @@ void Shader::destroyShaderProgram()
 	}
 	glDeleteProgram(ProgramId);
 
-	Utilities::checkOpenGLError("ERROR: Could not destroy shaders.");
+	checkShaderError("ERROR: Could not destroy shaders.");
 }
 
 void Shader::useShaderProgram()
@@ -130,4 +130,58 @@ void Shader::dropShaderProgram()
 GLint Shader::getUniformLocation(char* uniformName)
 {
 	return this->uniformId[uniformName];
+}
+
+GLint Shader::getShaderId(GLenum shader)
+{
+	return this->shadersId[shader];
+}
+
+GLuint Shader::getProgramId()
+{
+	return this->ProgramId;
+}
+
+bool Shader::isOpenGLError() {
+	bool isError = false;
+	GLenum errCode;
+	const GLubyte *errString;
+
+	while ((errCode = glGetError()) != GL_NO_ERROR) {
+		isError = true;
+		errString = gluErrorString(errCode);
+		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
+	}
+	return isError;
+}
+
+void Shader::checkShaderError(std::string error)
+{
+	int maxLength;
+	char result[128];
+
+	if (isOpenGLError()) {
+		std::cerr << error << std::endl;
+
+		glGetShaderInfoLog(this->getShaderId(GL_VERTEX_SHADER), sizeof(result), &maxLength, result);
+		if (maxLength > 11)
+			std::cerr << "Error Vertex Shader: " << result;
+
+		glGetShaderInfoLog(this->getShaderId(GL_FRAGMENT_SHADER), sizeof(result), &maxLength, result);
+		if (maxLength > 11)
+			std::cerr << "Error Fragment Shader: " << result;
+
+		glGetProgramInfoLog(this->getProgramId(), sizeof(result), &maxLength, result);
+		if (maxLength > 11)
+			std::cerr << "Error Program: " << result << std::endl;
+
+		exit(EXIT_FAILURE);
+	}
+}
+
+void Shader::checkGenericOpenGLError(std::string error) {
+	if (isOpenGLError()) {
+		std::cerr << error << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }

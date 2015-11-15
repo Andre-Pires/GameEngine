@@ -37,7 +37,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f transform)
 		//usar o programa criado
 		shader->dropShaderProgram();
 
-		Utilities::checkOpenGLError("ERROR: Could not draw scene.");
+		shader->checkShaderError("ERROR: Could not draw scene.");
 	}
 }
 

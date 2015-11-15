@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include "Shader.h"
 
 //shader locations
 const GLuint UBO_BP = 0;
@@ -57,8 +58,6 @@ class Utilities
 {
 public:
 
-	static bool isOpenGLError();
-	static void checkOpenGLError(std::string error);
 	static float lerp(float val1, float val2, float ratio);
 	static GLchar* loadFile(char* path);
 };
