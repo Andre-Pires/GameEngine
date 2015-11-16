@@ -71,7 +71,7 @@ void GeometricObject::draw(Matrix4f parentNodeTransformations)
 
 void GeometricObject::updateBuffer()
 {
-	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, Indices);
+	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, Indices, Normals);
 }
 
 void GeometricObject::translate(Vector3f translation)

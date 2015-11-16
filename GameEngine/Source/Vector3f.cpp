@@ -190,6 +190,11 @@ float* Vector3f::getVector()
 	return new float[3]{ x,y,z };
 }
 
+Vector4f Vector3f::toVector4()
+{
+	return Vector4f(this->x, this->y, this->z, 1.0f);
+}
+
 std::ostream& Vector3f::operator<<(std::ostream& stream)
 {
 	Vector3f vector = *this;

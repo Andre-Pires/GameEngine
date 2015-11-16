@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 //
-// (c)2015 by Andrï¿½ Pires
+// (c)2015 by André Pires
 //
 ///////////////////////////////////////////////////////////////////////
 
@@ -22,6 +22,7 @@
 #include "Plane.h"
 #include "Mesh.h"
 #include "SceneGraphNode.h"
+#include "Light.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -67,6 +68,9 @@ SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
+
+Light * directionalLight;
+Light * pointLight;
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createTangram()
@@ -78,7 +82,6 @@ void createTangram()
 	diamond->scale(Vector3f(0.5, 0.5, 0.5));
 	diamond->translate(Vector3f(0.0, 0.5, 0.0));
 	diamond->changeColor(YELLOW);
-	diamond->shadeColor();
 	tangramParts[0] = new SceneGraphNode(sceneGraph, diamond, scene);
 	tangramNode->add(tangramParts[0]);
 
@@ -89,7 +92,6 @@ void createTangram()
 		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(0.35, 1.55, 0.0));
 		triangle->changeColor(RED);
-		triangle->shadeColor();
 		tangramParts[1] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[1]);
 	}
@@ -101,7 +103,6 @@ void createTangram()
 		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(-0.35, 0.85, 0.0));
 		triangle->changeColor(RED);
-		triangle->shadeColor();
 		tangramParts[2] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[2]);
 	}
@@ -113,7 +114,6 @@ void createTangram()
 		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(0.25, 0.75, 0.0));
 		triangle->changeColor(GREEN);
-		triangle->shadeColor();
 		tangramParts[3] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[3]);
 	}
@@ -125,7 +125,6 @@ void createTangram()
 		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(0.25, -0.65, 0.0));
 		triangle->changeColor(BLUE);
-		triangle->shadeColor();
 		tangramParts[4] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[4]);
 	}
@@ -137,7 +136,6 @@ void createTangram()
 		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(-0.05, -0.95, 0.0));
 		triangle->changeColor(PURPLE);
-		triangle->shadeColor();
 		tangramParts[5] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[5]);
 	}
@@ -148,14 +146,14 @@ void createTangram()
 	square->shear(1.0, 0);
 	square->translate(Vector3f(0.95, -0.95, 0));
 	square->changeColor(ORANGE);
-	square->shadeColor();
 	tangramParts[6] = new SceneGraphNode(sceneGraph, square, scene);
 	tangramNode->add(tangramParts[6]);
 
 	//to create a bigger tangram figure
 	tangramNode->scale(Vector3f(1.5, 1.5, 1.5));
 
-	sceneGraph->add(tangramNode);
+	//TODO: tangram node
+	//sceneGraph->add(tangramNode);
 
 	// table
 	tableNode = new SceneGraphNode(sceneGraph, scene);
@@ -164,7 +162,6 @@ void createTangram()
 	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
 	tableTop->translate(Vector3f(-3.5, -2.5, -0.51));
 	tableTop->changeColor(BROWN);
-	tableTop->shadeColor();
 	tableNode->add(new SceneGraphNode(sceneGraph, tableTop, scene));
 
 	{
@@ -173,7 +170,6 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
 		tableLeg->changeColor(BROWN);
-		tableLeg->shadeColor();
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -183,7 +179,6 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
 		tableLeg->changeColor(BROWN);
-		tableLeg->shadeColor();
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -193,7 +188,6 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
 		tableLeg->changeColor(BROWN);
-		tableLeg->shadeColor();
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -203,7 +197,6 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
 		tableLeg->changeColor(BROWN);
-		tableLeg->shadeColor();
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -296,6 +289,9 @@ void updateCamera()
 	}
 
 	camera->updateCamera();
+
+	//necessario o Eye para a iluminacao
+	camera->updateEyeDirection(Vector3f(centerX, centerY, centerZ), Vector3f(eyeX, eyeY, eyeZ));
 }
 
 void drawScene()
@@ -303,6 +299,8 @@ void drawScene()
 	if (cameraType == CONTROLLED_PERSP)
 	{
 		updateCamera();
+
+		pointLight->setLightShaderValues();
 	}
 
 	sceneGraph->draw();
@@ -313,18 +311,35 @@ void createProgram()
 	//creating and linking shader program with respective shaders
 	shader = new Shader();
 	shader->addShader(GL_VERTEX_SHADER, "Assets/shaders/vertexShader.glsl");
-	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/fragmentShader.glsl");
+	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/lightFragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(COLORS, "in_Color");
+	shader->addAttribute(NORMALS, "in_Normal");
 	shader->addUniform("ModelMatrix");
+	shader->addUniform("NormalMatrix");
+	shader->addUniform("eyeDirection");
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
+
+	//TODO: parameters for a spot light
+	//	spotLight->position = Vector4f(-4, 0, 10, 1);
+	//	spotLight->ambientColor = Vector4f(0.5, 0.5, 0.5, 1.0);
+	//	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+	//	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+	//	spotLight->attenuation = 0.1f;
+	//	spotLight->coneAngle = 15.0f;
+	//	spotLight->coneDirection = Vector3f(0, 0, -1);
+
+	//NOTE: code for the point light
+	pointLight = new Light(shader);
+
+	//NOTE: has to happen after the lights set the uniforms?
 	shader->createShaderProgram();
 
 	//generating vao
 	bufferObjects = BufferObjects::getInstance();
 
 	//creating new scene object for further drawing
-	scene = new Scene(shader, "ModelMatrix");
+	scene = new Scene(shader, "ModelMatrix", "NormalMatrix");
 
 	camera = new Camera(bufferObjects, scene, shader);
 
@@ -332,6 +347,12 @@ void createProgram()
 
 	//creating our figure's objects
 	createTangram();
+
+	//NOTE: code for the point light
+	pointLight->position = Vector4f(0, 0, 3.0, 1.0); //w == 1 indicates a point light
+	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -417,6 +438,22 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case '-':
 		tangramNode->scale(Vector3f(0.9f, 0.9f, 1.0f));
+		break;
+	case 'h':
+	case 'H':
+		pointLight->position.x++;
+		break;
+	case 'j':
+	case 'J':
+		pointLight->position.x--;
+		break;
+	case 'k':
+	case 'K':
+		pointLight->position.y++;
+		break;
+	case 'l':
+	case 'L':
+		pointLight->position.y--;
 		break;
 	case 'i':
 	case 'I':

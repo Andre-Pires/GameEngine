@@ -12,8 +12,8 @@
 const GLuint UBO_BP = 0;
 #define VERTICES 0
 #define COLORS 1
-#define TEXCOORDS 2
-#define NORMALS 3
+#define NORMALS 2
+#define TEXCOORDS 3
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547
@@ -34,7 +34,8 @@ typedef struct {
 } Texcoord;
 
 typedef struct {
-	GLfloat NXNYNZ[3];
+	//ultima coordenada sempre a 1.0
+	GLfloat NXNYNZ[4];
 } Normal;
 
 //colors

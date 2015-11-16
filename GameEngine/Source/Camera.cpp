@@ -150,5 +150,11 @@ void Camera::updateEyeDirection(Vector3f center, Vector3f eye)
 {
 	GLint id = this->shader->getUniformLocation("eyeDirection");
 
-	glUniform3fv(id, 1, (center - eye).Normalize().getVector());
+	shader->useShaderProgram();
+
+	Vector4f eyeDirection = (center - eye).Normalize().toVector4();
+
+	glUniform4fv(id, 1, eyeDirection.getVector());
+
+	shader->dropShaderProgram();
 }

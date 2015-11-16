@@ -3,20 +3,22 @@
 #include "MatrixFactory.h"
 #include "BufferObjects.h"
 
-Scene::Scene(Shader * shader, char * uniformName)
+Scene::Scene(Shader * shader, char * modelName, char * normalName)
 {
 	this->shader = shader;
-	this->uniformName = uniformName;
+	this->modelName = modelName;
+	this->normalName = normalName;
 }
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-void Scene::draw(int vertices, GLuint vao, Matrix4f transform)
+void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix)
 {
 	if (shader != nullptr)
 	{
 		BufferObjects * obj = BufferObjects::getInstance();
-		GLint UniformId = shader->getUniformLocation(uniformName);
+		GLint modelUniform = shader->getUniformLocation(modelName);
+		GLint normalUniform = shader->getUniformLocation(normalName);
 
 		//usar o vertex array object criado
 		obj->bindVao(vao);
@@ -24,9 +26,14 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f transform)
 		//usar o programa criado
 		shader->useShaderProgram();
 
-		//usar o id do uniform "matrix" criado para passar a matrix
+		Matrix3f tempMat = MatrixFactory::Mat4to3(modelMatrix);
+		Matrix4f normalMat = MatrixFactory::Mat3to4(tempMat.Inverse().Transpose());
+
+		//usar o id do uniform "matrix" criado para passar a matrix model
 		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
-		glUniformMatrix4fv(UniformId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(transform));
+		glUniformMatrix4fv(normalUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(normalMat));
+		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(modelMatrix));
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_BYTE, (GLvoid*)0);
 

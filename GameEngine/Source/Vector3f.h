@@ -1,5 +1,6 @@
 #pragma once
 #include <ctgmath>
+#include "Vector4f.h"
 
 class Vector3f
 {
@@ -29,6 +30,7 @@ public:
 	float Quadrance();
 	static Vector3f lerp(Vector3f& A, Vector3f& B, float t);
 	float* getVector();
+	Vector4f toVector4();
 	std::ostream& operator<<(std::ostream& stream);
 	friend std::ostream& operator<<(std::ostream& stream, Vector3f vector);
 };
