@@ -14,10 +14,11 @@ public:
 	Vector4f position;
 	float attenuation;
 	float coneAngle;
-	Vector3f coneDirection;
+	float coneFalloffAngle;
+	Vector4f coneDirection;
 	float ambientCoefficient;
 	Shader * shader;
-	Light(Vector4f position, Vector4f ambient, Vector4f diffuse, Vector4f specular, Shader* shader);
-	Light(Shader * shader);
+	LightType lightType;
+	Light(Shader * shader, LightType type);
 	void setLightShaderValues();
 };

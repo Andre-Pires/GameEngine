@@ -71,6 +71,10 @@ SceneGraphNode* tangramParts[7];
 
 Light * directionalLight;
 Light * pointLight;
+Light * spotLight;
+
+//TODO: temporary remove after implementation finished
+Light * lightInUse;
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createTangram()
@@ -300,7 +304,7 @@ void drawScene()
 	{
 		updateCamera();
 
-		pointLight->setLightShaderValues();
+		lightInUse->setLightShaderValues();
 	}
 
 	sceneGraph->draw();
@@ -320,17 +324,16 @@ void createProgram()
 	shader->addUniform("eyeDirection");
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 
-	//TODO: parameters for a spot light
-	//	spotLight->position = Vector4f(-4, 0, 10, 1);
-	//	spotLight->ambientColor = Vector4f(0.5, 0.5, 0.5, 1.0);
-	//	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	//	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	//	spotLight->attenuation = 0.1f;
-	//	spotLight->coneAngle = 15.0f;
-	//	spotLight->coneDirection = Vector3f(0, 0, -1);
-
 	//NOTE: code for the point light
-	pointLight = new Light(shader);
+	//pointLight = new Light(shader, POINT_LIGHT);
+
+	//NOTE: code for the direccional light
+	//directionalLight = new Light(shader, DIRECTIONAL_LIGHT);
+
+	//NOTE: code for the spotlight
+	spotLight = new Light(shader, SPOTLIGHT);
+
+	lightInUse = spotLight;
 
 	//NOTE: has to happen after the lights set the uniforms?
 	shader->createShaderProgram();
@@ -349,10 +352,27 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 3.0, 1.0); //w == 1 indicates a point light
-	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
-	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+	//	pointLight->position = Vector4f(0, 0, 3.0, 1.0); //w == 1 indicates a point light
+	//	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+	//	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+	//	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+	//	pointLight->attenuation = 0.005f;
+
+	//NOTE: code for the spotlight
+	spotLight->position = Vector4f(0, 0, 3, 1.0);
+	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
+	spotLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+	spotLight->attenuation = 0.005f;
+	spotLight->coneAngle = 45.15f;
+	spotLight->coneFalloffAngle = 2.0f;
+	spotLight->coneDirection = Vector4f(0, 0, -1, 1.0);
+
+	//NOTE: code for the directional light
+	//	directionalLight->position = Vector4f(0, 0, 3.0, 0.0); //w == 0 indicates a directional light
+	//	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+	//	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+	//	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -441,19 +461,19 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'h':
 	case 'H':
-		pointLight->position.x++;
+		lightInUse->position.x--;
 		break;
 	case 'j':
 	case 'J':
-		pointLight->position.x--;
+		lightInUse->position.x++;
 		break;
 	case 'k':
 	case 'K':
-		pointLight->position.y++;
+		lightInUse->position.y++;
 		break;
 	case 'l':
 	case 'L':
-		pointLight->position.y--;
+		lightInUse->position.y--;
 		break;
 	case 'i':
 	case 'I':
