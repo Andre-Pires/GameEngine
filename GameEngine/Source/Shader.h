@@ -20,8 +20,8 @@ private:
 	//storage for shader atributes
 	std::map<int, char *> shaderAttributes;
 	//storage for uniform names and ids
-	std::list<char *> uniformName;
-	std::map<char *, GLint> uniformId;
+	std::list<std::string> uniformName;
+	std::map<std::string, GLint> uniformId;
 	//storage for uniform block names and ids
 	std::list<char *> uniformBlockName;
 	std::map<char *, GLuint> uniformBlockLocation;
@@ -30,13 +30,13 @@ public:
 	Shader();
 	void addShader(GLenum shaderType, char* shaderLocation);
 	void addAttribute(GLuint location, char* atributeName);
-	void addUniform(char* uniformName);
+	void addUniform(std::string uniformName);
 	void addUniformBlock(GLuint location, char* blockName);
 	void createShaderProgram();
 	void destroyShaderProgram();
 	void useShaderProgram();
 	void dropShaderProgram();
-	GLint getUniformLocation(char* uniformName);
+	GLint getUniformLocation(std::string uniformName);
 	GLint getShaderId(GLenum shader);
 	GLuint getProgramId();
 	void checkShaderError(std::string error);

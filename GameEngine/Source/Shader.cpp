@@ -24,7 +24,7 @@ void Shader::addAttribute(GLuint location, char* atributeName)
 	this->shaderAttributes[location] = atributeName;
 }
 
-void Shader::addUniform(char* uniformName)
+void Shader::addUniform(std::string uniformName)
 {
 	//"binda" uma uniform location, do programa criado, a um atributo (matrix) que vamos usar
 	this->uniformName.push_back(uniformName);
@@ -80,7 +80,7 @@ void Shader::createShaderProgram()
 
 	for (auto unifName = uniformName.begin(); unifName != uniformName.end(); ++unifName)
 	{
-		this->uniformId[(*unifName)] = glGetUniformLocation(ProgramId, (*unifName));
+		this->uniformId[(*unifName)] = glGetUniformLocation(ProgramId, (*unifName).c_str());
 	}
 
 	for (auto blockName = uniformBlockName.begin(); blockName != uniformBlockName.end(); ++blockName)
@@ -127,7 +127,7 @@ void Shader::dropShaderProgram()
 	glUseProgram(0);
 }
 
-GLint Shader::getUniformLocation(char* uniformName)
+GLint Shader::getUniformLocation(std::string uniformName)
 {
 	return this->uniformId[uniformName];
 }

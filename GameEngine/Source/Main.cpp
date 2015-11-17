@@ -30,6 +30,7 @@
 #define CAPTION "Game Engine"
 #define ANIMATION_RATE 1000 / 60
 #define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
+#define LIGHTS_IN_SCENE 2
 
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
@@ -69,12 +70,9 @@ SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
 
-Light * directionalLight;
-Light * pointLight;
-Light * spotLight;
+int lightIndex = 0;
+std::array<Light *, LIGHTS_IN_SCENE> sceneLights;
 
-//TODO: temporary remove after implementation finished
-Light * lightInUse;
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createTangram()
@@ -304,7 +302,10 @@ void drawScene()
 	{
 		updateCamera();
 
-		lightInUse->setLightShaderValues();
+		for (int i = 0; i < LIGHTS_IN_SCENE; i++)
+		{
+			sceneLights[i]->setLightShaderValues();
+		}
 	}
 
 	sceneGraph->draw();
@@ -322,18 +323,23 @@ void createProgram()
 	shader->addUniform("ModelMatrix");
 	shader->addUniform("NormalMatrix");
 	shader->addUniform("eyeDirection");
+	shader->addUniform("numLights");
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 
+	//NOTE: code for the spotlight
+	Light * spotLight = new Light(shader, lightIndex, SPOTLIGHT);
+	sceneLights[lightIndex] = spotLight;
+	lightIndex++;
+
 	//NOTE: code for the point light
-	//pointLight = new Light(shader, POINT_LIGHT);
+	Light * pointLight = new Light(shader, lightIndex, POINT_LIGHT);
+	sceneLights[lightIndex] = pointLight;
+	lightIndex++;
 
 	//NOTE: code for the direccional light
-	//directionalLight = new Light(shader, DIRECTIONAL_LIGHT);
-
-	//NOTE: code for the spotlight
-	spotLight = new Light(shader, SPOTLIGHT);
-
-	lightInUse = spotLight;
+	// Light * directionalLight = new Light(shader, DIRECTIONAL_LIGHT);
+	//	sceneLights[lightIndex] = directionalLight;
+	//	lightIndex++;
 
 	//NOTE: has to happen after the lights set the uniforms?
 	shader->createShaderProgram();
@@ -352,14 +358,14 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-//	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
-//	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
-//	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
-//	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-//	pointLight->lightRange = 13.0f;
+	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
+	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
+	pointLight->diffuseColor = Vector4f(0.0, 0.0, 0.85, 1.0);
+	pointLight->specularColor = Vector4f(0.0, 0.0, 0.9, 1.0);
+	pointLight->lightRange = 13.0f;
 
 	//NOTE: code for the spotlight
-	spotLight->position = Vector4f(0, 0, 3, 1.0);
+	spotLight->position = Vector4f(0, 0, 2.5, 1.0);
 	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
 	spotLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
@@ -373,6 +379,12 @@ void createProgram()
 	//	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 	//	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 	//	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+
+	//passes amount of scene lights to shader
+	shader->useShaderProgram();
+	GLint lighNumberId = shader->getUniformLocation("numLights");
+	glUniform1i(lighNumberId, lightIndex);
+	shader->dropShaderProgram();
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -461,19 +473,19 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'h':
 	case 'H':
-		lightInUse->position.x--;
+		sceneLights[0]->position.x--;
 		break;
 	case 'j':
 	case 'J':
-		lightInUse->position.x++;
+		sceneLights[0]->position.x++;
 		break;
 	case 'k':
 	case 'K':
-		lightInUse->position.y++;
+		sceneLights[0]->position.y++;
 		break;
 	case 'l':
 	case 'L':
-		lightInUse->position.y--;
+		sceneLights[0]->position.y--;
 		break;
 	case 'i':
 	case 'I':

@@ -19,6 +19,7 @@ public:
 	float ambientCoefficient;
 	Shader * shader;
 	LightType lightType;
-	Light(Shader * shader, LightType type);
+	int lightIndex;
+	Light(Shader * shader, int lightIndex, LightType type);
 	void setLightShaderValues();
 };

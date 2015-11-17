@@ -1,28 +1,34 @@
 ﻿#include "Light.h"
 
-Light::Light(Shader * shader, LightType type)
+Light::Light(Shader * shader, int lightIndex, LightType type)
 {
 	this->shader = shader;
 	this->lightType = type;
+	this->lightIndex = lightIndex;
 	//this->shader->useShaderProgram();
 
+	//tratar da memoria usada na criacao dos dups das strings
 	if (lightType == POINT_LIGHT || lightType == SPOTLIGHT)
 	{
-		this->shader->addUniform("lightRange");
+		this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].lightRange");
 	}
 
 	if (lightType == SPOTLIGHT)
 	{
-		this->shader->addUniform("coneAngle");
-		this->shader->addUniform("coneFalloffAngle");
-		this->shader->addUniform("coneDirection");
+		this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].coneAngle");
+		this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].coneFalloffAngle");
+		this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].coneDirection");
 	}
 
-	this->shader->addUniform("lightType");
-	this->shader->addUniform("lightPosition");
-	this->shader->addUniform("ambientColor");
-	this->shader->addUniform("diffuseColor");
-	this->shader->addUniform("specularColor");
+	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].lightType");
+
+	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].position");
+
+	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].ambientColor");
+
+	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].diffuseColor");
+
+	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].specularColor");
 
 	//this->shader->dropShaderProgram();
 }
@@ -33,24 +39,24 @@ void Light::setLightShaderValues()
 
 	if (this->lightType == POINT_LIGHT || lightType == SPOTLIGHT)
 	{
-		GLint lightRangeId = shader->getUniformLocation("lightRange");
+		GLint lightRangeId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].lightRange");
 		glUniform1f(lightRangeId, lightRange);
 	}
 	if (lightType == SPOTLIGHT)
 	{
-		GLint coneAngleId = shader->getUniformLocation("coneAngle");
-		GLint coneFalloffAngleId = shader->getUniformLocation("coneFalloffAngle");
-		GLint coneDirId = shader->getUniformLocation("coneDirection");
+		GLint coneAngleId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].coneAngle");
+		GLint coneFalloffAngleId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].coneFalloffAngle");
+		GLint coneDirId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].coneDirection");
 		glUniform1f(coneAngleId, coneAngle);
 		glUniform1f(coneFalloffAngleId, coneFalloffAngle);
 		glUniform4fv(coneDirId, 1, coneDirection.getVector());
 	}
 
-	GLint lightTypeId = shader->getUniformLocation("lightType");
-	GLint positionId = shader->getUniformLocation("lightPosition");
-	GLint ambientId = shader->getUniformLocation("ambientColor");
-	GLint diffuseId = shader->getUniformLocation("diffuseColor");
-	GLint specularId = shader->getUniformLocation("specularColor");
+	GLint lightTypeId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].lightType");
+	GLint positionId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].position");
+	GLint ambientId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].ambientColor");
+	GLint diffuseId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].diffuseColor");
+	GLint specularId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].specularColor");
 
 	// Set Values
 	glUniform1i(lightTypeId, lightType);
