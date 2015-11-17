@@ -352,24 +352,24 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-	//	pointLight->position = Vector4f(0, 0, 3.0, 1.0); //w == 1 indicates a point light
-	//	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-	//	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
-	//	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	//	pointLight->attenuation = 0.005f;
+//	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
+//	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
+//	pointLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+//	pointLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+//	pointLight->lightRange = 13.0f;
 
 	//NOTE: code for the spotlight
 	spotLight->position = Vector4f(0, 0, 3, 1.0);
 	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
 	spotLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	spotLight->attenuation = 0.005f;
+	spotLight->lightRange = 13.0f;
 	spotLight->coneAngle = 45.15f;
 	spotLight->coneFalloffAngle = 2.0f;
 	spotLight->coneDirection = Vector4f(0, 0, -1, 1.0);
 
 	//NOTE: code for the directional light
-	//	directionalLight->position = Vector4f(0, 0, 3.0, 0.0); //w == 0 indicates a directional light
+	//	directionalLight->position = Vector4f(0, 0, 3.0, 1.0);
 	//	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 	//	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 	//	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);

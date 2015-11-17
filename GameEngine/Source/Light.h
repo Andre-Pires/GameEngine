@@ -12,7 +12,7 @@ public:
 	Vector4f diffuseColor;
 	Vector4f specularColor;
 	Vector4f position;
-	float attenuation;
+	float lightRange;
 	float coneAngle;
 	float coneFalloffAngle;
 	Vector4f coneDirection;

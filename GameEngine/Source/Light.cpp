@@ -8,7 +8,7 @@ Light::Light(Shader * shader, LightType type)
 
 	if (lightType == POINT_LIGHT || lightType == SPOTLIGHT)
 	{
-		this->shader->addUniform("attenuationFactor");
+		this->shader->addUniform("lightRange");
 	}
 
 	if (lightType == SPOTLIGHT)
@@ -18,6 +18,7 @@ Light::Light(Shader * shader, LightType type)
 		this->shader->addUniform("coneDirection");
 	}
 
+	this->shader->addUniform("lightType");
 	this->shader->addUniform("lightPosition");
 	this->shader->addUniform("ambientColor");
 	this->shader->addUniform("diffuseColor");
@@ -32,8 +33,8 @@ void Light::setLightShaderValues()
 
 	if (this->lightType == POINT_LIGHT || lightType == SPOTLIGHT)
 	{
-		GLint attenuationId = shader->getUniformLocation("attenuationFactor");
-		glUniform1f(attenuationId, attenuation);
+		GLint lightRangeId = shader->getUniformLocation("lightRange");
+		glUniform1f(lightRangeId, lightRange);
 	}
 	if (lightType == SPOTLIGHT)
 	{
@@ -44,12 +45,15 @@ void Light::setLightShaderValues()
 		glUniform1f(coneFalloffAngleId, coneFalloffAngle);
 		glUniform4fv(coneDirId, 1, coneDirection.getVector());
 	}
+
+	GLint lightTypeId = shader->getUniformLocation("lightType");
 	GLint positionId = shader->getUniformLocation("lightPosition");
 	GLint ambientId = shader->getUniformLocation("ambientColor");
 	GLint diffuseId = shader->getUniformLocation("diffuseColor");
 	GLint specularId = shader->getUniformLocation("specularColor");
 
 	// Set Values
+	glUniform1i(lightTypeId, lightType);
 	glUniform4fv(positionId, 1, position.getVector());
 	glUniform4fv(ambientId, 1, ambientColor.getVector());
 	glUniform4fv(diffuseId, 1, diffuseColor.getVector());

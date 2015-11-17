@@ -8,11 +8,12 @@ in vec4 ex_Normal;
 out vec4 out_Color;
 
 // Light Attributes
+uniform int lightType;
 uniform vec4 lightPosition;
 uniform vec4 ambientColor;
 uniform vec4 diffuseColor;
 uniform vec4 specularColor;
-uniform float attenuationFactor;
+uniform float lightRange;
 
 // Spotlight Attributes
 uniform float coneAngle;
@@ -35,29 +36,25 @@ const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB c
 
 void main(void)
 {
-	float spot = 1.0;
 	vec4 lightDir;
+	float spot = 1.0;
 	float attenuation = 1.0f;
 
-	if(lightPosition.w == 0.0) // directional light
+	if(lightType == 2) // directional light
 	{
 		lightDir = normalize(vec4(lightPosition.xyz, 1.0));
-		attenuation = 1.0f; // directional lights don't fade
 	}
 	else // point or spot light
 	{
 		lightDir = normalize(lightPosition - ex_Position);
+
 		float distanceToLight = length(lightPosition - ex_Position);
 
-		attenuation = 1.0 / (1.0 - pow(distanceToLight / attenuationFactor, 2));
+		attenuation = 1.0 / (1.0 - pow(distanceToLight / lightRange, 2));
 
-		//cone restrictions (affects attenuation)
-        float lightToSurfaceAngle = degrees(acos(dot(-lightDir, normalize(coneDirection))));
+		if(lightType == 1){ //spotlight
 
-
-        if(lightToSurfaceAngle > coneAngle){
-            attenuation = 0.0;
-        }
+			float lightToSurfaceAngle = degrees(acos(dot(-lightDir, normalize(coneDirection))));
 
 			float innerConeAngle = coneAngle;
 			float outerConeAngle = coneAngle + coneFalloffAngle;
@@ -67,7 +64,7 @@ void main(void)
 			spot = clamp((lightToSurfaceAngle - outerConeAngle) / falloffAngle, 0.0, 1.0);
 
 
-			//NOTE: allows to see the spotlight softedges really clearly
+			//NOTE: allows to see the spotlight soft edges really clearly
 			/*if(spot > 0.7){
 				out_Color = vec4(1.0,0.0,0.0,1.0);
 				return;
@@ -79,6 +76,7 @@ void main(void)
 				return;
 			}*/
 
+		}
 	}
 
 	float lambertian =	max(dot(lightDir, ex_Normal), 0.0);
@@ -97,7 +95,7 @@ void main(void)
 		specular = pow(specAngle, shininess);
 	}
 
-	vec4 colorLinear = ambientColor + spot * /* attenuation * */ (lambertian * diffuseColor + specular * specularColor);
+	vec4 colorLinear = ambientColor + spot *  attenuation * (lambertian * diffuseColor + specular * specularColor);
 
 	vec4 lightColorGammaCorrected = pow(colorLinear, vec4(1.0/screenGamma));
 
