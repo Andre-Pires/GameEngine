@@ -56,17 +56,15 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 
 	for (int i = 0; i < mesh.vertexIdx.size(); i++)
 	{
-		this->Indices.insert(Indices.begin(), mesh.vertexIdx[i]);
+		this->Indices.push_back(mesh.vertexIdx[i]);
 	}
 
-	changeColor(BLUE);
-
-	updateBuffer();
+	changeColor(WHITE);
 }
 
 void GeometricObject::draw(Matrix4f parentNodeTransformations)
 {
-	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations);
+	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors);
 }
 
 void GeometricObject::updateBuffer()
@@ -106,47 +104,72 @@ void GeometricObject::shear(float shearX, float shearY)
 
 void GeometricObject::changeColor(Color color)
 {
-	GLfloat * colorToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
+	GLfloat * ambientToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
+	GLfloat * diffuseToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
+	GLfloat * specularToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
 
 	switch (color)
 	{
 	case RED:
-		memcpy(colorToUse, red, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, redAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, redDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, redSpecular, sizeof(GLfloat) * 4);
 		break;
 	case GREEN:
-		memcpy(colorToUse, green, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, greenAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, greenDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, greenSpecular, sizeof(GLfloat) * 4);
 		break;
 	case BLUE:
-		memcpy(colorToUse, blue, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, blueAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, blueDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, blueSpecular, sizeof(GLfloat) * 4);
 		break;
 	case GREY:
-		memcpy(colorToUse, grey, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, greyAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, greyDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, greySpecular, sizeof(GLfloat) * 4);
 		break;
 	case ORANGE:
-		memcpy(colorToUse, orange, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, orangeAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, orangeDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, orangeSpecular, sizeof(GLfloat) * 4);
 		break;
 	case PINK:
-		memcpy(colorToUse, pink, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, yellowAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, yellowDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, yellowSpecular, sizeof(GLfloat) * 4);
 		break;
 	case YELLOW:
-		memcpy(colorToUse, yellow, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, yellowAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, yellowDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, yellowSpecular, sizeof(GLfloat) * 4);
 		break;
 	case PURPLE:
-		memcpy(colorToUse, purple, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, purpleAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, purpleDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, purpleSpecular, sizeof(GLfloat) * 4);
 		break;
 	case BROWN:
-		memcpy(colorToUse, brown, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, brownAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, brownDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, brownSpecular, sizeof(GLfloat) * 4);
 		break;
 	case BLACK:
-		memcpy(colorToUse, black, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, blackAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, blackDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, blackSpecular, sizeof(GLfloat) * 4);
+	case WHITE:
+		memcpy(ambientToUse, whiteAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, whiteDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, whiteSpecular, sizeof(GLfloat) * 4);
 		break;
 	default: break;
 	}
 
-	for (int i = 0; i < verticesCount; i++)
-	{
-		memcpy(Vertices[i].RGBA, colorToUse, 4 * sizeof(GLfloat));
-	}
+	memcpy(MaterialColors.AMBIENT, ambientToUse, 4 * sizeof(GLfloat));
+	memcpy(MaterialColors.DIFFUSE, diffuseToUse, 4 * sizeof(GLfloat));
+	memcpy(MaterialColors.SPECULAR, specularToUse, 4 * sizeof(GLfloat));
 
 	updateBuffer();
 }

@@ -11,6 +11,7 @@ protected:
 	BufferObjects * bufferObjects;
 	Scene * scene;
 	std::vector<Vertex> Vertices;
+	Material MaterialColors;
 	std::vector <Texcoord> Texcoords;
 	std::vector <Normal> Normals;
 	std::vector <GLubyte> Indices;

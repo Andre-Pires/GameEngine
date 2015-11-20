@@ -20,6 +20,7 @@ private:
 	Vector3f initialPitch;
 	Vector3f initialYaw;
 	bool CameraChanged;
+	void updateShaderCameraPosition(Matrix4f rotation, Vector3f eye);
 public:
 	Camera(BufferObjects* buffer, Scene* scene, Shader * shader);
 	void updateCamera();
@@ -29,5 +30,4 @@ public:
 	void ortho(float left, float right, float bottom, float top, float nearp, float farp);
 	void perspective(float fov, float ratio, float nearp, float farp);
 	Matrix4f getViewMatrix();
-	void updateEyeDirection(Vector3f center, Vector3f eye);
 };

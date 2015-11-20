@@ -22,5 +22,6 @@ void main(void)
 	ex_Normal = normalize(NormalMatrix * in_Normal);
 	gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * in_Position;
 	ex_Color = in_Color;
-	ex_Position = ViewMatrix * ModelMatrix * in_Position;
+	ex_Position = ModelMatrix * in_Position;
+
 }

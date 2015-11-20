@@ -47,6 +47,8 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 
 	this->View = rotation * translation;
 
+	updateShaderCameraPosition(rotation, eye);
+
 	CameraChanged = true;
 }
 
@@ -72,6 +74,8 @@ void Camera::rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vec
 
 	this->View = translation * rotation;
 
+	updateShaderCameraPosition(rotation, eye);
+
 	CameraChanged = true;
 }
 
@@ -96,6 +100,8 @@ void Camera::quaternionLookAt(float rotationX, float rotationY, float zoom, Vect
 	Matrix4f translation = MatrixFactory::Translation4(-Vector3f(0, 0, zoom + eye.z));
 
 	this->View = translation * rotation.ToMatrix4();
+
+	updateShaderCameraPosition(rotation.ToMatrix4(), eye);
 
 	CameraChanged = true;
 }
@@ -146,15 +152,13 @@ Matrix4f Camera::getViewMatrix()
 	return this->View;
 }
 
-void Camera::updateEyeDirection(Vector3f center, Vector3f eye)
+void Camera::updateShaderCameraPosition(Matrix4f rotation, Vector3f eye)
 {
-	GLint id = this->shader->getUniformLocation("eyeDirection");
+	GLint id = this->shader->getUniformLocation("cameraPosition");
 
 	shader->useShaderProgram();
 
-	Vector4f eyeDirection = (center - eye).Normalize().toVector4();
-
-	glUniform4fv(id, 1, eyeDirection.getVector());
+	glUniform4fv(id, 1, (rotation * eye.toVector4()).getVector());
 
 	shader->dropShaderProgram();
 }

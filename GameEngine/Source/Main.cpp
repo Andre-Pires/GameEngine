@@ -71,6 +71,7 @@ SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
 
 int lightIndex = 0;
+int controllableLight = 0;
 std::array<Light *, LIGHTS_IN_SCENE> sceneLights;
 
 /////////////////////////////////////////////////////////////////////// SCENE
@@ -83,7 +84,7 @@ void createTangram()
 	GeometricObject * diamond = new Diamond(bufferObjects, scene);
 	diamond->scale(Vector3f(0.5, 0.5, 0.5));
 	diamond->translate(Vector3f(0.0, 0.5, 0.0));
-	diamond->changeColor(YELLOW);
+	diamond->changeColor(WHITE);
 	tangramParts[0] = new SceneGraphNode(sceneGraph, diamond, scene);
 	tangramNode->add(tangramParts[0]);
 
@@ -137,7 +138,7 @@ void createTangram()
 		triangle->scale(Vector3f(1, 1, 0.45));
 		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
 		triangle->translate(Vector3f(-0.05, -0.95, 0.0));
-		triangle->changeColor(PURPLE);
+		triangle->changeColor(WHITE);
 		tangramParts[5] = new SceneGraphNode(sceneGraph, triangle, scene);
 		tangramNode->add(tangramParts[5]);
 	}
@@ -163,7 +164,7 @@ void createTangram()
 	GeometricObject * tableTop = new Square(bufferObjects, scene);
 	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
 	tableTop->translate(Vector3f(-3.5, -2.5, -0.51));
-	tableTop->changeColor(BROWN);
+	tableTop->changeColor(WHITE);
 	tableNode->add(new SceneGraphNode(sceneGraph, tableTop, scene));
 
 	{
@@ -171,7 +172,7 @@ void createTangram()
 		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
-		tableLeg->changeColor(BROWN);
+		tableLeg->changeColor(WHITE);
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -180,7 +181,7 @@ void createTangram()
 		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
-		tableLeg->changeColor(BROWN);
+		tableLeg->changeColor(WHITE);
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -189,7 +190,7 @@ void createTangram()
 		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
-		tableLeg->changeColor(BROWN);
+		tableLeg->changeColor(WHITE);
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
@@ -198,13 +199,14 @@ void createTangram()
 		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
-		tableLeg->changeColor(BROWN);
+		tableLeg->changeColor(WHITE);
 		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
 	}
 
+	//tableNode->rotate(180, Vector3f(1.0, 0.0, 0.0));
 	sceneGraph->add(tableNode);
 
-	//	Mesh mesh = Mesh(std::string("Assets/mesh/untitled.obj"));
+	//	Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
 	//	GeometricObject * cube = new GeometricObject(bufferObjects, scene, mesh);
 	//	cube->translate(Vector3f(0, 0, 1));
 	//	sceneGraph->add(new SceneGraphNode(sceneGraph, cube, scene));
@@ -291,9 +293,6 @@ void updateCamera()
 	}
 
 	camera->updateCamera();
-
-	//necessario o Eye para a iluminacao
-	camera->updateEyeDirection(Vector3f(centerX, centerY, centerZ), Vector3f(eyeX, eyeY, eyeZ));
 }
 
 void drawScene()
@@ -302,7 +301,7 @@ void drawScene()
 	{
 		updateCamera();
 
-		for (int i = 0; i < LIGHTS_IN_SCENE; i++)
+		for (int i = 0; i < lightIndex; i++)
 		{
 			sceneLights[i]->setLightShaderValues();
 		}
@@ -318,12 +317,20 @@ void createProgram()
 	shader->addShader(GL_VERTEX_SHADER, "Assets/shaders/vertexShader.glsl");
 	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/lightFragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
-	shader->addAttribute(COLORS, "in_Color");
 	shader->addAttribute(NORMALS, "in_Normal");
+
+	//used while drawing the scene
+	shader->addUniform("materialAmbient");
+	shader->addUniform("materialDiffuse");
+	shader->addUniform("materialSpecular");
 	shader->addUniform("ModelMatrix");
 	shader->addUniform("NormalMatrix");
-	shader->addUniform("eyeDirection");
+
+	//used for setting up the lights
+	shader->addUniform("cameraPosition");
 	shader->addUniform("numLights");
+
+	//used for the camera's matrixes
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 
 	//NOTE: code for the spotlight
@@ -332,14 +339,14 @@ void createProgram()
 	lightIndex++;
 
 	//NOTE: code for the point light
-	Light * pointLight = new Light(shader, lightIndex, POINT_LIGHT);
-	sceneLights[lightIndex] = pointLight;
-	lightIndex++;
+//	Light * pointLight = new Light(shader, lightIndex, POINT_LIGHT);
+//	sceneLights[lightIndex] = pointLight;
+//	lightIndex++;
 
 	//NOTE: code for the direccional light
-	// Light * directionalLight = new Light(shader, DIRECTIONAL_LIGHT);
-	//	sceneLights[lightIndex] = directionalLight;
-	//	lightIndex++;
+//	Light * directionalLight = new Light(shader, lightIndex, DIRECTIONAL_LIGHT);
+//	sceneLights[lightIndex] = directionalLight;
+//	lightIndex++;
 
 	//NOTE: has to happen after the lights set the uniforms?
 	shader->createShaderProgram();
@@ -358,27 +365,27 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
-	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
-	pointLight->diffuseColor = Vector4f(0.0, 0.0, 0.85, 1.0);
-	pointLight->specularColor = Vector4f(0.0, 0.0, 0.9, 1.0);
-	pointLight->lightRange = 13.0f;
+//	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
+//	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
+//	pointLight->diffuseColor = Vector4f(0.6, 0.6, 0.6, 1.0);
+//	pointLight->specularColor = Vector4f(0.7, 0.7, 0.7, 1.0);
+//	pointLight->lightRange = 15.0f;
 
 	//NOTE: code for the spotlight
-	spotLight->position = Vector4f(0, 0, 2.5, 1.0);
+	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
+	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
 	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
-	spotLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	spotLight->lightRange = 13.0f;
-	spotLight->coneAngle = 45.15f;
-	spotLight->coneFalloffAngle = 2.0f;
-	spotLight->coneDirection = Vector4f(0, 0, -1, 1.0);
+	spotLight->lightRange = 20.0f;
+	spotLight->coneAngle = 45.05f;
+	spotLight->coneFalloffAngle = 3.0f;
+	spotLight->coneDirection = Vector4f(0.9, 0.0, -1, 1.0);
 
 	//NOTE: code for the directional light
-	//	directionalLight->position = Vector4f(0, 0, 3.0, 1.0);
-	//	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-	//	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
-	//	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+//	directionalLight->position = Vector4f(0, 0, 3.0, 1.0);
+//	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+//	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
+//	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
 
 	//passes amount of scene lights to shader
 	shader->useShaderProgram();
@@ -473,20 +480,24 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'h':
 	case 'H':
-		sceneLights[0]->position.x--;
+		sceneLights[controllableLight]->position.x -= 0.1f;
 		break;
 	case 'j':
 	case 'J':
-		sceneLights[0]->position.x++;
+		sceneLights[controllableLight]->position.x += 0.1f;
 		break;
 	case 'k':
 	case 'K':
-		sceneLights[0]->position.y++;
+		sceneLights[controllableLight]->position.z += 0.1f;
 		break;
 	case 'l':
 	case 'L':
-		sceneLights[0]->position.y--;
+		sceneLights[controllableLight]->position.z -= 0.1f;
 		break;
+	case '\\':
+	case '|':
+		controllableLight = (controllableLight + 1) % lightIndex;
+		cout << "Controlling light number: " << controllableLight << endl;
 	case 'i':
 	case 'I':
 		if (animationState == ANIMATION_REVERSE)

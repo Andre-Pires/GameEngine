@@ -23,8 +23,12 @@ uniform struct Light {
    vec4 coneDirection;
 } sceneLights[MAX_LIGHTS];
 
-uniform vec4 eyeDirection;
+// Material Attributes
+uniform vec4 materialAmbient;
+uniform vec4 materialDiffuse;
+uniform vec4 materialSpecular;
 
+uniform vec4 cameraPosition;
 
 // Matrix
 uniform mat4 ModelMatrix;
@@ -34,7 +38,7 @@ uniform SharedMatrices
 	mat4 ProjectionMatrix;
 };
 
-const float shininess = 10.0;
+float shininess;
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
 
 
@@ -52,7 +56,7 @@ vec4 calculateLight(Light light){
 	{
 		lightDir = normalize(light.position - ex_Position);
 
-		float distanceToLight = length(light.position - ex_Position);
+		float distanceToLight = length((light.position) - ex_Position);
 
 		attenuation = 1.0 / (1.0 - pow(distanceToLight / light.lightRange, 2));
 
@@ -64,42 +68,42 @@ vec4 calculateLight(Light light){
 			float outerConeAngle = light.coneAngle + light.coneFalloffAngle;
 
 			float falloffAngle = innerConeAngle - outerConeAngle;
-
 			spot = clamp((lightToSurfaceAngle - outerConeAngle) / falloffAngle, 0.0, 1.0);
 
 
 			//NOTE: allows to see the spotlight soft edges really clearly
 			/*if(spot > 0.7){
-				out_Color = vec4(1.0,0.0,0.0,1.0);
-				return;
+				return vec4(1.0,0.0,0.0,1.0);
 			}else if(spot > 0.4){
-				out_Color = vec4(0,1.0,0.0,1.0);
-				return;
+				return vec4(0,1.0,0.0,1.0);
 			}else{
-				out_Color = vec4(0,0.0,1.0,1.0);
-				return;
+				return vec4(0,0.0,1.0,1.0);
 			}*/
-
+            //return mix(vec4(0.9,0.0,0.0,0.0),vec4(0.0,0.9,0.0,0.0), spot);
 		}
 	}
 
-	float lambertian =	max(dot(lightDir, ex_Normal), 0.0);
-	float specular = 0.0;
+	float diffuseCoefficient =	max(dot(lightDir, ex_Normal), 0.0);
+	float specularCoefficient = 0.0;
 
-	if(lambertian > 0.0)
+	if(diffuseCoefficient > 0.0 )
 	{
-
-		vec4 viewDir = normalize(-ex_Position);
-
-		//Blinn-Phong
+		vec4 viewDir = normalize(cameraPosition - ex_Position);
 		vec4 halfDir = normalize(lightDir + viewDir);
 
-		float specAngle = max(dot(halfDir, ex_Normal), 0.0);
+        //Blinn-Phong
+        //shininess = 16.0;
+		//float specAngle = max(dot(halfDir, ex_Normal), 0.0);
+		//specularCoefficient = pow(specAngle, shininess);
 
-		specular = pow(specAngle, shininess);
+        //Gaussian
+        shininess = 0.8;
+        float dotNH = clamp(dot(halfDir, ex_Normal), 0.0, 1.0);
+        float angle = acos(dotNH);
+        specularCoefficient = exp(- pow (angle/ shininess, 2));
 	}
 
-	return light.ambientColor + spot *  attenuation * (lambertian * light.diffuseColor + specular * light.specularColor);
+	return light.ambientColor * materialAmbient + spot *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 }
 
 
@@ -115,6 +119,7 @@ void main(void)
 
 	vec4 lightColorGammaCorrected = pow(lightColorResult, vec4(1.0/screenGamma));
 
-	out_Color = ex_Color * lightColorGammaCorrected;
+	out_Color = lightColorGammaCorrected;
+    //out_Color = materialAmbient;
 	//out_Color = abs(ex_Normal);
 }

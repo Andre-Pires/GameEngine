@@ -5,9 +5,7 @@ Light::Light(Shader * shader, int lightIndex, LightType type)
 	this->shader = shader;
 	this->lightType = type;
 	this->lightIndex = lightIndex;
-	//this->shader->useShaderProgram();
 
-	//tratar da memoria usada na criacao dos dups das strings
 	if (lightType == POINT_LIGHT || lightType == SPOTLIGHT)
 	{
 		this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].lightRange");
@@ -29,8 +27,6 @@ Light::Light(Shader * shader, int lightIndex, LightType type)
 	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].diffuseColor");
 
 	this->shader->addUniform("sceneLights[" + std::to_string(lightIndex) + "].specularColor");
-
-	//this->shader->dropShaderProgram();
 }
 
 void Light::setLightShaderValues()
