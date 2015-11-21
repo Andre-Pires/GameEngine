@@ -23,6 +23,7 @@
 #include "Mesh.h"
 #include "SceneGraphNode.h"
 #include "Light.h"
+#include "Texture.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -41,6 +42,9 @@ BufferObjects* bufferObjects;
 Shader* shader;
 Scene* scene;
 Camera* camera;
+
+//Textures
+Texture* texture;
 
 // Camera Position
 float eyeX = 0;
@@ -159,7 +163,9 @@ void createTangram()
 	//sceneGraph->add(tangramNode);
 
 	// table
-	tableNode = new SceneGraphNode(sceneGraph, scene);
+	texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
+	tableNode = new SceneGraphNode(sceneGraph, scene, texture);
+	sceneGraph->setTexture(texture);
 
 	GeometricObject * tableTop = new Square(bufferObjects, scene);
 	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
@@ -318,6 +324,7 @@ void createProgram()
 	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/lightFragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(NORMALS, "in_Normal");
+	shader->addAttribute(TEXCOORDS, "in_UV");
 
 	//used while drawing the scene
 	shader->addUniform("materialAmbient");
@@ -325,6 +332,7 @@ void createProgram()
 	shader->addUniform("materialSpecular");
 	shader->addUniform("ModelMatrix");
 	shader->addUniform("NormalMatrix");
+	shader->addUniform("TextureSampler");
 
 	//used for setting up the lights
 	shader->addUniform("cameraPosition");

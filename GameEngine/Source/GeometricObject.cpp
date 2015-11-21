@@ -62,14 +62,14 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 	changeColor(WHITE);
 }
 
-void GeometricObject::draw(Matrix4f parentNodeTransformations)
+void GeometricObject::draw(Matrix4f parentNodeTransformations, Texture* texture)
 {
-	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors);
+	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors, texture);
 }
 
 void GeometricObject::updateBuffer()
 {
-	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, Indices, Normals);
+	bufferObjects->createBufferObjects(VboId, VaoId, Vertices, Indices, Normals, Texcoords);
 }
 
 void GeometricObject::translate(Vector3f translation)

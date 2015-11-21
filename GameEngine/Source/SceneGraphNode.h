@@ -3,6 +3,7 @@
 #include <list>
 #include "Utilities.h"
 #include "GeometricObject.h"
+#include "Texture.h"
 
 class SceneGraphNode
 {
@@ -13,9 +14,11 @@ private:
 	Matrix4f transformations;
 	Shader * shader;
 	Scene * scene;
+	Texture * texture;
 public:
 	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
+	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex);
 	SceneGraphNode(Scene * scene);
 	void add(SceneGraphNode* sceneGraphNode);
 	void draw(Matrix4f parentTransformations = MatrixFactory::Identity4());
@@ -25,5 +28,6 @@ public:
 	void clearBuffer();
 	void clearTransformations();
 	void setShader(Shader* shader);
+	void setTexture(Texture* texture);
 	Matrix4f getTransformationsMatrix();
 };

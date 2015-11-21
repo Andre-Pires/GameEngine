@@ -108,6 +108,55 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, sc
 		this->Normals.push_back(tempNormals[i]);
 	}
 
+	Texcoord tempTexture[] = {
+		{ 0.0f, 0.0f }, // 0 - FRONT
+		{ 1.0f, 0.0f }, // 1
+		{ 1.0f, 1.0f }, // 2
+		{ 1.0f, 1.0f }, // 2
+		{ 0.0f, 1.0f }, // 3
+		{ 0.0f, 0.0f }, // 0
+
+		{ 0.0f, 0.0f }, // 5 - BACK
+		{ 1.0f, 0.0f }, // 4
+		{ 1.0f, 1.0f }, // 7
+		{ 1.0f, 1.0f }, // 7
+		{ 0.0f, 1.0f }, // 6
+		{ 0.0f, 0.0f }, // 5
+
+		{ 0.0f, 0.0f }, // 1 - RIGHT
+		{ 1.0f, 0.0f }, // 5
+		{ 1.0f, 1.0f }, // 6
+		{ 1.0f, 1.0f }, // 6
+		{ 0.0f, 1.0f }, // 2
+		{ 0.0f, 0.0f }, // 1
+
+		{ 0.0f, 0.0f }, // 4 - LEFT
+		{ 1.0f, 0.0f }, // 0
+		{ 1.0f, 1.0f }, // 3
+		{ 1.0f, 1.0f }, // 3
+		{ 0.0f, 1.0f }, // 7
+		{ 0.0f, 0.0f }, // 4
+
+		{ 1.0f, 0.0f }, // 2 - TOP
+		{ 1.0f, 1.0f }, // 6
+		{ 0.0f, 1.0f }, // 7
+		{ 0.0f, 1.0f }, // 7
+		{ 0.0f, 0.0f }, // 3
+		{ 1.0f, 0.0f }, // 2
+
+		{ 0.0f, 1.0f }, // 0 - BOTTOM
+		{ 0.0f, 0.0f }, // 4
+		{ 1.0f, 0.0f }, // 5
+		{ 1.0f, 0.0f }, // 5
+		{ 1.0f, 1.0f }, // 1
+		{ 0.0f, 1.0f }  // 0
+	};
+
+	for (int i = 0; i < verticesCount; i++)
+	{
+		this->Texcoords.push_back(tempTexture[i]);
+	}
+
 	updateBuffer();
 }
 

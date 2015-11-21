@@ -12,7 +12,7 @@ Scene::Scene(Shader * shader, char * modelName, char * normalName)
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors)
+void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, Texture* texture)
 {
 	if (shader != nullptr)
 	{
@@ -41,6 +41,11 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		glUniformMatrix4fv(normalUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(normalMat));
 		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(modelMatrix));
+		//texturas
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
+		//shader->checkGenericOpenGLError("ERROR: Could not draw scene.");
+		glUniform1i(texture->getTexUniform(), 0);
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_BYTE, (GLvoid*)0);
 

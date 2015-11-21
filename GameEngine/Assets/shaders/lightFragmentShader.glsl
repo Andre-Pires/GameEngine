@@ -3,6 +3,7 @@
 in vec4 ex_Position;
 in vec4 ex_Color;
 in vec4 ex_Normal;
+in vec2 ex_UV;
 
 // Out
 out vec4 out_Color;
@@ -27,6 +28,9 @@ uniform struct Light {
 uniform vec4 materialAmbient;
 uniform vec4 materialDiffuse;
 uniform vec4 materialSpecular;
+
+// Texture Samplers
+uniform sampler2D TextureSampler;
 
 uniform vec4 cameraPosition;
 
@@ -109,7 +113,8 @@ vec4 calculateLight(Light light){
 
 void main(void)
 {
-	vec4 lightColorResult = vec4(0.0);
+	//vec4 lightColorResult = vec4(0.0);
+	vec4 lightColorResult = texture( TextureSampler, ex_UV );
 
 	//adds the different lights' contribution for resulting color
 	for(int i = 0; i < numLights; i++)

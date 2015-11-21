@@ -36,6 +36,7 @@
     <ClCompile Include="Source\SceneGraphNode.cpp" />
     <ClCompile Include="Source\Shader.cpp" />
     <ClCompile Include="Source\Square.cpp" />
+    <ClCompile Include="Source\Texture.cpp" />
     <ClCompile Include="Source\Triangle.cpp" />
     <ClCompile Include="Source\Utilities.cpp" />
     <ClCompile Include="Source\Vector2f.cpp" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Source\SceneGraphNode.h" />
     <ClInclude Include="Source\Shader.h" />
     <ClInclude Include="Source\Square.h" />
+    <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\Triangle.h" />
     <ClInclude Include="Source\Utilities.h" />
     <ClInclude Include="Source\Vector2f.h" />
@@ -123,6 +125,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>Simple OpenGL Image Library\src;$(IncludePath)</IncludePath>
+    <LibraryPath>Simple OpenGL Image Library\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -159,6 +163,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>Dependencies\freeglut;Dependencies\glew </AdditionalLibraryDirectories>
+      <AdditionalDependencies>SOIL.lib;opengl32.lib;freeglut.lib;glew32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

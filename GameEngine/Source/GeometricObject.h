@@ -4,6 +4,7 @@
 #include "Utilities.h"
 #include "Matrix4f.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 class GeometricObject
 {
@@ -28,7 +29,7 @@ public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
 	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
-	void draw(Matrix4f parentNodeTransformations);
+	void draw(Matrix4f parentNodeTransformations, Texture* texture);
 	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);

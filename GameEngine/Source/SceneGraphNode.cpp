@@ -8,6 +8,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, 
 	this->transformations = MatrixFactory::Identity4();
 	this->scene = scene;
 	this->shader = nullptr;
+	this->texture = parent->texture;
 }
 
 //struture node - no object associated (draws childs only)
@@ -18,6 +19,18 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
 	this->transformations = MatrixFactory::Identity4();
 	this->scene = scene;
 	this->shader = nullptr;
+	this->texture = nullptr;
+}
+
+//struture node - no object associated (draws childs only) with texture associated
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex)
+{
+	this->parent = parent;
+	this->object = nullptr;
+	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
+	this->texture = tex;
 }
 
 //root node - no parent or objects
@@ -28,6 +41,7 @@ SceneGraphNode::SceneGraphNode(Scene * scene)
 	this->transformations = MatrixFactory::Identity4();
 	this->scene = scene;
 	this->shader = nullptr;
+	this->texture = nullptr;
 }
 
 void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
@@ -48,7 +62,7 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 	finalTransformation = parentTransformations * this->transformations;
 
 	if (object != NULL)
-		object->draw(finalTransformation);
+		object->draw(finalTransformation, texture);
 
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{
@@ -90,6 +104,11 @@ void SceneGraphNode::clearTransformations()
 void SceneGraphNode::setShader(Shader* shader)
 {
 	this->shader = shader;
+}
+
+void SceneGraphNode::setTexture(Texture* tex)
+{
+	this->texture = tex;
 }
 
 Matrix4f SceneGraphNode::getTransformationsMatrix()
