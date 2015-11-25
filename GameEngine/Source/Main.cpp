@@ -42,6 +42,7 @@ BufferObjects* bufferObjects;
 Shader* shader;
 Scene* scene;
 Camera* camera;
+Camera* lightCamera;
 
 //Textures
 Texture* texture;
@@ -211,11 +212,14 @@ void createTangram()
 
 	//tableNode->rotate(180, Vector3f(1.0, 0.0, 0.0));
 	sceneGraph->add(tableNode);
-
-	//	Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
-	//	GeometricObject * cube = new GeometricObject(bufferObjects, scene, mesh);
-	//	cube->translate(Vector3f(0, 0, 1));
-	//	sceneGraph->add(new SceneGraphNode(sceneGraph, cube, scene));
+	{
+		texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
+		Mesh mesh = Mesh(std::string("Assets/mesh/parallellogram-original.obj"));
+		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+		object->translate(Vector3f(0, 0, 1));
+		object->scale(Vector3f(5, 5, 1));
+		sceneGraph->add(new SceneGraphNode(sceneGraph, object, scene, texture));
+	}
 }
 
 //interpolation : ratio * x + (1 - ratio) * y
@@ -321,7 +325,7 @@ void createProgram()
 	//creating and linking shader program with respective shaders
 	shader = new Shader();
 	shader->addShader(GL_VERTEX_SHADER, "Assets/shaders/vertexShader.glsl");
-	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/lightFragmentShader.glsl");
+	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/fragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(NORMALS, "in_Normal");
 	shader->addAttribute(TEXCOORDS, "in_UV");
@@ -489,18 +493,22 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'h':
 	case 'H':
 		sceneLights[controllableLight]->position.x -= 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'j':
 	case 'J':
 		sceneLights[controllableLight]->position.x += 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'k':
 	case 'K':
 		sceneLights[controllableLight]->position.z += 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'l':
 	case 'L':
 		sceneLights[controllableLight]->position.z -= 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case '\\':
 	case '|':

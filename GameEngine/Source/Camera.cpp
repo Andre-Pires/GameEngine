@@ -47,14 +47,15 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 
 	this->View = rotation * translation;
 
-	updateShaderCameraPosition(rotation, eye);
+	//TODO:crashes for some reason
+	//updateShaderCameraPosition(rotation, eye);
 
 	CameraChanged = true;
 }
 
 void Camera::rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vector3f center, Vector3f up)
 {
-	Vector3f view = center - eye;
+	Vector3f view = Vector3f(0, 0, 1);//center - eye;
 
 	view = view.Normalize();
 
@@ -70,7 +71,7 @@ void Camera::rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vec
 
 	Matrix4f rotation = rotationMatX * rotationMatY;
 
-	Matrix4f translation = MatrixFactory::Translation4(-eye);
+	Matrix4f translation = MatrixFactory::Translation4(Vector3f(center.x, center.y, eye.z));
 
 	this->View = translation * rotation;
 
@@ -81,7 +82,7 @@ void Camera::rodriguesLookAt(float rotationX, float rotationY, Vector3f eye, Vec
 
 void Camera::quaternionLookAt(float rotationX, float rotationY, float zoom, Vector3f eye, Vector3f center, Vector3f up)
 {
-	Vector3f view = center - eye;
+	Vector3f view = Vector3f(0, 0, 1);//center - eye;
 
 	view = view.Normalize();
 
@@ -97,7 +98,7 @@ void Camera::quaternionLookAt(float rotationX, float rotationY, float zoom, Vect
 
 	Quaternion rotation = verticalRotation * horizontalRotation;
 
-	Matrix4f translation = MatrixFactory::Translation4(-Vector3f(0, 0, zoom + eye.z));
+	Matrix4f translation = MatrixFactory::Translation4(Vector3f(center.x, center.y, -(zoom + eye.z)));
 
 	this->View = translation * rotation.ToMatrix4();
 
@@ -150,6 +151,11 @@ void Camera::perspective(float fov, float ratio, float nearp, float farp)
 Matrix4f Camera::getViewMatrix()
 {
 	return this->View;
+}
+
+Matrix4f Camera::getProjectionMatrix()
+{
+	return this->Projection;
 }
 
 void Camera::updateShaderCameraPosition(Matrix4f rotation, Vector3f eye)

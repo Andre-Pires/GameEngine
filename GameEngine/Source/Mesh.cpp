@@ -34,7 +34,7 @@ void Mesh::parseFace(std::stringstream& sin)
 	std::string token;
 	for (int i = 0; i < 3; i++) {
 		std::getline(sin, token, '/');
-		if (token.size() > 0) vertexIdx.push_back(std::stoi(token));
+		if (token.size() > 0)	vertexIdx.push_back(std::stoi(token));
 		std::getline(sin, token, '/');
 		if (token.size() > 0) texcoordIdx.push_back(std::stoi(token));
 		std::getline(sin, token, ' ');
@@ -88,9 +88,9 @@ void Mesh::freeMeshData()
 	vertexData.clear();
 	texcoordData.clear();
 	normalData.clear();
-	//	vertexIdx.clear();
-	//	texcoordIdx.clear();
-	//	normalIdx.clear();
+	vertexIdx.clear();
+	texcoordIdx.clear();
+	normalIdx.clear();
 }
 
 const void Mesh::createMesh(std::string& filename)

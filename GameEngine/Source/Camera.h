@@ -30,4 +30,5 @@ public:
 	void ortho(float left, float right, float bottom, float top, float nearp, float farp);
 	void perspective(float fov, float ratio, float nearp, float farp);
 	Matrix4f getViewMatrix();
+	Matrix4f getProjectionMatrix();
 };

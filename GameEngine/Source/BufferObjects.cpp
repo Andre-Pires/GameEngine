@@ -18,7 +18,7 @@ BufferObjects * BufferObjects::getInstance() {
 }
 /////////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLubyte> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures)
+void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLuint> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures)
 {
 	//binda o vertexArray "VaoID" para ser utilizado
 	glBindVertexArray(VaoId);
@@ -46,14 +46,14 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vecto
 
 		glEnableVertexAttribArray(TEXCOORDS);
 		//define o tamanho do atributo, o tipo, se esta normalizado, o tamanho de cada vertice na estrutura, o inicio da mesma (tem de ser depois da posicoes)
-		glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_TRUE, sizeof(Texcoord), 0);
+		glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(Texcoord), 0);
 
 		//usa o 2 buffer object para guardar os indices que permitem selecionar quais os vertices (dos presentes no buffer) a serem desenhados
 		//assim nao temos de estar sempre a adicionar vertices podemos faze lo tudo de uma vez, limitando nos a escolher quais usar de seguida
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[3]);
 
 		//descreve o espaco a alocar como o tamanho da estrutura criada e diz que os dados sao estaticos
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLubyte), Indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLuint), Indices.data(), GL_STATIC_DRAW);
 	}
 
 	//remover todos os buffers em uso

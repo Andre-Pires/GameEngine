@@ -15,7 +15,7 @@ protected:
 	Material MaterialColors;
 	std::vector <Texcoord> Texcoords;
 	std::vector <Normal> Normals;
-	std::vector <GLubyte> Indices;
+	std::vector <GLuint> Indices;
 	int indicesCount;
 	int verticesCount;
 	Matrix4f transformations;
@@ -28,7 +28,7 @@ protected:
 public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
-	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLubyte* Indices, int indicesSize);
+	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLuint* Indices, int indicesSize);
 	void draw(Matrix4f parentNodeTransformations, Texture* texture);
 	void updateBuffer();
 	void translate(Vector3f translation);

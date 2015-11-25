@@ -17,7 +17,7 @@ public:
 	std::vector <Texcoord> Texcoords, texcoordData;
 	std::vector <Normal> Normals, normalData;
 
-	std::vector<unsigned int> vertexIdx, texcoordIdx, normalIdx;
+	std::vector<GLuint> vertexIdx, texcoordIdx, normalIdx;
 
 	bool TexcoordsLoaded, NormalsLoaded;
 	Mesh(std::string& filename);

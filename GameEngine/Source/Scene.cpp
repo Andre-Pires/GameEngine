@@ -44,10 +44,9 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		//texturas
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-		//shader->checkGenericOpenGLError("ERROR: Could not draw scene.");
 		glUniform1i(texture->getTexUniform(), 0);
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
-		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_BYTE, (GLvoid*)0);
+		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);
 
 		//fazemos unbind do programa e Vao
 		//usar o vertex array object criado

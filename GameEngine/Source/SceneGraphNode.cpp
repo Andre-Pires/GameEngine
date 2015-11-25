@@ -1,5 +1,16 @@
 ﻿#include "SceneGraphNode.h"
 
+//standard node - with parent, draw content and texture
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture)
+{
+	this->parent = parent;
+	this->object = object;
+	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
+	this->texture = texture;
+}
+
 //standard node - with parent and draw content
 SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene)
 {
@@ -23,14 +34,14 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
 }
 
 //struture node - no object associated (draws childs only) with texture associated
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * texture)
 {
 	this->parent = parent;
 	this->object = nullptr;
 	this->transformations = MatrixFactory::Identity4();
 	this->scene = scene;
 	this->shader = nullptr;
-	this->texture = tex;
+	this->texture = texture;
 }
 
 //root node - no parent or objects
@@ -106,9 +117,9 @@ void SceneGraphNode::setShader(Shader* shader)
 	this->shader = shader;
 }
 
-void SceneGraphNode::setTexture(Texture* tex)
+void SceneGraphNode::setTexture(Texture* texture)
 {
-	this->texture = tex;
+	this->texture = texture;
 }
 
 Matrix4f SceneGraphNode::getTransformationsMatrix()

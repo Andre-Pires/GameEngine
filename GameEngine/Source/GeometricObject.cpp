@@ -5,7 +5,7 @@
 #include "Mesh.h"
 
 //TODO: never been used, might have bugs
-GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLubyte * Indices, int indicesSize)
+GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLuint * Indices, int indicesSize)
 {
 	this->bufferObjects = buffer;
 	this->scene = scene;
@@ -14,7 +14,7 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * V
 	this->indicesCount = indicesSize;
 	this->verticesCount = verticesSize;
 
-	memcpy(this->Indices.data(), Indices, indicesSize * sizeof(GLubyte));
+	memcpy(this->Indices.data(), Indices, indicesSize * sizeof(GLuint));
 
 	for (int i = 0; i < verticesCount; i++)
 	{
@@ -52,11 +52,11 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 	this->verticesCount = mesh.Vertices.size();
 	this->Texcoords = mesh.Texcoords;
 	this->Normals = mesh.Normals;
-	this->indicesCount = mesh.vertexIdx.size();
+	this->indicesCount = mesh.Vertices.size();
 
-	for (int i = 0; i < mesh.vertexIdx.size(); i++)
+	for (int i = 0; i < mesh.Vertices.size(); i++)
 	{
-		this->Indices.push_back(mesh.vertexIdx[i]);
+		this->Indices.push_back(i);
 	}
 
 	changeColor(WHITE);
