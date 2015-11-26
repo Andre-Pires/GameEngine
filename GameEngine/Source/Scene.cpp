@@ -22,6 +22,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		GLint ambientUniform = shader->getUniformLocation("materialAmbient");
 		GLint diffuseUniform = shader->getUniformLocation("materialDiffuse");
 		GLint specularUniform = shader->getUniformLocation("materialSpecular");
+		GLint textureActiveUnif = shader->getUniformLocation("textureActive");
 		//usar o vertex array object criado
 		obj->bindVao(vao);
 
@@ -41,10 +42,19 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		glUniformMatrix4fv(normalUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(normalMat));
 		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
 		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(modelMatrix));
+
 		//texturas
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-		glUniform1i(texture->getTexUniform(), 0);
+		if (texture != nullptr)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
+			glUniform1i(texture->getTexUniform(), 0);
+			glUniform1i(textureActiveUnif, 1);
+		}
+		else
+		{
+			glUniform1i(textureActiveUnif, 0);
+		}
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);
 

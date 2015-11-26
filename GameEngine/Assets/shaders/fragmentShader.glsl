@@ -9,7 +9,6 @@ in vec2 ex_UV;
 // Out
 out vec4 out_Color;
 
-
 // array of lights
 #define MAX_LIGHTS 10
 uniform int numLights;
@@ -32,6 +31,7 @@ uniform vec4 materialSpecular;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
+uniform int textureActive;
 
 uniform vec4 cameraPosition;
 
@@ -119,23 +119,31 @@ vec4 calculateLight(Light light){
 void main(void)
 {
 	vec4 lightColorResult = vec4(0.0);
-
+    vec4 colorResult = vec4(0.0);
 	//adds the different lights' contribution for resulting color
 	for(int i = 0; i < numLights; i++)
 	{
 		lightColorResult += calculateLight(sceneLights[i]);
 	}
 
-	vec4 lightColorGammaCorrected = pow(lightColorResult, vec4(1.0/screenGamma));
+	lightColorResult = pow(lightColorResult, vec4(1.0/screenGamma));
+
+    //if we have textures add them
+    if(textureActive == 1){
+        colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
+    }
+    else{
+        colorResult = lightColorResult;
+    }
 
     //TODO: testing shadows
 
 	float shadow = texture(shadowMap,vec3(ex_shadowCoord.xy, (ex_shadowCoord.z)/ex_shadowCoord.w));
 
-    //out_Color = vec4(lightColorGammaCorrected * shadow);
+    out_Color = vec4(colorResult * shadow);
     //TODO: testing shadows
 
-	out_Color = texture( TextureSampler, ex_UV ) * lightColorGammaCorrected;
+    //out_Color = texture( TextureSampler, ex_UV ) * lightColorGammaCorrected;
     //out_Color = materialAmbient;
 	//out_Color = abs(ex_Normal);
 }

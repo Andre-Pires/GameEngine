@@ -46,7 +46,7 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vecto
 
 		glEnableVertexAttribArray(TEXCOORDS);
 		//define o tamanho do atributo, o tipo, se esta normalizado, o tamanho de cada vertice na estrutura, o inicio da mesma (tem de ser depois da posicoes)
-		glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(Texcoord), 0);
+		glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_TRUE, sizeof(Texcoord), 0);
 
 		//usa o 2 buffer object para guardar os indices que permitem selecionar quais os vertices (dos presentes no buffer) a serem desenhados
 		//assim nao temos de estar sempre a adicionar vertices podemos faze lo tudo de uma vez, limitando nos a escolher quais usar de seguida

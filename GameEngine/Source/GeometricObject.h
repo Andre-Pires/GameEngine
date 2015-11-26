@@ -29,7 +29,7 @@ public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
 	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLuint* Indices, int indicesSize);
-	void draw(Matrix4f parentNodeTransformations, Texture* texture);
+	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr);
 	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);

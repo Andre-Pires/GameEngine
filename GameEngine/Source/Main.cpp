@@ -32,8 +32,9 @@
 #define ANIMATION_RATE 1000 / 60
 #define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
 #define LIGHTS_IN_SCENE 2
+#define SHADOW_MAP_RATIO 1
 
-int WinX = 640, WinY = 480;
+int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 float ratio = 1.33;
@@ -75,9 +76,18 @@ SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
 
-int lightIndex = 0;
+// Lights
 int controllableLight = 0;
-std::array<Light *, LIGHTS_IN_SCENE> sceneLights;
+std::vector<Light *> sceneLights;
+
+//TODO: migrate this into a class
+// Shadows
+// Hold id of the framebuffer for light POV rendering
+GLuint fboId;
+// Z values will be rendered to this texture when using fboId framebuffer
+GLuint depthTextureId;
+GLint shadowCoordId, shadowMapId;
+GLint lightViewMatrixId;
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
@@ -166,13 +176,13 @@ void createTangram()
 	// table
 	texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
 	tableNode = new SceneGraphNode(sceneGraph, scene, texture);
-	sceneGraph->setTexture(texture);
+	//tableNode = new SceneGraphNode(sceneGraph, scene);
 
 	GeometricObject * tableTop = new Square(bufferObjects, scene);
 	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
 	tableTop->translate(Vector3f(-3.5, -2.5, -0.51));
 	tableTop->changeColor(WHITE);
-	tableNode->add(new SceneGraphNode(sceneGraph, tableTop, scene));
+	tableNode->add(new SceneGraphNode(tableNode, tableTop, scene));
 
 	{
 		GeometricObject * tableLeg = new Square(bufferObjects, scene);
@@ -180,7 +190,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
+		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
 	{
@@ -189,7 +199,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
+		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
 	{
@@ -198,7 +208,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
+		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
 	{
@@ -207,17 +217,18 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableNode->add(new SceneGraphNode(sceneGraph, tableLeg, scene));
+		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
 	//tableNode->rotate(180, Vector3f(1.0, 0.0, 0.0));
 	sceneGraph->add(tableNode);
+
 	{
 		texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
-		Mesh mesh = Mesh(std::string("Assets/mesh/parallellogram-original.obj"));
+		Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->translate(Vector3f(0, 0, 1));
-		object->scale(Vector3f(5, 5, 1));
+		object->translate(Vector3f(0, 0, 2));
+		object->scale(Vector3f(2, 2, 1));
 		sceneGraph->add(new SceneGraphNode(sceneGraph, object, scene, texture));
 	}
 }
@@ -305,13 +316,129 @@ void updateCamera()
 	camera->updateCamera();
 }
 
+void generateShadowFBO()
+{
+	//might have to put back on
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
+	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
+
+	GLenum FBOstatus;
+
+	// create a framebuffer object
+	glGenFramebuffers(1, &fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+
+	// Try to use a texture depth component
+	glGenTextures(1, &depthTextureId);
+	glBindTexture(GL_TEXTURE_2D, depthTextureId);
+
+	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Remove artifact on the edges of the shadowmap
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+	GLfloat * ones = new GLfloat[4]{ 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ones);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach the texture to FBO depth attachment point
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureId, 0);
+
+	// Instruct openGL that we won't bind a color texture with the currently bound FBO
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	// check FBO status
+	FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (FBOstatus != GL_FRAMEBUFFER_COMPLETE)
+		printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
+
+	//	switch back to window-system-provided framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+void renderShadows()
+{
+	// Render to our framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+	glViewport(0, 0, WinX * SHADOW_MAP_RATIO, WinY * SHADOW_MAP_RATIO); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+
+																		// We don't use bias in the shader, but instead we draw back faces,
+																		// which are already separated from the front faces by a small distance
+																		// (if your geometry is made this way)
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+
+						 // Clear the screen
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Vector3f lightInvDir = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
+
+	// Compute the MVP matrix from the light's point of view
+	lightCamera->ortho(-3.0f + centerX, 3.0f + centerX, -3.0f + centerY, 3.0f + centerY, -3.0f, 3.0f);
+	lightCamera->quaternionLookAt(rotateX, rotateY, zoom, lightInvDir, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+	// or, for spot light :
+	//	Vector3f lightPos = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
+	//	lightCamera->perspective(15.0f, 1.0f, 2.0f, 50.0f);
+	//	lightCamera->lookAt(lightPos, Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+
+	lightCamera->updateCamera();
+	Matrix4f depthProjectionMatrix = lightCamera->getProjectionMatrix();
+	Matrix4f depthViewMatrix = lightCamera->getViewMatrix();
+	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
+
+	Matrix4f biasMatrix = Matrix4f(new float[16]
+	{
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	});
+
+	sceneGraph->draw();
+
+	// Send our transformation to the currently bound shader,
+	// in the "MVP" uniform
+	shader->useShaderProgram();
+
+	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix* depthMVP));
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthTextureId);
+	glUniform1i(shadowMapId, 1);
+	// Render to the screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+
+						 // Clear the screen
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	shader->dropShaderProgram();
+}
+
 void drawScene()
 {
+	renderShadows();
+
 	if (cameraType == CONTROLLED_PERSP)
 	{
 		updateCamera();
 
-		for (int i = 0; i < lightIndex; i++)
+		for (int i = 0; i < sceneLights.size(); i++)
 		{
 			sceneLights[i]->setLightShaderValues();
 		}
@@ -330,14 +457,20 @@ void createProgram()
 	shader->addAttribute(NORMALS, "in_Normal");
 	shader->addAttribute(TEXCOORDS, "in_UV");
 
+	//shadow uniforms
+	shader->addUniform("lightViewMatrix");
+	shader->addUniform("shadowMap");
+
 	//used while drawing the scene
 	shader->addUniform("materialAmbient");
 	shader->addUniform("materialDiffuse");
 	shader->addUniform("materialSpecular");
 	shader->addUniform("ModelMatrix");
 	shader->addUniform("NormalMatrix");
-	shader->addUniform("TextureSampler");
 
+	//textures
+	shader->addUniform("TextureSampler");
+	shader->addUniform("textureActive");
 	//used for setting up the lights
 	shader->addUniform("cameraPosition");
 	shader->addUniform("numLights");
@@ -346,19 +479,16 @@ void createProgram()
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 
 	//NOTE: code for the spotlight
-	Light * spotLight = new Light(shader, lightIndex, SPOTLIGHT);
-	sceneLights[lightIndex] = spotLight;
-	lightIndex++;
+//	Light * spotLight = new Light(shader, sceneLights.size(), SPOTLIGHT);
+//	sceneLights.push_back(spotLight);
 
 	//NOTE: code for the point light
-//	Light * pointLight = new Light(shader, lightIndex, POINT_LIGHT);
-//	sceneLights[lightIndex] = pointLight;
-//	lightIndex++;
+	Light * pointLight = new Light(shader, sceneLights.size(), POINT_LIGHT);
+	sceneLights.push_back(pointLight);
 
 	//NOTE: code for the direccional light
-//	Light * directionalLight = new Light(shader, lightIndex, DIRECTIONAL_LIGHT);
-//	sceneLights[lightIndex] = directionalLight;
-//	lightIndex++;
+//	Light * directionalLight = new Light(shader, sceneLights.size(), DIRECTIONAL_LIGHT);
+//	sceneLights.push_back(directionalLight);
 
 	//NOTE: has to happen after the lights set the uniforms?
 	shader->createShaderProgram();
@@ -369,6 +499,8 @@ void createProgram()
 	//creating new scene object for further drawing
 	scene = new Scene(shader, "ModelMatrix", "NormalMatrix");
 
+	lightCamera = new Camera(bufferObjects, scene, shader);
+	//should be initialized after light camera since this camera should occupy the shared UBOs
 	camera = new Camera(bufferObjects, scene, shader);
 
 	sceneGraph = new SceneGraphNode(scene);
@@ -377,21 +509,21 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-//	pointLight->position = Vector4f(0, 0, 1.0, 1.0);
-//	pointLight->ambientColor = Vector4f(0.0, 0.0, 0.0, 1.0);
-//	pointLight->diffuseColor = Vector4f(0.6, 0.6, 0.6, 1.0);
-//	pointLight->specularColor = Vector4f(0.7, 0.7, 0.7, 1.0);
-//	pointLight->lightRange = 15.0f;
+	pointLight->position = Vector4f(0, 0, 16.5, 1.0);
+	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+	pointLight->diffuseColor = Vector4f(0.6, 0.6, 0.6, 1.0);
+	pointLight->specularColor = Vector4f(0.7, 0.7, 0.7, 1.0);
+	pointLight->lightRange = 30.0f;
 
 	//NOTE: code for the spotlight
-	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
-	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
-	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-	spotLight->lightRange = 20.0f;
-	spotLight->coneAngle = 45.05f;
-	spotLight->coneFalloffAngle = 3.0f;
-	spotLight->coneDirection = Vector4f(0.9, 0.0, -1, 1.0);
+//	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
+//	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+//	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
+//	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
+//	spotLight->lightRange = 20.0f;
+//	spotLight->coneAngle = 45.05f;
+//	spotLight->coneFalloffAngle = 3.0f;
+//	spotLight->coneDirection = Vector4f(0.9, 0.0, -1, 1.0);
 
 	//NOTE: code for the directional light
 //	directionalLight->position = Vector4f(0, 0, 3.0, 1.0);
@@ -402,8 +534,16 @@ void createProgram()
 	//passes amount of scene lights to shader
 	shader->useShaderProgram();
 	GLint lighNumberId = shader->getUniformLocation("numLights");
-	glUniform1i(lighNumberId, lightIndex);
+	glUniform1i(lighNumberId, sceneLights.size());
 	shader->dropShaderProgram();
+
+	//get shadow's uniforms
+	shader->useShaderProgram();
+	shadowMapId = shader->getUniformLocation("shadowMap");
+	lightViewMatrixId = shader->getUniformLocation("lightViewMatrix");
+	shader->dropShaderProgram();
+
+	generateShadowFBO();
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -512,7 +652,7 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case '\\':
 	case '|':
-		controllableLight = (controllableLight + 1) % lightIndex;
+		controllableLight = (controllableLight + 1) % sceneLights.size();
 		cout << "Controlling light number: " << controllableLight << endl;
 	case 'i':
 	case 'I':
