@@ -75,6 +75,7 @@ SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
+SceneGraphNode* lightMarker;
 
 // Lights
 int controllableLight = 0;
@@ -234,8 +235,17 @@ void createTangram()
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
 		object->repeatTexture(2.0);
 		object->translate(Vector3f(0, 0, 2));
-		object->scale(Vector3f(2, 2, 1));
+		object->scale(Vector3f(1, 1, 1));
 		sceneGraph->add(new SceneGraphNode(sceneGraph, object, scene, texture));
+	}
+
+	{
+		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
+		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+		object->translate(Vector3f(0, 0, 2.5));
+		object->scale(Vector3f(0.5, 0.5, 0.5));
+		object->changeColor(PINK);
+		lightMarker = new SceneGraphNode(sceneGraph, object, scene, texture);
 	}
 }
 
@@ -341,7 +351,7 @@ void generateShadowFBO()
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
 
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -400,7 +410,7 @@ void renderShadows()
 	//	lightCamera->perspective(15.0f, 1.0f, 2.0f, 50.0f);
 	//	lightCamera->lookAt(lightPos, Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 
-	lightCamera->updateCamera();
+	//lightCamera->updateCamera();
 	Matrix4f depthProjectionMatrix = lightCamera->getProjectionMatrix();
 	Matrix4f depthViewMatrix = lightCamera->getViewMatrix();
 	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
@@ -449,7 +459,7 @@ void drawScene()
 			sceneLights[i]->setLightShaderValues();
 		}
 	}
-
+	lightMarker->draw(); //NOTE: debug sphere for light
 	sceneGraph->draw();
 }
 
@@ -515,11 +525,11 @@ void createProgram()
 	createTangram();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 16.5, 1.0);
+	pointLight->position = Vector4f(0, 0, 3, 1.0);
 	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 	pointLight->diffuseColor = Vector4f(0.6, 0.6, 0.6, 1.0);
-	pointLight->specularColor = Vector4f(0.7, 0.7, 0.7, 1.0);
-	pointLight->lightRange = 30.0f;
+	pointLight->specularColor = Vector4f(0.8, 0.8, 0.8, 1.0);
+	pointLight->lightRange = 20.0f;
 
 	//NOTE: code for the spotlight
 //	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
@@ -639,21 +649,25 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'h':
 	case 'H':
 		sceneLights[controllableLight]->position.x -= 0.1f;
+		lightMarker->translate(Vector3f(-0.1f, 0, 0));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'j':
 	case 'J':
 		sceneLights[controllableLight]->position.x += 0.1f;
+		lightMarker->translate(Vector3f(0.1f, 0, 0));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'k':
 	case 'K':
 		sceneLights[controllableLight]->position.z += 0.1f;
+		lightMarker->translate(Vector3f(0, 0, 0.1));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'l':
 	case 'L':
 		sceneLights[controllableLight]->position.z -= 0.1f;
+		lightMarker->translate(Vector3f(0, 0, -0.1f));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case '\\':

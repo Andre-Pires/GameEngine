@@ -67,7 +67,10 @@ vec4 calculateLight(Light light){
 
 		float distanceToLight = length((light.position) - ex_Position);
 
-		attenuation = 1.0 / (1.0 - pow(distanceToLight / light.lightRange, 2));
+        if(distanceToLight < light.lightRange)
+            attenuation = 1.0 - pow(distanceToLight / light.lightRange, 2);
+        else
+            attenuation = 0.0;
 
 		if(light.lightType == 1){ //spotlight
 
@@ -97,7 +100,7 @@ vec4 calculateLight(Light light){
 
 	if(diffuseCoefficient > 0.0 )
 	{
-		vec4 viewDir = normalize(cameraPosition - ex_Position);
+		vec4 viewDir = - normalize(- ex_Position);
 		vec4 halfDir = normalize(lightDir + viewDir);
 
         //Blinn-Phong
@@ -106,13 +109,14 @@ vec4 calculateLight(Light light){
 		//specularCoefficient = pow(specAngle, shininess);
 
         //Gaussian
-        shininess = 0.8;
+        shininess = 0.7;
         float dotNH = clamp(dot(halfDir, ex_Normal), 0.0, 1.0);
         float angle = acos(dotNH);
         specularCoefficient = exp(- pow (angle/ shininess, 2));
 	}
+    return spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 
-	return light.ambientColor * materialAmbient + spot *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
+	return light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 }
 
 
@@ -126,6 +130,8 @@ void main(void)
 		lightColorResult += calculateLight(sceneLights[i]);
 	}
 
+    out_Color = lightColorResult;
+/*
 	lightColorResult = pow(lightColorResult, vec4(1.0/screenGamma));
 
     //if we have textures add them
@@ -136,14 +142,26 @@ void main(void)
         colorResult = lightColorResult;
     }
 
+    out_Color = colorResult;
+    return;
     //TODO: testing shadows
 
 	float shadow = texture(shadowMap,vec3(ex_shadowCoord.xy, (ex_shadowCoord.z)/ex_shadowCoord.w));
 
-    out_Color = vec4(colorResult * shadow);
+    if(gl_FragCoord.z > shadow){
+        out_Color = vec4(colorResult * shadow);
+        //out_Color = vec4(1.0,0.0,0.0,1.0);
+    }
+    else if (abs(gl_FragCoord.z - shadow) < 0.001f){
+        //out_Color = vec4(0.0,1.0,0.0,1.0);
+        out_Color = colorResult;
+    }else{
+        //out_Color = vec4(0.0,0.0,1.0,1.0);
+        out_Color = colorResult;
+    }
     //TODO: testing shadows
 
     //out_Color = texture( TextureSampler, ex_UV ) * lightColorGammaCorrected;
     //out_Color = materialAmbient;
-	//out_Color = abs(ex_Normal);
+	//out_Color = abs(ex_Normal);*/
 }
