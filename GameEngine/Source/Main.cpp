@@ -174,7 +174,7 @@ void createTangram()
 	//sceneGraph->add(tangramNode);
 
 	// table
-	texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
+	texture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
 	tableNode = new SceneGraphNode(sceneGraph, scene, texture);
 	//tableNode = new SceneGraphNode(sceneGraph, scene);
 
@@ -182,6 +182,7 @@ void createTangram()
 	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
 	tableTop->translate(Vector3f(-3.5, -2.5, -0.51));
 	tableTop->changeColor(WHITE);
+	tableTop->repeatTexture(3.0);
 	tableNode->add(new SceneGraphNode(tableNode, tableTop, scene));
 
 	{
@@ -190,6 +191,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
+		tableLeg->repeatTexture(7.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -199,6 +201,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
+		tableLeg->repeatTexture(7.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -208,6 +211,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
+		tableLeg->repeatTexture(7.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -217,6 +221,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
+		tableLeg->repeatTexture(7.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -227,6 +232,7 @@ void createTangram()
 		texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
 		Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+		object->repeatTexture(2.0);
 		object->translate(Vector3f(0, 0, 2));
 		object->scale(Vector3f(2, 2, 1));
 		sceneGraph->add(new SceneGraphNode(sceneGraph, object, scene, texture));
@@ -432,7 +438,7 @@ void renderShadows()
 
 void drawScene()
 {
-	renderShadows();
+	//renderShadows();
 
 	if (cameraType == CONTROLLED_PERSP)
 	{

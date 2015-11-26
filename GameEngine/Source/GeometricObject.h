@@ -38,6 +38,7 @@ public:
 	void changeColor(Color color);
 	void clearObjectFromBuffer();
 	virtual void shadeColor();
+	void repeatTexture(float repeat);
 	ostream& operator<<(std::ostream& stream);
 	friend ostream& operator<< (ostream& stream, GeometricObject object);
 };

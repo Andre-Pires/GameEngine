@@ -185,6 +185,16 @@ void GeometricObject::shadeColor()
 	return;
 }
 
+void GeometricObject::repeatTexture(float repeat) {
+	for (int i = 0; i < verticesCount; i++)
+	{
+		this->Texcoords[i].UV[0] *= repeat;
+		this->Texcoords[i].UV[1] *= repeat;
+	}
+
+	updateBuffer();
+}
+
 std::ostream& GeometricObject::operator<<(std::ostream& stream)
 {
 	for (int i = 0; i < verticesCount; i++)
