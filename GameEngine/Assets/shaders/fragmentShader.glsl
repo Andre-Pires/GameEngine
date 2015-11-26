@@ -100,7 +100,7 @@ vec4 calculateLight(Light light){
 
 	if(diffuseCoefficient > 0.0 )
 	{
-		vec4 viewDir = - normalize(- ex_Position);
+		vec4 viewDir = normalize(cameraPosition - ex_Position);
 		vec4 halfDir = normalize(lightDir + viewDir);
 
         //Blinn-Phong
