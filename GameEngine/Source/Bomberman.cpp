@@ -60,6 +60,11 @@ void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferO
 
 			}
 
+			auto ground = new Square(bufferObjects, scene);
+			ground->changeColor(GREEN);
+			ground->translate(Vector3f(col - 2, -(row - 2), -1));
+			gameNode->add(new SceneGraphNode(gameNode, ground, scene));
+
 			col++;
 		}
 
