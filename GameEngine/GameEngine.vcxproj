@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Bomberman.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\Diamond.cpp" />
     <ClCompile Include="Source\GeometricObject.cpp" />
@@ -44,6 +45,7 @@
     <ClCompile Include="Source\Vector4f.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Bomberman.h" />
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\Diamond.h" />
     <ClInclude Include="Source\GeometricObject.h" />

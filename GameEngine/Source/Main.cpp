@@ -24,6 +24,7 @@
 #include "SceneGraphNode.h"
 #include "Light.h"
 #include "Texture.h"
+#include "Bomberman.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -44,6 +45,7 @@ Shader* shader;
 Scene* scene;
 Camera* camera;
 Camera* lightCamera;
+Bomberman* bomberman;
 
 //Textures
 Texture* texture;
@@ -74,6 +76,7 @@ AnimationState animationActive = ANIMATION_OFF;
 SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
+SceneGraphNode* gameNode;
 SceneGraphNode* tangramParts[7];
 SceneGraphNode* lightMarker;
 
@@ -92,6 +95,15 @@ GLint lightViewMatrixId;
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
+void createGameScene()
+{
+	gameNode = new SceneGraphNode(sceneGraph, scene);
+
+	bomberman->createSceneGraph(scene, gameNode, bufferObjects, shader);
+
+	sceneGraph->add(gameNode);
+}
+
 void createTangram()
 {
 	tangramNode = new SceneGraphNode(sceneGraph, scene);
@@ -459,7 +471,7 @@ void drawScene()
 			sceneLights[i]->setLightShaderValues();
 		}
 	}
-	lightMarker->draw(); //NOTE: debug sphere for light
+	//lightMarker->draw(); //NOTE: debug sphere for light
 	sceneGraph->draw();
 }
 
@@ -522,7 +534,8 @@ void createProgram()
 	sceneGraph = new SceneGraphNode(scene);
 
 	//creating our figure's objects
-	createTangram();
+	//createTangram();
+	createGameScene();
 
 	//NOTE: code for the point light
 	pointLight->position = Vector4f(0, 0, 3, 1.0);
@@ -697,16 +710,20 @@ void processSpecialKeys(int key, int xx, int yy)
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		sceneGraph->translate(Vector3f(0.0f, 0.1f, 0.0f));
+		//sceneGraph->translate(Vector3f(0.0f, 0.1f, 0.0f));
+		bomberman->movePlayerUp();
 		break;
 	case GLUT_KEY_DOWN:
-		sceneGraph->translate(Vector3f(0.0f, -0.1f, 0.0f));
+		//sceneGraph->translate(Vector3f(0.0f, -0.1f, 0.0f));
+		bomberman->movePlayerDown();
 		break;
 	case GLUT_KEY_LEFT:
-		sceneGraph->translate(Vector3f(-0.1f, 0.0f, 0.0f));
+		//sceneGraph->translate(Vector3f(-0.1f, 0.0f, 0.0f));
+		bomberman->movePlayerLeft();
 		break;
 	case GLUT_KEY_RIGHT:
-		sceneGraph->translate(Vector3f(0.1f, 0.0f, 0.0f));
+		//sceneGraph->translate(Vector3f(0.1f, 0.0f, 0.0f));
+		bomberman->movePlayerRight();
 		break;
 	}
 }
@@ -928,6 +945,7 @@ void init(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
 	std::cout << std::boolalpha;
+	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"));
 	init(argc, argv);
 	glutMainLoop();
 	exit(EXIT_SUCCESS);
