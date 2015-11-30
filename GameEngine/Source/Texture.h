@@ -11,12 +11,10 @@
 class Texture {
 public:
 	GLuint textureID;
-	GLint uniform;
-
 public:
 	Texture(Shader* shader, char* filename);
 	void bind();
 	void unbind();
 	GLuint getTextureID();
-	GLint getTexUniform();
+	GLint getTexUniform(Shader* shader);
 };

@@ -43,6 +43,24 @@ uniform SharedMatrices
 	mat4 ProjectionMatrix;
 };
 
+vec2 poissonDisk[16] = vec2[](
+   vec2( -0.94201624, -0.39906216 ),
+   vec2( 0.94558609, -0.76890725 ),
+   vec2( -0.094184101, -0.92938870 ),
+   vec2( 0.34495938, 0.29387760 ),
+   vec2( -0.91588581, 0.45771432 ),
+   vec2( -0.81544232, -0.87912464 ),
+   vec2( -0.38277543, 0.27676845 ),
+   vec2( 0.97484398, 0.75648379 ),
+   vec2( 0.44323325, -0.97511554 ),
+   vec2( 0.53742981, -0.47373420 ),
+   vec2( -0.26496911, -0.41893023 ),
+   vec2( 0.79197514, 0.19090188 ),
+   vec2( -0.24188840, 0.99706507 ),
+   vec2( -0.81409955, 0.91437590 ),
+   vec2( 0.19984126, 0.78641367 ),
+   vec2( 0.14383161, -0.14100790 )
+);
 
 //shadow uniform
 uniform sampler2DShadow shadowMap;
@@ -50,6 +68,12 @@ uniform sampler2DShadow shadowMap;
 float shininess;
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
 
+// Returns a random number based on a vec3 and an int.
+float random(vec3 seed, int i){
+	vec4 seed4 = vec4(seed,i);
+	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
+	return fract(sin(dot_product) * 43758.5453);
+}
 
 vec4 calculateLight(Light light){
 
@@ -59,13 +83,13 @@ vec4 calculateLight(Light light){
 
 	if(light.lightType == 2) // directional light
 	{
-		lightDir = normalize(vec4(light.position.xyz, 1.0));
+		lightDir = normalize(light.position);
 	}
 	else // point or spot light
 	{
-		lightDir = normalize(light.position - ex_Position);
+		lightDir = normalize(ViewMatrix *light.position - ex_Position);
 
-		float distanceToLight = length((light.position) - ex_Position);
+		float distanceToLight = length(light.position - ex_Position);
 
         if(distanceToLight < light.lightRange)
             attenuation = 1.0 - pow(distanceToLight / light.lightRange, 2);
@@ -95,26 +119,27 @@ vec4 calculateLight(Light light){
 		}
 	}
 
-	float diffuseCoefficient =	max(dot(lightDir, ex_Normal), 0.0);
+	float diffuseCoefficient =	clamp(dot(lightDir, ex_Normal), 0.0, 1.0);
 	float specularCoefficient = 0.0;
 
 	if(diffuseCoefficient > 0.0 )
 	{
-		vec4 viewDir = normalize(cameraPosition - ex_Position);
-		vec4 halfDir = normalize(lightDir + viewDir);
+		vec4 viewDir = normalize(-ex_Position);
+		vec4 halfDir = normalize(lightDir  + viewDir);
 
         //Blinn-Phong
-        //shininess = 16.0;
+        //shininess = 4.0;
 		//float specAngle = max(dot(halfDir, ex_Normal), 0.0);
 		//specularCoefficient = pow(specAngle, shininess);
 
         //Gaussian
-        shininess = 0.7;
-        float dotNH = clamp(dot(halfDir, ex_Normal), 0.0, 1.0);
-        float angle = acos(dotNH);
+        shininess = 0.9;
+        float NdotH = clamp(dot(ex_Normal, halfDir), 0.0, 1.0);
+        float angle = acos(NdotH);
         specularCoefficient = exp(- pow (angle/ shininess, 2));
 	}
-    return spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
+
+    //return mix(vec4(0.9,0.0,0.0,0.0),vec4(0.0,0.9,0.0,0.0), specularCoefficient);
 
 	return light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 }
@@ -130,8 +155,6 @@ void main(void)
 		lightColorResult += calculateLight(sceneLights[i]);
 	}
 
-    out_Color = lightColorResult;
-/*
 	lightColorResult = pow(lightColorResult, vec4(1.0/screenGamma));
 
     //if we have textures add them
@@ -142,26 +165,37 @@ void main(void)
         colorResult = lightColorResult;
     }
 
+    //TODO: testing shadows
+
+    float visibility=1.0;
+	float bias = 0.0025;
+
+    // Sample the shadow map 4 times
+	for (int i=0;i<4;i++){
+		// use either :
+		//  - Always the same samples.
+		//    Gives a fixed pattern in the shadow, but no noise
+		int index = i;
+		//  - A random sample, based on the pixel's screen location.
+		//    No banding, but the shadow moves with the camera, which looks weird.
+		// int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
+		//  - A random sample, based on the pixel's position in world space.
+		//    The position is rounded to the millimeter to avoid too much aliasing
+		// int index = int(16.0*random(floor(ex_Position.xyz*1000.0), i))%16;
+
+		// being fully in the shadow will eat up 4*0.2 = 0.8
+		// 0.2 potentially remain, which is quite dark.
+		visibility -= 0.2*(1.0-textureProj( shadowMap, vec4(ex_shadowCoord.xy + poissonDisk[index]/700.0,  ex_shadowCoord.z-bias, ex_shadowCoord.w) ));
+	}
+
+    if(visibility < 1.0){
+        colorResult *= visibility;
+        //out_Color = mix(vec4(1.0,0.0,0.0,1.0), vec4(0.0,0.0,1.0,1.0), shadow);
+    }
+
     out_Color = colorResult;
-    return;
+
+
     //TODO: testing shadows
-
-	float shadow = texture(shadowMap,vec3(ex_shadowCoord.xy, (ex_shadowCoord.z)/ex_shadowCoord.w));
-
-    if(gl_FragCoord.z > shadow){
-        out_Color = vec4(colorResult * shadow);
-        //out_Color = vec4(1.0,0.0,0.0,1.0);
-    }
-    else if (abs(gl_FragCoord.z - shadow) < 0.001f){
-        //out_Color = vec4(0.0,1.0,0.0,1.0);
-        out_Color = colorResult;
-    }else{
-        //out_Color = vec4(0.0,0.0,1.0,1.0);
-        out_Color = colorResult;
-    }
-    //TODO: testing shadows
-
-    //out_Color = texture( TextureSampler, ex_UV ) * lightColorGammaCorrected;
-    //out_Color = materialAmbient;
-	//out_Color = abs(ex_Normal);*/
+	//out_Color = abs(ex_Normal);
 }

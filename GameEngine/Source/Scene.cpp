@@ -48,13 +48,14 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-			glUniform1i(texture->getTexUniform(), 0);
+			glUniform1i(texture->getTexUniform(shader), 0);
 			glUniform1i(textureActiveUnif, 1);
 		}
 		else
 		{
 			glUniform1i(textureActiveUnif, 0);
 		}
+
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);
 

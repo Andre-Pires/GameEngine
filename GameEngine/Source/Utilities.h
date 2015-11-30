@@ -87,8 +87,8 @@ const GLfloat blackDiffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const GLfloat blackSpecular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 const GLfloat whiteAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
-const GLfloat whiteDiffuse[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
-const GLfloat whiteSpecular[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
+const GLfloat whiteDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+const GLfloat whiteSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK, BROWN, WHITE };
 enum CameraType { ORTHOGRAPHIC, PERSPECTIVE, CONTROLLED_PERSP };

@@ -1,17 +1,9 @@
 #include "Bomberman.h"
-#include <string>
-#include <fstream>
-#include <cassert>
-#include "Square.h"
-#include "Diamond.h"
-#include "Triangle.h"
-
 
 Bomberman::Bomberman(std::string& filename)
 {
 	parseFile(filename);
 }
-
 
 Bomberman::~Bomberman()
 {
@@ -57,7 +49,6 @@ void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferO
 				aBox->translate(Vector3f(col - 2, -(row - 2), 0));
 				aBox->repeatTexture(3.0);
 				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture));
-
 			}
 
 			auto ground = new Square(bufferObjects, scene);
@@ -82,7 +73,6 @@ void Bomberman::parseFile(std::string filename)
 	}
 }
 
-
 std::vector<CellStatus> Bomberman::parseLine(std::string line)
 {
 	std::vector<CellStatus> gameRow;
@@ -94,7 +84,6 @@ std::vector<CellStatus> Bomberman::parseLine(std::string line)
 
 	return gameRow;
 }
-
 
 CellStatus Bomberman::parseCharacter(char c)
 {
@@ -131,7 +120,6 @@ bool Bomberman::setPlayerPos(float x, float y)
 
 	if (valid)
 	{
-		
 	}
 
 	return valid;
@@ -151,7 +139,6 @@ std::string Bomberman::dump() const
 	}
 	return raw;
 }
-
 
 CellStatus Bomberman::fromCharToCS(char c)
 {
@@ -174,7 +161,6 @@ CellStatus Bomberman::fromCharToCS(char c)
 
 	return status;
 }
-
 
 char Bomberman::fromCSToChar(CellStatus cs)
 {

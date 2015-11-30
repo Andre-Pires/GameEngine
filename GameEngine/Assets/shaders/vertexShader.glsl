@@ -26,10 +26,13 @@ uniform mat4 lightViewMatrix;
 
 void main(void)
 {
-	ex_Normal = normalize(NormalMatrix * in_Normal);
+	//ex_Normal = normalize(NormalMatrix * in_Normal);
+	mat3 nMat = transpose(inverse(mat3(ViewMatrix * ModelMatrix)));
+	ex_Normal = normalize(vec4(nMat * in_Normal.xyz, 1.0));
+
 	gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * in_Position;
 	ex_Color = in_Color;
-	ex_Position = ModelMatrix * in_Position;
+	ex_Position =  ViewMatrix * ModelMatrix * in_Position;
 	ex_UV = in_UV;
-	ex_shadowCoord = lightViewMatrix * in_Position;
+	ex_shadowCoord = lightViewMatrix * ModelMatrix * in_Position;
 }

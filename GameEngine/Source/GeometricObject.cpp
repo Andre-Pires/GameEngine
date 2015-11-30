@@ -136,9 +136,9 @@ void GeometricObject::changeColor(Color color)
 		memcpy(specularToUse, orangeSpecular, sizeof(GLfloat) * 4);
 		break;
 	case PINK:
-		memcpy(ambientToUse, yellowAmbient, sizeof(GLfloat) * 4);
-		memcpy(diffuseToUse, yellowDiffuse, sizeof(GLfloat) * 4);
-		memcpy(specularToUse, yellowSpecular, sizeof(GLfloat) * 4);
+		memcpy(ambientToUse, pinkAmbient, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, pinkDiffuse, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, pinkSpecular, sizeof(GLfloat) * 4);
 		break;
 	case YELLOW:
 		memcpy(ambientToUse, yellowAmbient, sizeof(GLfloat) * 4);

@@ -32,8 +32,8 @@
 #define CAPTION "Game Engine"
 #define ANIMATION_RATE 1000 / 60
 #define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
-#define LIGHTS_IN_SCENE 2
-#define SHADOW_MAP_RATIO 1
+#define LIGHTS_IN_SCENE 1
+#define SHADOW_MAP_RATIO 1.0
 
 int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
@@ -42,9 +42,9 @@ float ratio = 1.33;
 
 BufferObjects* bufferObjects;
 Shader* shader;
+Shader* shadowShader;
 Scene* scene;
 Camera* camera;
-Camera* lightCamera;
 Bomberman* bomberman;
 
 //Textures
@@ -73,13 +73,13 @@ float interpolationStep = ANIMATION_RATE;
 AnimationState animationState = ANIMATION_REVERSE;
 AnimationState animationActive = ANIMATION_OFF;
 
+SceneGraphNode* gameNode;
 SceneGraphNode* sceneGraph;
 SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
-SceneGraphNode* gameNode;
 SceneGraphNode* tangramParts[7];
 SceneGraphNode* lightMarker;
-
+SceneGraphNode* cube;
 // Lights
 int controllableLight = 0;
 std::vector<Light *> sceneLights;
@@ -102,6 +102,16 @@ void createGameScene()
 	bomberman->createSceneGraph(scene, gameNode, bufferObjects, shader);
 
 	sceneGraph->add(gameNode);
+
+	///ONLY FOR DEBUG - NOT NEEDED
+	{
+		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
+		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+		object->scale(Vector3f(0.5, 0.5, 0.5));
+		object->translate(Vector3f(0, 0, 5.8));
+		object->changeColor(PINK);
+		lightMarker = new SceneGraphNode(sceneGraph, object, scene, texture);
+	}
 }
 
 void createTangram()
@@ -204,7 +214,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(7.0);
+		tableLeg->repeatTexture(3.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -214,7 +224,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(7.0);
+		tableLeg->repeatTexture(3.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -224,7 +234,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(7.0);
+		tableLeg->repeatTexture(3.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -234,7 +244,7 @@ void createTangram()
 		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
 		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
 		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(7.0);
+		tableLeg->repeatTexture(3.0);
 		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
 	}
 
@@ -248,17 +258,27 @@ void createTangram()
 		object->repeatTexture(2.0);
 		object->translate(Vector3f(0, 0, 2));
 		object->scale(Vector3f(1, 1, 1));
-		sceneGraph->add(new SceneGraphNode(sceneGraph, object, scene, texture));
+		cube = new SceneGraphNode(sceneGraph, object, scene, texture);
+		sceneGraph->add(cube);
 	}
 
 	{
 		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->translate(Vector3f(0, 0, 2.5));
 		object->scale(Vector3f(0.5, 0.5, 0.5));
+		object->translate(Vector3f(0, 0, 5.8));
 		object->changeColor(PINK);
 		lightMarker = new SceneGraphNode(sceneGraph, object, scene, texture);
 	}
+
+	/*{
+	Mesh mesh = Mesh(std::string("Assets/mesh/plane.obj"));
+	GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+	object->scale(Vector3f(10, 10, 1));
+	object->rotate(180, Vector3f(1.0, 0.0, 0.0));
+	object->changeColor(WHITE);
+	plane = new SceneGraphNode(sceneGraph, object, scene);
+	}*/
 }
 
 //interpolation : ratio * x + (1 - ratio) * y
@@ -346,9 +366,6 @@ void updateCamera()
 
 void generateShadowFBO()
 {
-	//might have to put back on
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
 	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
 	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
 
@@ -363,16 +380,16 @@ void generateShadowFBO()
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
 
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// Remove artifact on the edges of the shadowmap
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
 	GLfloat * ones = new GLfloat[4]{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -380,11 +397,10 @@ void generateShadowFBO()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// attach the texture to FBO depth attachment point
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureId, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureId, 0);
 
 	// Instruct openGL that we won't bind a color texture with the currently bound FBO
 	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
 
 	// check FBO status
 	FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -393,8 +409,6 @@ void generateShadowFBO()
 
 	//	switch back to window-system-provided framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void renderShadows()
@@ -406,25 +420,29 @@ void renderShadows()
 																		// We don't use bias in the shader, but instead we draw back faces,
 																		// which are already separated from the front faces by a small distance
 																		// (if your geometry is made this way)
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+																		// Clear the screen
+	glClearDepth(1.0f);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
-						 // Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// activate offset for polygons
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	// offset by two units equal to smallest value of change in the shadow map
+	// and offset by two units depending on the slope of the polygon
+	glPolygonOffset(0.6f, 0.6f);
 
-	Vector3f lightInvDir = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
+	Vector3f lightPos = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
 
 	// Compute the MVP matrix from the light's point of view
-	lightCamera->ortho(-3.0f + centerX, 3.0f + centerX, -3.0f + centerY, 3.0f + centerY, -3.0f, 3.0f);
-	lightCamera->quaternionLookAt(rotateX, rotateY, zoom, lightInvDir, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
-	// or, for spot light :
-	//	Vector3f lightPos = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
-	//	lightCamera->perspective(15.0f, 1.0f, 2.0f, 50.0f);
-	//	lightCamera->lookAt(lightPos, Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	//	camera->ortho(-20.0f + lightPos.x, 20.0f + lightPos.x, -20.0f + lightPos.y, 20.0f + lightPos.y, -20.0f + lightPos.z, 20.0f + lightPos.z);
+	//	camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
 
-	//lightCamera->updateCamera();
-	Matrix4f depthProjectionMatrix = lightCamera->getProjectionMatrix();
-	Matrix4f depthViewMatrix = lightCamera->getViewMatrix();
+	// or, for spot light :
+	camera->perspective(120.0f, ratio, 0.1f, 100.0f);
+	camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+
+	camera->updateCamera();
+	Matrix4f depthProjectionMatrix = camera->getProjectionMatrix();
+	Matrix4f depthViewMatrix = camera->getViewMatrix();
 	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
 
 	Matrix4f biasMatrix = Matrix4f(new float[16]
@@ -435,24 +453,24 @@ void renderShadows()
 		0.5, 0.5, 0.5, 1.0
 	});
 
+	scene->setActiveShader(shadowShader);
 	sceneGraph->draw();
+	scene->setActiveShader(shader);
 
 	// Send our transformation to the currently bound shader,
 	// in the "MVP" uniform
 	shader->useShaderProgram();
 
-	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix* depthMVP));
+	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
 	glUniform1i(shadowMapId, 1);
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_POLYGON_OFFSET_FILL);
 	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
-
-						 // Clear the screen
+								  // Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader->dropShaderProgram();
@@ -460,7 +478,7 @@ void renderShadows()
 
 void drawScene()
 {
-	//renderShadows();
+	renderShadows();
 
 	if (cameraType == CONTROLLED_PERSP)
 	{
@@ -471,7 +489,7 @@ void drawScene()
 			sceneLights[i]->setLightShaderValues();
 		}
 	}
-	//lightMarker->draw(); //NOTE: debug sphere for light
+	lightMarker->draw(); //NOTE: debug sphere for light
 	sceneGraph->draw();
 }
 
@@ -527,7 +545,6 @@ void createProgram()
 	//creating new scene object for further drawing
 	scene = new Scene(shader, "ModelMatrix", "NormalMatrix");
 
-	lightCamera = new Camera(bufferObjects, scene, shader);
 	//should be initialized after light camera since this camera should occupy the shared UBOs
 	camera = new Camera(bufferObjects, scene, shader);
 
@@ -538,11 +555,11 @@ void createProgram()
 	createGameScene();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 3, 1.0);
+	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
 	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-	pointLight->diffuseColor = Vector4f(0.6, 0.6, 0.6, 1.0);
-	pointLight->specularColor = Vector4f(0.8, 0.8, 0.8, 1.0);
-	pointLight->lightRange = 20.0f;
+	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
+	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
+	pointLight->lightRange = 50.0f;
 
 	//NOTE: code for the spotlight
 //	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
@@ -552,10 +569,10 @@ void createProgram()
 //	spotLight->lightRange = 20.0f;
 //	spotLight->coneAngle = 45.05f;
 //	spotLight->coneFalloffAngle = 3.0f;
-//	spotLight->coneDirection = Vector4f(0.9, 0.0, -1, 1.0);
+//	spotLight->coneDirection = Vector4f(0.9, 0.0, 1, 1.0);
 
 	//NOTE: code for the directional light
-//	directionalLight->position = Vector4f(0, 0, 3.0, 1.0);
+//	directionalLight->position = Vector4f(0, 0, 10.0, 1.0);
 //	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 //	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 //	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
@@ -564,13 +581,37 @@ void createProgram()
 	shader->useShaderProgram();
 	GLint lighNumberId = shader->getUniformLocation("numLights");
 	glUniform1i(lighNumberId, sceneLights.size());
-	shader->dropShaderProgram();
 
 	//get shadow's uniforms
-	shader->useShaderProgram();
 	shadowMapId = shader->getUniformLocation("shadowMap");
 	lightViewMatrixId = shader->getUniformLocation("lightViewMatrix");
 	shader->dropShaderProgram();
+
+	///NEW SHADOW SHADER -- LIGHTER THAN MAIN SHADER
+	shadowShader = new Shader();
+	shadowShader->addShader(GL_VERTEX_SHADER, "Assets/shaders/shadowVertexShader.glsl");
+	shadowShader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/shadowFragmentShader.glsl");
+	shadowShader->addAttribute(VERTICES, "in_Position");
+	shadowShader->addAttribute(NORMALS, "in_Normal");
+	shadowShader->addAttribute(TEXCOORDS, "in_UV");
+
+	//used while drawing the scene
+	shadowShader->addUniform("materialAmbient");
+	shadowShader->addUniform("materialDiffuse");
+	shadowShader->addUniform("materialSpecular");
+	shadowShader->addUniform("ModelMatrix");
+	shadowShader->addUniform("NormalMatrix");
+
+	//textures
+	shadowShader->addUniform("TextureSampler");
+	shadowShader->addUniform("textureActive");
+	//used for setting up the lights
+	shadowShader->addUniform("cameraPosition");
+	shadowShader->addUniform("numLights");
+
+	//used for the camera's matrixes
+	shadowShader->addUniformBlock(UBO_BP, "SharedMatrices");
+	shadowShader->createShaderProgram();
 
 	generateShadowFBO();
 }
@@ -711,18 +752,22 @@ void processSpecialKeys(int key, int xx, int yy)
 	{
 	case GLUT_KEY_UP:
 		//sceneGraph->translate(Vector3f(0.0f, 0.1f, 0.0f));
+		//cube->translate(Vector3f(0.0f, 0.1f, 0.0f));
 		bomberman->movePlayerUp();
 		break;
 	case GLUT_KEY_DOWN:
 		//sceneGraph->translate(Vector3f(0.0f, -0.1f, 0.0f));
+		//cube->translate(Vector3f(0.0f, -0.1f, 0.0f));
 		bomberman->movePlayerDown();
 		break;
 	case GLUT_KEY_LEFT:
 		//sceneGraph->translate(Vector3f(-0.1f, 0.0f, 0.0f));
+		//cube->translate(Vector3f(-0.1f, 0.0f, 0.0f));
 		bomberman->movePlayerLeft();
 		break;
 	case GLUT_KEY_RIGHT:
 		//sceneGraph->translate(Vector3f(0.1f, 0.0f, 0.0f));
+		//cube->translate(Vector3f(0.1f, 0.0f, 0.0f));
 		bomberman->movePlayerRight();
 		break;
 	}

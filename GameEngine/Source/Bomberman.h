@@ -1,6 +1,12 @@
 #pragma once
 #include <vector>
 #include "SceneGraphNode.h"
+#include <string>
+#include <fstream>
+#include <cassert>
+#include "Square.h"
+#include "Diamond.h"
+#include "Triangle.h"
 
 enum class CellStatus { clear, wall, player, destructible };
 
@@ -23,7 +29,7 @@ private:
 public:
 	Bomberman(std::string& filename);
 	~Bomberman();
-	
+
 	void createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 
 	bool isCellClear(unsigned row, unsigned col) const;
@@ -36,6 +42,4 @@ public:
 	bool movePlayerDown() { return movePlayer(0, -_moveStep); }
 
 	std::string dump() const;
-
 };
-

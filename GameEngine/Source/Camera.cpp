@@ -7,7 +7,6 @@ Camera::Camera(BufferObjects* buffer, Scene* scene, Shader * shader)
 	this->shader = shader;
 	this->cameraVboId = bufferObjects->getCameraVboId();
 	bufferObjects->createCameraBufferObjects(cameraVboId);
-
 	this->View = MatrixFactory::Identity4();
 	this->Projection = MatrixFactory::Identity4();
 
@@ -47,8 +46,7 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 
 	this->View = rotation * translation;
 
-	//TODO:crashes for some reason
-	//updateShaderCameraPosition(rotation, eye);
+	updateShaderCameraPosition(rotation, eye);
 
 	CameraChanged = true;
 }
