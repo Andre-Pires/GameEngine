@@ -162,7 +162,7 @@ void Camera::updateShaderCameraPosition(Matrix4f rotation, Vector3f eye)
 
 	shader->useShaderProgram();
 
-	glUniform4fv(id, 1, (rotation * eye.toVector4()).getVector());
+	glUniform4fv(id, 1, (View * eye.toVector4()).getVector());
 
 	shader->dropShaderProgram();
 }

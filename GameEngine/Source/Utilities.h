@@ -67,7 +67,7 @@ const GLfloat pinkDiffuse[4] = { 0.7f, 0.0f, 0.4f, 1.0f };
 const GLfloat pinkSpecular[4] = { 1.0f, 0.0f, 0.6f, 1.0f };
 
 const GLfloat redAmbient[4] = { 0.15f, 0.0f, 0.0f, 1.0f };
-const GLfloat redDiffuse[4] = { 0.6f, 0.0f, 0.0f, 1.0f };
+const GLfloat redDiffuse[4] = { 0.7f, 0.0f, 0.0f, 1.0f };
 const GLfloat redSpecular[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 const GLfloat purpleAmbient[4] = { 0.15f, 0.0f, 0.25f, 1.0f };

@@ -47,7 +47,6 @@ void Light::setLightShaderValues()
 		glUniform1f(coneFalloffAngleId, coneFalloffAngle);
 		glUniform4fv(coneDirId, 1, coneDirection.getVector());
 	}
-
 	GLint lightTypeId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].lightType");
 	GLint positionId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].position");
 	GLint ambientId = shader->getUniformLocation("sceneLights[" + std::to_string(lightIndex) + "].ambientColor");

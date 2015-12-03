@@ -7,7 +7,7 @@ in vec2 in_UV;
 
 out vec4 ex_Position;
 out vec4 ex_Color;
-out vec4 ex_Normal;
+out vec3 ex_Normal;
 out vec2 ex_UV;
 // Used for shadow lookup
 out vec4 ex_shadowCoord;
@@ -27,12 +27,13 @@ uniform mat4 lightViewMatrix;
 void main(void)
 {
 	//ex_Normal = normalize(NormalMatrix * in_Normal);
+	//NOTE:this should be moved to the application
 	mat3 nMat = transpose(inverse(mat3(ViewMatrix * ModelMatrix)));
-	ex_Normal = normalize(vec4(nMat * in_Normal.xyz, 1.0));
+	ex_Normal = normalize(nMat * in_Normal.xyz);
 
 	gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * in_Position;
 	ex_Color = in_Color;
-	ex_Position =  ViewMatrix * ModelMatrix * in_Position;
+	ex_Position =   ViewMatrix * ModelMatrix * in_Position;
 	ex_UV = in_UV;
 	ex_shadowCoord = lightViewMatrix * ModelMatrix * in_Position;
 }

@@ -1,6 +1,5 @@
 #version 330 core
-// In
-in vec4 ex_Color;
+
 
 // Out
 out vec4 out_Color;
@@ -24,5 +23,5 @@ uniform SharedMatrices
 
 void main(void)
 {
-	out_Color = vec4(1.0,1.0,1.0,1.0);
+	out_Color = vec4( 0.0,0.0, 0.0, 0.0 );
 }

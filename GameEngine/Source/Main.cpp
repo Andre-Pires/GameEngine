@@ -98,19 +98,19 @@ GLint lightViewMatrixId;
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-
+	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"));
 	bomberman->createSceneGraph(scene, gameNode, bufferObjects, shader);
 
 	sceneGraph->add(gameNode);
 
 	///ONLY FOR DEBUG - NOT NEEDED
 	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
+		Mesh mesh = Mesh(std::string("Assets/mesh/suzanne.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
 		object->scale(Vector3f(0.5, 0.5, 0.5));
-		object->translate(Vector3f(0, 0, 5.8));
+		object->translate(Vector3f(0, 0, 2.0));
 		object->changeColor(PINK);
-		lightMarker = new SceneGraphNode(sceneGraph, object, scene, texture);
+		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
 	}
 }
 
@@ -249,9 +249,9 @@ void createTangram()
 	}
 
 	//tableNode->rotate(180, Vector3f(1.0, 0.0, 0.0));
-	sceneGraph->add(tableNode);
+	//sceneGraph->add(tableNode);
 
-	{
+	/*{
 		texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
 		Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
@@ -260,15 +260,15 @@ void createTangram()
 		object->scale(Vector3f(1, 1, 1));
 		cube = new SceneGraphNode(sceneGraph, object, scene, texture);
 		sceneGraph->add(cube);
-	}
+	}*/
 
 	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
+		Mesh mesh = Mesh(std::string("Assets/mesh/suzanne.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->scale(Vector3f(0.5, 0.5, 0.5));
-		object->translate(Vector3f(0, 0, 5.8));
-		object->changeColor(PINK);
-		lightMarker = new SceneGraphNode(sceneGraph, object, scene, texture);
+		object->scale(Vector3f(1.0, 1.0, 1.0));
+		object->translate(Vector3f(0, 0, 0.5));
+		object->changeColor(RED);
+		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
 	}
 
 	/*{
@@ -382,8 +382,8 @@ void generateShadowFBO()
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Remove artifact on the edges of the shadowmap
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -401,6 +401,7 @@ void generateShadowFBO()
 
 	// Instruct openGL that we won't bind a color texture with the currently bound FBO
 	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
 
 	// check FBO status
 	FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -420,25 +421,29 @@ void renderShadows()
 																		// We don't use bias in the shader, but instead we draw back faces,
 																		// which are already separated from the front faces by a small distance
 																		// (if your geometry is made this way)
-																		// Clear the screen
-	glClearDepth(1.0f);
-	glClear(GL_DEPTH_BUFFER_BIT);
 
-	// activate offset for polygons
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	// offset by two units equal to smallest value of change in the shadow map
-	// and offset by two units depending on the slope of the polygon
-	glPolygonOffset(0.6f, 0.6f);
+	// Clear the screen
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Vector3f lightPos = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
 
-	// Compute the MVP matrix from the light's point of view
-	//	camera->ortho(-20.0f + lightPos.x, 20.0f + lightPos.x, -20.0f + lightPos.y, 20.0f + lightPos.y, -20.0f + lightPos.z, 20.0f + lightPos.z);
-	//	camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
-
-	// or, for spot light :
-	camera->perspective(120.0f, ratio, 0.1f, 100.0f);
-	camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+	if (sceneLights[0]->lightType == DIRECTIONAL_LIGHT)
+	{
+		// activate offset for polygons
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		// offset by two units equal to smallest value of change in the shadow map
+		// and offset by two units depending on the slope of the polygon
+		glPolygonOffset(2.0f, 2.0f);
+		camera->ortho(-20.0f + lightPos.x, 20.0f + lightPos.x, -20.0f + lightPos.y, 20.0f + lightPos.y, -100.0f + lightPos.z, 100.0f + lightPos.z);
+		camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+	}
+	else
+	{
+		// for spot and point light :
+		camera->perspective(120.0f, ratio, 0.1f, 50.0f);
+		camera->lookAt(lightPos, Vector3f(lightPos.x, lightPos.y, centerZ), Vector3f(0, 1, 0));
+	}
 
 	camera->updateCamera();
 	Matrix4f depthProjectionMatrix = camera->getProjectionMatrix();
@@ -455,6 +460,7 @@ void renderShadows()
 
 	scene->setActiveShader(shadowShader);
 	sceneGraph->draw();
+	lightMarker->draw();
 	scene->setActiveShader(shader);
 
 	// Send our transformation to the currently bound shader,
@@ -467,10 +473,12 @@ void renderShadows()
 	glUniform1i(shadowMapId, 1);
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
-								  // Clear the screen
+	if (sceneLights[0]->lightType == DIRECTIONAL_LIGHT)
+		glDisable(GL_POLYGON_OFFSET_FILL);
+
+	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader->dropShaderProgram();
@@ -489,6 +497,7 @@ void drawScene()
 			sceneLights[i]->setLightShaderValues();
 		}
 	}
+
 	lightMarker->draw(); //NOTE: debug sphere for light
 	sceneGraph->draw();
 }
@@ -525,12 +534,12 @@ void createProgram()
 	shader->addUniformBlock(UBO_BP, "SharedMatrices");
 
 	//NOTE: code for the spotlight
-//	Light * spotLight = new Light(shader, sceneLights.size(), SPOTLIGHT);
-//	sceneLights.push_back(spotLight);
+	Light * spotLight = new Light(shader, sceneLights.size(), SPOTLIGHT);
+	sceneLights.push_back(spotLight);
 
 	//NOTE: code for the point light
-	Light * pointLight = new Light(shader, sceneLights.size(), POINT_LIGHT);
-	sceneLights.push_back(pointLight);
+//	Light * pointLight = new Light(shader, sceneLights.size(), POINT_LIGHT);
+//	sceneLights.push_back(pointLight);
 
 	//NOTE: code for the direccional light
 //	Light * directionalLight = new Light(shader, sceneLights.size(), DIRECTIONAL_LIGHT);
@@ -555,24 +564,24 @@ void createProgram()
 	createGameScene();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
-	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
-	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
-	pointLight->lightRange = 50.0f;
+//	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
+//	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+//	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
+//	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
+//	pointLight->lightRange = 50.0f;
 
 	//NOTE: code for the spotlight
-//	spotLight->position = Vector4f(-3.9, 0, 1.9, 1.0);
-//	spotLight->diffuseColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-//	spotLight->ambientColor = Vector4f(0.02, 0.02, 0.02, 1.0);
-//	spotLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
-//	spotLight->lightRange = 20.0f;
-//	spotLight->coneAngle = 45.05f;
-//	spotLight->coneFalloffAngle = 3.0f;
-//	spotLight->coneDirection = Vector4f(0.9, 0.0, 1, 1.0);
+	spotLight->position = Vector4f(-1.0, 0, 5.8, 1.0);
+	spotLight->ambientColor = Vector4f(0.15, 0.15, 0.15, 1.0);
+	spotLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
+	spotLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
+	spotLight->lightRange = 25.0f;
+	spotLight->coneAngle = 40.00f;
+	spotLight->coneFalloffAngle = 10.0f;
+	spotLight->coneDirection = Vector4f(0.3, 0.0, -1.0, 1.0);
 
 	//NOTE: code for the directional light
-//	directionalLight->position = Vector4f(0, 0, 10.0, 1.0);
+//	directionalLight->position = Vector4f(-9.6, 0, 10.0, 1.0);
 //	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 //	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
 //	directionalLight->specularColor = Vector4f(0.9, 0.9, 0.9, 1.0);
@@ -582,7 +591,7 @@ void createProgram()
 	GLint lighNumberId = shader->getUniformLocation("numLights");
 	glUniform1i(lighNumberId, sceneLights.size());
 
-	//get shadow's uniforms
+	//get shadow's uniforms - for each available light
 	shadowMapId = shader->getUniformLocation("shadowMap");
 	lightViewMatrixId = shader->getUniformLocation("lightViewMatrix");
 	shader->dropShaderProgram();
@@ -695,10 +704,12 @@ void processKeys(unsigned char key, int xx, int yy)
 		centerX += 0.25;
 		break;
 	case '+':
-		tangramNode->scale(Vector3f(1.1f, 1.1f, 1.0f));
+		sceneLights[controllableLight]->position.y += 0.1f;
+		//sceneGraph->translate(Vector3f(0.0f, 0.0f, 0.1f));
 		break;
 	case '-':
-		tangramNode->scale(Vector3f(0.9f, 0.9f, 1.0f));
+		sceneLights[controllableLight]->position.y -= 0.1f;
+		//sceneGraph->translate(Vector3f(0.0f, 0.0f, -0.1f));
 		break;
 	case 'h':
 	case 'H':
@@ -902,6 +913,8 @@ void reshape(int w, int h)
 	updateCamera();
 
 	glViewport(0, 0, WinX, WinY);
+
+	generateShadowFBO();
 }
 
 void timer(int value)
@@ -990,7 +1003,7 @@ void init(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
 	std::cout << std::boolalpha;
-	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"));
+
 	init(argc, argv);
 	glutMainLoop();
 	exit(EXIT_SUCCESS);

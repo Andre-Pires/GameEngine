@@ -2,7 +2,7 @@
 // In
 in vec4 ex_Position;
 in vec4 ex_Color;
-in vec4 ex_Normal;
+in vec3 ex_Normal;
 in vec4 ex_shadowCoord;
 in vec2 ex_UV;
 
@@ -68,6 +68,26 @@ uniform sampler2DShadow shadowMap;
 float shininess;
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
 
+float chebyshevUpperBound(vec4 shadowCoordW)
+{
+
+    float distance = shadowCoordW.z;
+
+    float moments = textureProj(shadowMap,shadowCoordW);
+
+	// Surface is fully lit. as the current fragment is before the light occluder
+	if (distance <= moments)
+		return 1.0 ;
+
+	float variance = (moments * moments);
+	variance = max(variance,0.00002); //NOTE: this variance looks good in my case
+
+	float d = distance - moments;
+	float p_max = variance / (variance + d*d);
+
+	return p_max;
+}
+
 // Returns a random number based on a vec3 and an int.
 float random(vec3 seed, int i){
 	vec4 seed4 = vec4(seed,i);
@@ -77,19 +97,19 @@ float random(vec3 seed, int i){
 
 vec4 calculateLight(Light light){
 
-	vec4 lightDir;
+	vec3 lightDir;
 	float spot = 1.0;
 	float attenuation = 1.0f;
 
 	if(light.lightType == 2) // directional light
 	{
-		lightDir = normalize(light.position);
+		lightDir = normalize(light.position.xyz);
 	}
 	else // point or spot light
 	{
-		lightDir = normalize(ViewMatrix *light.position - ex_Position);
+		lightDir = normalize(vec3(ViewMatrix *light.position) - ex_Position.xyz);
 
-		float distanceToLight = length(light.position - ex_Position);
+		float distanceToLight = length(vec3(ViewMatrix *light.position) - ex_Position.xyz);
 
         if(distanceToLight < light.lightRange)
             attenuation = 1.0 - pow(distanceToLight / light.lightRange, 2);
@@ -98,7 +118,8 @@ vec4 calculateLight(Light light){
 
 		if(light.lightType == 1){ //spotlight
 
-			float lightToSurfaceAngle = degrees(acos(dot(-lightDir, normalize(light.coneDirection))));
+            vec3 lightDirWorld = normalize(light.position.xyz - vec3(inverse(ViewMatrix) *ex_Position));
+			float lightToSurfaceAngle = degrees(acos(dot(- lightDirWorld, normalize(light.coneDirection.xyz))));
 
 			float innerConeAngle = light.coneAngle;
 			float outerConeAngle = light.coneAngle + light.coneFalloffAngle;
@@ -124,32 +145,32 @@ vec4 calculateLight(Light light){
 
 	if(diffuseCoefficient > 0.0 )
 	{
-		vec4 viewDir = normalize(-ex_Position);
-		vec4 halfDir = normalize(lightDir  + viewDir);
+		vec3 viewDir = normalize( -ex_Position.xyz);
+		vec3 halfDir = normalize(lightDir  + viewDir);
 
         //Blinn-Phong
-        //shininess = 4.0;
+        //shininess = 32.0;
 		//float specAngle = max(dot(halfDir, ex_Normal), 0.0);
 		//specularCoefficient = pow(specAngle, shininess);
 
         //Gaussian
-        shininess = 0.9;
+        shininess = 0.3;
         float NdotH = clamp(dot(ex_Normal, halfDir), 0.0, 1.0);
         float angle = acos(NdotH);
         specularCoefficient = exp(- pow (angle/ shininess, 2));
 	}
 
-    //return mix(vec4(0.9,0.0,0.0,0.0),vec4(0.0,0.9,0.0,0.0), specularCoefficient);
+    //return mix(vec4(0.9,0.0,0.0,1.0),vec4(0.0,0.9,0.0,1.0), specularCoefficient);
 
-	return light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
+    //NOTE: removed the specular contribution from the material (made the highlight hard to see)
+	return light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor);
 }
-
 
 void main(void)
 {
 	vec4 lightColorResult = vec4(0.0);
     vec4 colorResult = vec4(0.0);
-	//adds the different lights' contribution for resulting color
+	//adds the different lights' contribution for the resulting color
 	for(int i = 0; i < numLights; i++)
 	{
 		lightColorResult += calculateLight(sceneLights[i]);
@@ -157,45 +178,41 @@ void main(void)
 
 	lightColorResult = pow(lightColorResult, vec4(1.0/screenGamma));
 
-    //if we have textures add them
-    if(textureActive == 1){
-        colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
-    }
-    else{
-        colorResult = lightColorResult;
-    }
 
-    //TODO: testing shadows
 
     float visibility=1.0;
-	float bias = 0.0025;
-
-    // Sample the shadow map 4 times
-	for (int i=0;i<4;i++){
+    float bias = 0.0003;
+    for (int i=0;i<6;i++){
 		// use either :
 		//  - Always the same samples.
 		//    Gives a fixed pattern in the shadow, but no noise
-		int index = i;
+        int index = i;
 		//  - A random sample, based on the pixel's screen location.
 		//    No banding, but the shadow moves with the camera, which looks weird.
 		// int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
 		//  - A random sample, based on the pixel's position in world space.
 		//    The position is rounded to the millimeter to avoid too much aliasing
-		// int index = int(16.0*random(floor(ex_Position.xyz*1000.0), i))%16;
+        // int index = int(16.0*random(floor(ex_Position.xyz*1000.0), i))%16;
 
-		// being fully in the shadow will eat up 4*0.2 = 0.8
-		// 0.2 potentially remain, which is quite dark.
-		visibility -= 0.2*(1.0-textureProj( shadowMap, vec4(ex_shadowCoord.xy + poissonDisk[index]/700.0,  ex_shadowCoord.z-bias, ex_shadowCoord.w) ));
-	}
+        //NOTE: acho que serve assim, tenho de estudar pq é que isto funciona e descrever depois na dicsussao
+        vec4 shadowCoordW = ex_shadowCoord / ex_shadowCoord.w;
+
+        shadowCoordW.xy += poissonDisk[index]/700.0;
+        shadowCoordW.z -= bias;
+        visibility -= 0.15*(1.0- chebyshevUpperBound(shadowCoordW));
+    }
+
 
     if(visibility < 1.0){
-        colorResult *= visibility;
-        //out_Color = mix(vec4(1.0,0.0,0.0,1.0), vec4(0.0,0.0,1.0,1.0), shadow);
+        colorResult = lightColorResult * visibility;
+    }else{
+        colorResult = lightColorResult;
+    }
+
+    //if we have textures add them
+    if(textureActive == 1){
+        colorResult = texture( TextureSampler, ex_UV ) * colorResult;
     }
 
     out_Color = colorResult;
-
-
-    //TODO: testing shadows
-	//out_Color = abs(ex_Normal);
 }
