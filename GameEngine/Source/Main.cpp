@@ -84,14 +84,13 @@ SceneGraphNode* cube;
 int controllableLight = 0;
 std::vector<Light *> sceneLights;
 
-//TODO: migrate this into a class
 // Shadows
 // Hold id of the framebuffer for light POV rendering
-GLuint fboId;
+std::vector<GLuint> fboIds;
 // Z values will be rendered to this texture when using fboId framebuffer
-GLuint depthTextureId;
-GLint shadowCoordId, shadowMapId;
-GLint lightViewMatrixId;
+std::vector<GLuint> depthTextureIds;
+std::vector<GLuint> shadowMapIds;
+std::vector<GLuint> lightViewMatrixIds;
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
@@ -105,7 +104,7 @@ void createGameScene()
 
 	///ONLY FOR DEBUG - NOT NEEDED
 	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/suzanne.obj"));
+		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
 		object->scale(Vector3f(0.5, 0.5, 0.5));
 		object->translate(Vector3f(0, 0, 2.0));
@@ -263,7 +262,7 @@ void createTangram()
 	}*/
 
 	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/suzanne.obj"));
+		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
 		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
 		object->scale(Vector3f(1.0, 1.0, 1.0));
 		object->translate(Vector3f(0, 0, 0.5));
@@ -364,7 +363,7 @@ void updateCamera()
 	camera->updateCamera();
 }
 
-void generateShadowFBO()
+void generateShadowFBO(int lightIndex)
 {
 	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
 	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
@@ -372,14 +371,17 @@ void generateShadowFBO()
 	GLenum FBOstatus;
 
 	// create a framebuffer object
+	GLuint fboId;
 	glGenFramebuffers(1, &fboId);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+	fboIds.push_back(fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboIds[lightIndex]);
 
+	GLuint textureId;
 	// Try to use a texture depth component
-	glGenTextures(1, &depthTextureId);
-	glBindTexture(GL_TEXTURE_2D, depthTextureId);
+	glGenTextures(1, &textureId);
+	depthTextureIds.push_back(textureId);
+	glBindTexture(GL_TEXTURE_2D, depthTextureIds[lightIndex]);
 
-	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -397,7 +399,7 @@ void generateShadowFBO()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// attach the texture to FBO depth attachment point
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureId, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureIds[lightIndex], 0);
 
 	// Instruct openGL that we won't bind a color texture with the currently bound FBO
 	glDrawBuffer(GL_NONE);
@@ -412,23 +414,19 @@ void generateShadowFBO()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void renderShadows()
+void renderShadows(int lightIndex)
 {
 	// Render to our framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboIds[lightIndex]);
 	glViewport(0, 0, WinX * SHADOW_MAP_RATIO, WinY * SHADOW_MAP_RATIO); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
-																		// We don't use bias in the shader, but instead we draw back faces,
-																		// which are already separated from the front faces by a small distance
-																		// (if your geometry is made this way)
 
 	// Clear the screen
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Vector3f lightPos = Vector3f(sceneLights[0]->position.x, sceneLights[0]->position.y, sceneLights[0]->position.z);
+	Vector3f lightPos = Vector3f(sceneLights[lightIndex]->position.x, sceneLights[lightIndex]->position.y, sceneLights[lightIndex]->position.z);
 
-	if (sceneLights[0]->lightType == DIRECTIONAL_LIGHT)
+	if (sceneLights[lightIndex]->lightType == DIRECTIONAL_LIGHT)
 	{
 		// activate offset for polygons
 		glEnable(GL_POLYGON_OFFSET_FILL);
@@ -467,14 +465,16 @@ void renderShadows()
 	// in the "MVP" uniform
 	shader->useShaderProgram();
 
-	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, depthTextureId);
-	glUniform1i(shadowMapId, 1);
+	glUniformMatrix4fv(lightViewMatrixIds[lightIndex], 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
+	//Note: texture starts at 1 since index 0 is already in use
+	glActiveTexture(GL_TEXTURE1 + lightIndex);
+	glBindTexture(GL_TEXTURE_2D, depthTextureIds[lightIndex]);
+	glUniform1i(shadowMapIds[lightIndex], 1 + lightIndex);
+
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	if (sceneLights[0]->lightType == DIRECTIONAL_LIGHT)
+	if (sceneLights[lightIndex]->lightType == DIRECTIONAL_LIGHT)
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
 	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
@@ -486,7 +486,11 @@ void renderShadows()
 
 void drawScene()
 {
-	renderShadows();
+	//NOTE: calculates shadows for up to 2 lights in scene
+	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
+	{
+		renderShadows(i);
+	}
 
 	if (cameraType == CONTROLLED_PERSP)
 	{
@@ -512,10 +516,6 @@ void createProgram()
 	shader->addAttribute(NORMALS, "in_Normal");
 	shader->addAttribute(TEXCOORDS, "in_UV");
 
-	//shadow uniforms
-	shader->addUniform("lightViewMatrix");
-	shader->addUniform("shadowMap");
-
 	//used while drawing the scene
 	shader->addUniform("materialAmbient");
 	shader->addUniform("materialDiffuse");
@@ -538,14 +538,21 @@ void createProgram()
 	sceneLights.push_back(spotLight);
 
 	//NOTE: code for the point light
-//	Light * pointLight = new Light(shader, sceneLights.size(), POINT_LIGHT);
-//	sceneLights.push_back(pointLight);
+	Light * pointLight = new Light(shader, sceneLights.size(), POINT_LIGHT);
+	sceneLights.push_back(pointLight);
 
 	//NOTE: code for the direccional light
 //	Light * directionalLight = new Light(shader, sceneLights.size(), DIRECTIONAL_LIGHT);
 //	sceneLights.push_back(directionalLight);
 
-	//NOTE: has to happen after the lights set the uniforms?
+	for (int i = 0; i < 2; i++)
+	{
+		//shadow uniforms
+		shader->addUniform("lightViewMatrix[" + std::to_string(i) + "]");
+		shader->addUniform("shadowMap[" + std::to_string(i) + "]");
+	}
+
+	//NOTE: has to happen after the lights set the uniforms
 	shader->createShaderProgram();
 
 	//generating vao
@@ -564,20 +571,20 @@ void createProgram()
 	createGameScene();
 
 	//NOTE: code for the point light
-//	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
-//	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
-//	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
-//	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
-//	pointLight->lightRange = 50.0f;
+	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
+	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
+	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
+	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
+	pointLight->lightRange = 50.0f;
 
 	//NOTE: code for the spotlight
-	spotLight->position = Vector4f(-1.0, 0, 5.8, 1.0);
-	spotLight->ambientColor = Vector4f(0.15, 0.15, 0.15, 1.0);
+	spotLight->position = Vector4f(-1.0, 0, 4.0, 1.0);
+	spotLight->ambientColor = Vector4f(0.05, 0.05, 0.05, 1.0);
 	spotLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
 	spotLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
 	spotLight->lightRange = 25.0f;
-	spotLight->coneAngle = 40.00f;
-	spotLight->coneFalloffAngle = 10.0f;
+	spotLight->coneAngle = 30.00f;
+	spotLight->coneFalloffAngle = 3.0f;
 	spotLight->coneDirection = Vector4f(0.3, 0.0, -1.0, 1.0);
 
 	//NOTE: code for the directional light
@@ -591,9 +598,14 @@ void createProgram()
 	GLint lighNumberId = shader->getUniformLocation("numLights");
 	glUniform1i(lighNumberId, sceneLights.size());
 
-	//get shadow's uniforms - for each available light
-	shadowMapId = shader->getUniformLocation("shadowMap");
-	lightViewMatrixId = shader->getUniformLocation("lightViewMatrix");
+	//for performance reasons shader only supports two lights' shadows
+	for (int i = 0; i < 2; i++)
+	{
+		//get shadow's uniforms - for each available light
+		shadowMapIds.push_back(shader->getUniformLocation("shadowMap[" + std::to_string(i) + "]"));
+		lightViewMatrixIds.push_back(shader->getUniformLocation("lightViewMatrix[" + std::to_string(i) + "]"));
+	}
+
 	shader->dropShaderProgram();
 
 	///NEW SHADOW SHADER -- LIGHTER THAN MAIN SHADER
@@ -622,7 +634,12 @@ void createProgram()
 	shadowShader->addUniformBlock(UBO_BP, "SharedMatrices");
 	shadowShader->createShaderProgram();
 
-	generateShadowFBO();
+	//add 2 framebuffers at the start of application to allow easier
+	//switching between number of shadow calculations
+	for (int i = 0; i < 2; i++)
+	{
+		generateShadowFBO(i);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -739,6 +756,7 @@ void processKeys(unsigned char key, int xx, int yy)
 	case '|':
 		controllableLight = (controllableLight + 1) % sceneLights.size();
 		cout << "Controlling light number: " << controllableLight << endl;
+		break;
 	case 'i':
 	case 'I':
 		if (animationState == ANIMATION_REVERSE)
@@ -914,7 +932,12 @@ void reshape(int w, int h)
 
 	glViewport(0, 0, WinX, WinY);
 
-	generateShadowFBO();
+	//always generate 2 framebuffers at the start of application to allow easier
+	//switching between number of shadow calculations
+	for (int i = 0; i < 2; i++)
+	{
+		generateShadowFBO(i);
+	}
 }
 
 void timer(int value)

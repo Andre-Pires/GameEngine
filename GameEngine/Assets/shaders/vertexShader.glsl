@@ -10,7 +10,7 @@ out vec4 ex_Color;
 out vec3 ex_Normal;
 out vec2 ex_UV;
 // Used for shadow lookup
-out vec4 ex_shadowCoord;
+out vec4 ex_shadowCoord[2];
 
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
@@ -21,8 +21,11 @@ uniform SharedMatrices
 	mat4 ProjectionMatrix;
 };
 
+//needed to check how many lights need shadows (max. 2)
+uniform int numLights;
+
 // Values that stay constant for the whole mesh.
-uniform mat4 lightViewMatrix;
+uniform mat4 lightViewMatrix[2];
 
 void main(void)
 {
@@ -35,5 +38,9 @@ void main(void)
 	ex_Color = in_Color;
 	ex_Position =   ViewMatrix * ModelMatrix * in_Position;
 	ex_UV = in_UV;
-	ex_shadowCoord = lightViewMatrix * ModelMatrix * in_Position;
+
+	ex_shadowCoord[0] = lightViewMatrix[0] * ModelMatrix * in_Position;
+	if(numLights > 1){
+		ex_shadowCoord[1] = lightViewMatrix[1] * ModelMatrix * in_Position;
+	}
 }
