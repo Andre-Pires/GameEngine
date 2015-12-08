@@ -14,6 +14,7 @@ void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferO
 	auto wallTexture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
 	auto destructibleTexture = new Texture(shader, "Assets/textures/text.jpg");
 	auto playerTexture = new Texture(shader, "Assets/textures/text.jpg");
+	auto normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
 
 	auto row = 0;
 
@@ -48,7 +49,7 @@ void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferO
 
 				aBox->translate(Vector3f(col - 2, -(row - 2), 0));
 				aBox->repeatTexture(3.0);
-				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture));
+				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture, normalMap));
 			}
 
 			auto ground = new Square(bufferObjects, scene);

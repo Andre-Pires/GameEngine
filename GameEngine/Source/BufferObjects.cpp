@@ -18,7 +18,7 @@ BufferObjects * BufferObjects::getInstance() {
 }
 /////////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLuint> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures)
+void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLuint> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures, std::vector<Tangent> Tangents)
 {
 	//binda o vertexArray "VaoID" para ser utilizado
 	glBindVertexArray(VaoId);
@@ -48,9 +48,17 @@ void BufferObjects::createBufferObjects(GLuint * VboId, GLuint VaoId, std::vecto
 		//define o tamanho do atributo, o tipo, se esta normalizado, o tamanho de cada vertice na estrutura, o inicio da mesma (tem de ser depois da posicoes)
 		glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(Texcoord), 0);
 
+		glBindBuffer(GL_ARRAY_BUFFER, VboId[3]);
+		//descreve o espaco a alocar como o tamanho da estrutura criada e diz que os dados sao estaticos
+		glBufferData(GL_ARRAY_BUFFER, Tangents.size() * sizeof(Tangent), Tangents.data(), GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(TANGENTS);
+		//define o tamanho do atributo, o tipo, se esta normalizado, o tamanho de cada vertice na estrutura, o inicio da mesma (tem de ser depois da posicoes)
+		glVertexAttribPointer(TANGENTS, 3, GL_FLOAT, GL_FALSE, sizeof(Tangent), 0);
+
 		//usa o 2 buffer object para guardar os indices que permitem selecionar quais os vertices (dos presentes no buffer) a serem desenhados
 		//assim nao temos de estar sempre a adicionar vertices podemos faze lo tudo de uma vez, limitando nos a escolher quais usar de seguida
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[3]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[4]);
 
 		//descreve o espaco a alocar como o tamanho da estrutura criada e diz que os dados sao estaticos
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLuint), Indices.data(), GL_STATIC_DRAW);
@@ -89,7 +97,8 @@ void BufferObjects::destroyBufferObjects(GLuint * VboId, GLuint VaoId)
 	glDisableVertexAttribArray(VERTICES);
 	glDisableVertexAttribArray(NORMALS);
 	glDisableVertexAttribArray(TEXCOORDS);
-	glDeleteBuffers(4, VboId);
+	glDisableVertexAttribArray(TANGENTS);
+	glDeleteBuffers(5, VboId);
 	glDeleteVertexArrays(1, &VaoId);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -121,11 +130,11 @@ GLuint BufferObjects::getVaoId()
 
 GLuint * BufferObjects::getVboId()
 {
-	//alterado para criar espaco para as normais e texturas
-	GLuint * VboId = new GLuint[4];
+	//alterado para criar espaco para as normais, texturas e tangentes
+	GLuint * VboId = new GLuint[5];
 
 	//gera dois buffer names e guarda os
-	glGenBuffers(4, VboId);
+	glGenBuffers(5, VboId);
 
 	return VboId;
 }

@@ -1,7 +1,7 @@
 ﻿#include "SceneGraphNode.h"
 
 //standard node - with parent, draw content and texture
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap)
 {
 	this->parent = parent;
 	this->object = object;
@@ -9,6 +9,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, 
 	this->scene = scene;
 	this->shader = nullptr;
 	this->texture = texture;
+	this->normalMap = normalMap;
 }
 
 //standard node - with parent and draw content
@@ -20,6 +21,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, 
 	this->scene = scene;
 	this->shader = nullptr;
 	this->texture = parent->texture;
+	this->normalMap = parent->normalMap;
 }
 
 //struture node - no object associated (draws childs only)
@@ -31,10 +33,11 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
 	this->scene = scene;
 	this->shader = nullptr;
 	this->texture = nullptr;
+	this->normalMap = nullptr;
 }
 
 //struture node - no object associated (draws childs only) with texture associated
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * texture)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * texture, Texture * normalMap)
 {
 	this->parent = parent;
 	this->object = nullptr;
@@ -42,6 +45,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * 
 	this->scene = scene;
 	this->shader = nullptr;
 	this->texture = texture;
+	this->normalMap = normalMap;
 }
 
 //root node - no parent or objects
@@ -53,6 +57,7 @@ SceneGraphNode::SceneGraphNode(Scene * scene)
 	this->scene = scene;
 	this->shader = nullptr;
 	this->texture = nullptr;
+	this->normalMap = nullptr;
 }
 
 void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
@@ -73,7 +78,7 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 	finalTransformation = parentTransformations * this->transformations;
 
 	if (object != NULL)
-		object->draw(finalTransformation, texture);
+		object->draw(finalTransformation, texture, normalMap);
 
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{
@@ -117,9 +122,10 @@ void SceneGraphNode::setShader(Shader* shader)
 	this->shader = shader;
 }
 
-void SceneGraphNode::setTexture(Texture* texture)
+void SceneGraphNode::setTexture(Texture* texture, Texture * normalMap)
 {
 	this->texture = texture;
+	this->normalMap = normalMap;
 }
 
 Matrix4f SceneGraphNode::getTransformationsMatrix()

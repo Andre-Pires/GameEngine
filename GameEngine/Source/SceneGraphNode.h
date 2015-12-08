@@ -15,11 +15,13 @@ private:
 	Shader * shader;
 	Scene * scene;
 	Texture * texture;
+	Texture * normalMap;
+
 public:
-	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture);
+	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap);
 	SceneGraphNode(SceneGraphNode* parent, GeometricObject* object, Scene* scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
-	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex);
+	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex, Texture * normalMap);
 	SceneGraphNode(Scene * scene);
 	void add(SceneGraphNode* sceneGraphNode);
 	void draw(Matrix4f parentTransformations = MatrixFactory::Identity4());
@@ -29,6 +31,6 @@ public:
 	void clearBuffer();
 	void clearTransformations();
 	void setShader(Shader* shader);
-	void setTexture(Texture* texture);
+	void setTexture(Texture* texture, Texture * normalMap);
 	Matrix4f getTransformationsMatrix();
 };

@@ -5,6 +5,7 @@ in vec4 ex_Color;
 in vec3 ex_Normal;
 in vec4 ex_shadowCoord[2];
 in vec2 ex_UV;
+in vec3 ex_Tangent;
 
 // Out
 out vec4 out_Color;
@@ -32,6 +33,10 @@ uniform vec4 materialSpecular;
 // Texture Samplers
 uniform sampler2D TextureSampler;
 uniform int textureActive;
+
+// Normal Map Samplers
+uniform sampler2D NormalMapSampler;
+vec3 mappedNormal;
 
 uniform vec4 cameraPosition;
 
@@ -95,7 +100,7 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-vec4 calculateShadow(int lightIndex){
+float calculateShadow(int lightIndex){
 
     float visibility=1.0;
     float bias = 0.0003;
@@ -173,7 +178,7 @@ vec4 calculateLight(int index){
 		}
 	}
 
-	float diffuseCoefficient =	clamp(dot(lightDir, ex_Normal), 0.0, 1.0);
+	float diffuseCoefficient =	clamp(dot(lightDir, mappedNormal.xyz), 0.0, 1.0);
 	float specularCoefficient = 0.0;
 
 	if(diffuseCoefficient > 0.0 )
@@ -183,12 +188,12 @@ vec4 calculateLight(int index){
 
         //Blinn-Phong
         //shininess = 32.0;
-		//float specAngle = max(dot(halfDir, ex_Normal), 0.0);
+		//float specAngle = max(dot(halfDir, mappedNormal), 0.0);
 		//specularCoefficient = pow(specAngle, shininess);
 
         //Gaussian
         shininess = 0.3;
-        float NdotH = clamp(dot(ex_Normal, halfDir), 0.0, 1.0);
+        float NdotH = clamp(dot(mappedNormal, halfDir), 0.0, 1.0);
         float angle = acos(NdotH);
         specularCoefficient = exp(- pow (angle/ shininess, 2));
 	}
@@ -206,8 +211,31 @@ vec4 calculateLight(int index){
 
 }
 
+//calculate new normal
+
+vec3 CalculateBumpedNormal()
+{
+    vec3 Normal = normalize(ex_Normal.xyz);
+    vec3 Tangent = normalize(ex_Tangent);
+    Tangent = normalize(Tangent - dot(Tangent, Normal) * Normal);
+    vec3 Bitangent = cross(Tangent, Normal);
+    vec3 BumpMapNormal = texture(NormalMapSampler, ex_UV).xyz;
+    BumpMapNormal = 2.0 * BumpMapNormal - vec3(1.0, 1.0, 1.0);
+    vec3 NewNormal;
+    mat3 TBN = mat3(Tangent, Bitangent, Normal);
+    NewNormal = TBN * BumpMapNormal;
+    NewNormal = normalize(NewNormal);
+    return NewNormal;
+}
+
 void main(void)
 {
+  if(textureActive == 1){
+    mappedNormal = CalculateBumpedNormal();
+  } else {
+    mappedNormal = ex_Normal;
+  }
+
 	vec4 lightColorResult = vec4(0.0);
     vec4 colorResult = vec4(0.0);
 	//adds the different lights' contribution for the resulting color

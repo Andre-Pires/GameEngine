@@ -16,7 +16,7 @@ private:
 
 public:
 	static BufferObjects* getInstance();
-	void createBufferObjects(GLuint* VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLuint> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures);
+	void createBufferObjects(GLuint* VboId, GLuint VaoId, std::vector<Vertex> Vertices, std::vector<GLuint> Indices, std::vector<Normal> Normals, std::vector<Texcoord> Textures, std::vector<Tangent> Tangents);
 	void createCameraBufferObjects(GLuint* camVboId);
 	void updateCamera(GLuint * VboId, Matrix4f view, Matrix4f projection);
 	void destroyBufferObjects(GLuint * VboId, GLuint VaoId);

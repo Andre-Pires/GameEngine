@@ -20,5 +20,7 @@ Plane::Plane(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scen
 		this->Vertices.push_back(tempVertices[i]);
 	}
 
+	calculateTangents();
+
 	updateBuffer();
 }

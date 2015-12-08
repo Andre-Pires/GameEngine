@@ -16,5 +16,5 @@ public:
 	void bind();
 	void unbind();
 	GLuint getTextureID();
-	GLint getTexUniform(Shader* shader);
+	GLint getTexUniform(Shader* shader, int type);
 };

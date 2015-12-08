@@ -157,6 +157,8 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, sc
 		this->Texcoords.push_back(tempTexture[i]);
 	}
 
+	calculateTangents();
+
 	updateBuffer();
 }
 

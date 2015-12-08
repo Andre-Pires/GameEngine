@@ -12,7 +12,7 @@ Scene::Scene(Shader * shader, char * modelName, char * normalName)
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, Texture* texture)
+void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, Texture* texture, Texture* normalMap)
 {
 	if (shader != nullptr)
 	{
@@ -48,8 +48,13 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-			glUniform1i(texture->getTexUniform(shader), 0);
+			glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
 			glUniform1i(textureActiveUnif, 1);
+			shader->checkShaderError("ERROR: Could not draw scene.");
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, normalMap->getTextureID());
+			glUniform1i(normalMap->getTexUniform(shader, TANGENTS), 1);
+			shader->checkShaderError("ERROR: Could not draw scene.");
 		}
 		else
 		{

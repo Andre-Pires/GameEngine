@@ -44,6 +44,8 @@ Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer
 		this->Vertices.push_back(tempVertices[i]);
 	}
 
+	calculateTangents();
+
 	updateBuffer();
 }
 

@@ -11,6 +11,7 @@ uniform vec4 materialSpecular;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
+uniform sampler2D NormalMapSampler;
 uniform int textureActive;
 
 uniform vec4 cameraPosition;

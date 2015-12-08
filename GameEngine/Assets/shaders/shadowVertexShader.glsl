@@ -5,6 +5,7 @@ in vec4 in_Position;
 in vec4 in_Color;
 in vec4 in_Normal;
 in vec2 in_UV;
+in vec3 in_Tangent;
 
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;

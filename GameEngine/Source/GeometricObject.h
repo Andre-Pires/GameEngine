@@ -16,6 +16,7 @@ protected:
 	std::vector <Texcoord> Texcoords;
 	std::vector <Normal> Normals;
 	std::vector <GLuint> Indices;
+	std::vector <Tangent> Tangents;
 	int indicesCount;
 	int verticesCount;
 	Matrix4f transformations;
@@ -29,7 +30,7 @@ public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
 	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLuint* Indices, int indicesSize);
-	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr);
+	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr, Texture* normalMap = nullptr);
 	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);
@@ -39,6 +40,7 @@ public:
 	void clearObjectFromBuffer();
 	virtual void shadeColor();
 	void repeatTexture(float repeat);
+	void calculateTangents();
 	ostream& operator<<(std::ostream& stream);
 	friend ostream& operator<< (ostream& stream, GeometricObject object);
 };

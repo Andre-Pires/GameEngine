@@ -16,6 +16,7 @@ const GLuint UBO_BP = 0;
 //#define SPECULAR_COLOR 3
 #define NORMALS 1
 #define TEXCOORDS 2
+#define TANGENTS 3
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547
@@ -44,6 +45,10 @@ typedef struct {
 	//ultima coordenada sempre a 1.0
 	GLfloat NXNYNZ[4];
 } Normal;
+
+typedef struct {
+	GLfloat TXTYTZ[3];
+} Tangent;
 
 //colors
 const GLfloat greyAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };

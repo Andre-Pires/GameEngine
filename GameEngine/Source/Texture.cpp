@@ -39,6 +39,11 @@ void Texture::unbind() {
 GLuint Texture::getTextureID() {
 	return textureID;
 }
-GLint Texture::getTexUniform(Shader * shader) {
-	return shader->getUniformLocation("TextureSampler");
+GLint Texture::getTexUniform(Shader * shader, int type) {
+	if (type == TEXCOORDS) {
+		return shader->getUniformLocation("TextureSampler");
+	}
+	else if (type == TANGENTS) {
+		return shader->getUniformLocation("NormalMapSampler");
+	}
 }

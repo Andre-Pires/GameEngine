@@ -197,7 +197,8 @@ void createTangram()
 
 	// table
 	texture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
-	tableNode = new SceneGraphNode(sceneGraph, scene, texture);
+	Texture* normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
+	tableNode = new SceneGraphNode(sceneGraph, scene, texture, normalMap);
 	//tableNode = new SceneGraphNode(sceneGraph, scene);
 
 	GeometricObject * tableTop = new Square(bufferObjects, scene);
@@ -268,6 +269,7 @@ void createTangram()
 		object->translate(Vector3f(0, 0, 0.5));
 		object->changeColor(RED);
 		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
+		
 	}
 
 	/*{
@@ -467,9 +469,9 @@ void renderShadows(int lightIndex)
 
 	glUniformMatrix4fv(lightViewMatrixIds[lightIndex], 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
 	//Note: texture starts at 1 since index 0 is already in use
-	glActiveTexture(GL_TEXTURE1 + lightIndex);
+	glActiveTexture(GL_TEXTURE2 + lightIndex);
 	glBindTexture(GL_TEXTURE_2D, depthTextureIds[lightIndex]);
-	glUniform1i(shadowMapIds[lightIndex], 1 + lightIndex);
+	glUniform1i(shadowMapIds[lightIndex], 2 + lightIndex);
 
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -515,6 +517,7 @@ void createProgram()
 	shader->addAttribute(VERTICES, "in_Position");
 	shader->addAttribute(NORMALS, "in_Normal");
 	shader->addAttribute(TEXCOORDS, "in_UV");
+	shader->addAttribute(TANGENTS, "in_Tangent");
 
 	//used while drawing the scene
 	shader->addUniform("materialAmbient");
@@ -525,6 +528,7 @@ void createProgram()
 
 	//textures
 	shader->addUniform("TextureSampler");
+	shader->addUniform("NormalMapSampler");
 	shader->addUniform("textureActive");
 	//used for setting up the lights
 	shader->addUniform("cameraPosition");
@@ -615,6 +619,7 @@ void createProgram()
 	shadowShader->addAttribute(VERTICES, "in_Position");
 	shadowShader->addAttribute(NORMALS, "in_Normal");
 	shadowShader->addAttribute(TEXCOORDS, "in_UV");
+	shadowShader->addAttribute(TEXCOORDS, "in_Tangents");
 
 	//used while drawing the scene
 	shadowShader->addUniform("materialAmbient");
@@ -625,6 +630,7 @@ void createProgram()
 
 	//textures
 	shadowShader->addUniform("TextureSampler");
+	shadowShader->addUniform("NormalMapSampler");
 	shadowShader->addUniform("textureActive");
 	//used for setting up the lights
 	shadowShader->addUniform("cameraPosition");
