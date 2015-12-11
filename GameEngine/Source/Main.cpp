@@ -25,6 +25,7 @@
 #include "Light.h"
 #include "Texture.h"
 #include "Bomberman.h"
+#include "ShadowRenderer.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -38,7 +39,7 @@
 int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
-float ratio = 1.33;
+float viewportRatio = 1.33;
 
 BufferObjects* bufferObjects;
 Shader* shader;
@@ -85,10 +86,8 @@ int controllableLight = 0;
 std::vector<Light *> sceneLights;
 
 // Shadows
-// Hold id of the framebuffer for light POV rendering
-std::vector<GLuint> fboIds;
-// Z values will be rendered to this texture when using fboId framebuffer
-std::vector<GLuint> depthTextureIds;
+bool shadowRenderingActive;
+std::vector<ShadowRenderer *> shadowRenderers;
 std::vector<GLuint> shadowMapIds;
 std::vector<GLuint> lightViewMatrixIds;
 
@@ -269,7 +268,6 @@ void createTangram()
 		object->translate(Vector3f(0, 0, 0.5));
 		object->changeColor(RED);
 		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
-		
 	}
 
 	/*{
@@ -333,7 +331,7 @@ void updateCamera()
 	}
 	else if (cameraType == PERSPECTIVE)
 	{
-		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
+		camera->perspective(45.0f, viewportRatio, 0.1f, 100.0f);
 
 		if (gimbalState == GIMBAL_LOCK_ON)
 		{
@@ -348,7 +346,7 @@ void updateCamera()
 
 	else if (cameraType == CONTROLLED_PERSP)
 	{
-		camera->perspective(45.0f, ratio, 0.1f, 100.0f);
+		camera->perspective(45.0f, viewportRatio, 0.1f, 100.0f);
 		// set the camera using a function similar to gluLookAt
 
 		if (gimbalState == GIMBAL_LOCK_ON)
@@ -365,133 +363,13 @@ void updateCamera()
 	camera->updateCamera();
 }
 
-void generateShadowFBO(int lightIndex)
-{
-	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
-	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
-
-	GLenum FBOstatus;
-
-	// create a framebuffer object
-	GLuint fboId;
-	glGenFramebuffers(1, &fboId);
-	fboIds.push_back(fboId);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboIds[lightIndex]);
-
-	GLuint textureId;
-	// Try to use a texture depth component
-	glGenTextures(1, &textureId);
-	depthTextureIds.push_back(textureId);
-	glBindTexture(GL_TEXTURE_2D, depthTextureIds[lightIndex]);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Remove artifact on the edges of the shadowmap
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-
-	GLfloat * ones = new GLfloat[4]{ 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ones);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// attach the texture to FBO depth attachment point
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureIds[lightIndex], 0);
-
-	// Instruct openGL that we won't bind a color texture with the currently bound FBO
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-
-	// check FBO status
-	FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (FBOstatus != GL_FRAMEBUFFER_COMPLETE)
-		printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
-
-	//	switch back to window-system-provided framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void renderShadows(int lightIndex)
-{
-	// Render to our framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, fboIds[lightIndex]);
-	glViewport(0, 0, WinX * SHADOW_MAP_RATIO, WinY * SHADOW_MAP_RATIO); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
-	// Clear the screen
-	glClearDepth(1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Vector3f lightPos = Vector3f(sceneLights[lightIndex]->position.x, sceneLights[lightIndex]->position.y, sceneLights[lightIndex]->position.z);
-
-	if (sceneLights[lightIndex]->lightType == DIRECTIONAL_LIGHT)
-	{
-		// activate offset for polygons
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		// offset by two units equal to smallest value of change in the shadow map
-		// and offset by two units depending on the slope of the polygon
-		glPolygonOffset(2.0f, 2.0f);
-		camera->ortho(-20.0f + lightPos.x, 20.0f + lightPos.x, -20.0f + lightPos.y, 20.0f + lightPos.y, -100.0f + lightPos.z, 100.0f + lightPos.z);
-		camera->lookAt(lightPos, Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
-	}
-	else
-	{
-		// for spot and point light :
-		camera->perspective(120.0f, ratio, 0.1f, 50.0f);
-		camera->lookAt(lightPos, Vector3f(lightPos.x, lightPos.y, centerZ), Vector3f(0, 1, 0));
-	}
-
-	camera->updateCamera();
-	Matrix4f depthProjectionMatrix = camera->getProjectionMatrix();
-	Matrix4f depthViewMatrix = camera->getViewMatrix();
-	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
-
-	Matrix4f biasMatrix = Matrix4f(new float[16]
-	{
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	});
-
-	scene->setActiveShader(shadowShader);
-	sceneGraph->draw();
-	lightMarker->draw();
-	scene->setActiveShader(shader);
-
-	// Send our transformation to the currently bound shader,
-	// in the "MVP" uniform
-	shader->useShaderProgram();
-
-	glUniformMatrix4fv(lightViewMatrixIds[lightIndex], 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
-	//Note: texture starts at 1 since index 0 is already in use
-	glActiveTexture(GL_TEXTURE2 + lightIndex);
-	glBindTexture(GL_TEXTURE_2D, depthTextureIds[lightIndex]);
-	glUniform1i(shadowMapIds[lightIndex], 2 + lightIndex);
-
-	// Render to the screen
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	if (sceneLights[lightIndex]->lightType == DIRECTIONAL_LIGHT)
-		glDisable(GL_POLYGON_OFFSET_FILL);
-
-	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-	// Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	shader->dropShaderProgram();
-}
-
 void drawScene()
 {
 	//NOTE: calculates shadows for up to 2 lights in scene
 	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
-		renderShadows(i);
+		shadowRenderers[i]->updateCameraCenter(Vector3f(centerX, centerY, centerZ));
+		shadowRenderers[i]->renderShadows();
 	}
 
 	if (cameraType == CONTROLLED_PERSP)
@@ -640,11 +518,10 @@ void createProgram()
 	shadowShader->addUniformBlock(UBO_BP, "SharedMatrices");
 	shadowShader->createShaderProgram();
 
-	//add 2 framebuffers at the start of application to allow easier
-	//switching between number of shadow calculations
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
-		generateShadowFBO(i);
+		shadowRenderers.push_back(new ShadowRenderer(sceneLights[i], i, camera, scene, sceneGraph, shader, shadowShader, lightViewMatrixIds[i], shadowMapIds[i]));
+		shadowRenderers[i]->generateShadowFBO();
 	}
 }
 
@@ -805,6 +682,8 @@ void processSpecialKeys(int key, int xx, int yy)
 		//cube->translate(Vector3f(0.1f, 0.0f, 0.0f));
 		bomberman->movePlayerRight();
 		break;
+	case GLUT_KEY_F1:
+		shadowRenderingActive = shadowRenderingActive ? false : true;
 	}
 }
 
@@ -932,7 +811,7 @@ void reshape(int w, int h)
 
 	if (WinY == 0)
 		WinY = 1;
-	ratio = WinX * 1.0 / WinY;
+	viewportRatio = WinX * 1.0 / WinY;
 
 	updateCamera();
 
@@ -940,9 +819,10 @@ void reshape(int w, int h)
 
 	//always generate 2 framebuffers at the start of application to allow easier
 	//switching between number of shadow calculations
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
-		generateShadowFBO(i);
+		shadowRenderers[i]->updateViewport(WinX, WinY);
+		shadowRenderers[i]->generateShadowFBO();
 	}
 }
 

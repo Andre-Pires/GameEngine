@@ -36,6 +36,7 @@
     <ClCompile Include="Source\MatrixFactory.cpp" />
     <ClCompile Include="Source\SceneGraphNode.cpp" />
     <ClCompile Include="Source\Shader.cpp" />
+    <ClCompile Include="Source\ShadowRenderer.cpp" />
     <ClCompile Include="Source\Square.cpp" />
     <ClCompile Include="Source\Texture.cpp" />
     <ClCompile Include="Source\Triangle.cpp" />
@@ -61,6 +62,7 @@
     <ClInclude Include="Source\MatrixFactory.h" />
     <ClInclude Include="Source\SceneGraphNode.h" />
     <ClInclude Include="Source\Shader.h" />
+    <ClInclude Include="Source\ShadowRenderer.h" />
     <ClInclude Include="Source\Square.h" />
     <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\Triangle.h" />
