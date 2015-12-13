@@ -8,7 +8,7 @@ in vec2 ex_UV;
 in vec3 ex_Tangent;
 
 // Out
-out vec4 out_Color;
+//out vec4 out_Color;
 
 // array of lights
 #define MAX_LIGHTS 10
@@ -72,6 +72,8 @@ uniform sampler2DShadow shadowMap[2];
 
 float shininess;
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
+
+layout(location = 0) out vec4 color;
 
 float chebyshevUpperBound(vec4 shadowCoordW, int lightIndex)
 {
@@ -230,11 +232,11 @@ vec3 CalculateBumpedNormal()
 
 void main(void)
 {
-  if(textureActive == 1){
-    mappedNormal = CalculateBumpedNormal();
-  } else {
-    mappedNormal = ex_Normal;
-  }
+    if(textureActive == 1){
+        mappedNormal = CalculateBumpedNormal();
+    } else {
+        mappedNormal = ex_Normal;
+    }
 
 	vec4 lightColorResult = vec4(0.0);
     vec4 colorResult = vec4(0.0);
@@ -253,5 +255,7 @@ void main(void)
         colorResult = lightColorResult;
     }
 
-    out_Color = colorResult;
+    color = colorResult;
+
+    //out_Color = colorResult;
 }

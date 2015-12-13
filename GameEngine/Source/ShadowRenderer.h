@@ -28,8 +28,8 @@ private:
 	GLuint lightViewMatrixId;
 	GLuint shadowMapId;
 public:
-	ShadowRenderer(Light* light, int lightIndex, Camera* camera, Scene* scene, SceneGraphNode* sceneGraph, Shader* shader, Shader* shadowShader, GLuint lightViewMatrixId, GLuint shadowMapId);
-	void generateShadowFBO();
+	ShadowRenderer(Light* light, int lightIndex, Camera* camera, Scene* scene, SceneGraphNode* sceneGraph, Shader* shader, Shader* shadowShader);
+	void generateShadowFBO(int viewX, int viewY);
 	void renderShadows();
 	void updateViewport(int x, int y);
 	void updateCameraCenter(Vector3f center);

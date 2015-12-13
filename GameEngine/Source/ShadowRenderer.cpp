@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "SceneGraphNode.h"
 
-ShadowRenderer::ShadowRenderer(Light * light, int lightIndex, Camera * camera, Scene * scene, SceneGraphNode * sceneGraph, Shader * shader, Shader * shadowShader, GLuint lightViewMatrixId, GLuint shadowMapId)
+ShadowRenderer::ShadowRenderer(Light * light, int lightIndex, Camera * camera, Scene * scene, SceneGraphNode * sceneGraph, Shader * shader, Shader * shadowShader)
 {
 	this->scene = scene;
 	this->shader = shader;
@@ -16,16 +16,19 @@ ShadowRenderer::ShadowRenderer(Light * light, int lightIndex, Camera * camera, S
 	this->WinY = 576;
 	this->ratio = 1024 / 576;
 	this->center = Vector3f(0.0f, 0.0f, 0.0f);
-	this->lightViewMatrixId = lightViewMatrixId;
-	this->shadowMapId = shadowMapId;
+
+	shader->useShaderProgram();
+	this->lightViewMatrixId = shader->getUniformLocation("lightViewMatrix[" + std::to_string(lightIndex) + "]");
+	this->shadowMapId = shader->getUniformLocation("shadowMap[" + std::to_string(lightIndex) + "]");
+	shader->dropShaderProgram();
 }
 
-void ShadowRenderer::generateShadowFBO()
+void ShadowRenderer::generateShadowFBO(int viewX, int viewY)
 {
+	updateViewport(viewX, viewY);
+
 	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
 	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
-
-	GLenum FBOstatus;
 
 	// create a framebuffer object
 	glGenFramebuffers(1, &fboId);
@@ -59,7 +62,30 @@ void ShadowRenderer::generateShadowFBO()
 	glReadBuffer(GL_NONE);
 
 	// check FBO status
-	FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	GLenum FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	switch (FBOstatus) {
+	case GL_FRAMEBUFFER_UNDEFINED:
+		printf("FBO Undefined\n");
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		printf("FBO Incomplete Attachment\n");
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		printf("FBO Missing Attachment\n");
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		printf("FBO Incomplete Draw Buffer\n");
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		printf("FBO Unsupported\n");
+		break;
+	case GL_FRAMEBUFFER_COMPLETE:
+		printf("FBO OK\n");
+		break;
+	default:
+		printf("FBO Problem?\n");
+	}
+
 	if (FBOstatus != GL_FRAMEBUFFER_COMPLETE)
 		printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
 
@@ -118,7 +144,7 @@ void ShadowRenderer::renderShadows()
 	shader->useShaderProgram();
 
 	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
-	//Note: texture starts at 1 since index 0 is already in use
+	//Note: texture starts at 2 since index 0 & 1 are already in use
 	glActiveTexture(GL_TEXTURE2 + lightIndex);
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
 	glUniform1i(shadowMapId, 2 + lightIndex);

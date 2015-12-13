@@ -27,6 +27,7 @@
     <ClCompile Include="Source\Light.cpp" />
     <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
+    <ClCompile Include="Source\PostProcessRenderer.cpp" />
     <ClCompile Include="Source\Quaternions.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\Main.cpp" />
@@ -54,6 +55,7 @@
     <ClInclude Include="Source\Light.h" />
     <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\Plane.h" />
+    <ClInclude Include="Source\PostProcessRenderer.h" />
     <ClInclude Include="Source\Quaternions.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\Matrix2f.h" />

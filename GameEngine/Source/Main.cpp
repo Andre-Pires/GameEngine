@@ -35,6 +35,7 @@
 #define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
 #define LIGHTS_IN_SCENE 1
 #define SHADOW_MAP_RATIO 1.0
+#include "PostProcessRenderer.h"
 
 int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
@@ -44,6 +45,7 @@ float viewportRatio = 1.33;
 BufferObjects* bufferObjects;
 Shader* shader;
 Shader* shadowShader;
+Shader* postProcessingShader;
 Scene* scene;
 Camera* camera;
 Bomberman* bomberman;
@@ -80,16 +82,21 @@ SceneGraphNode* tangramNode;
 SceneGraphNode* tableNode;
 SceneGraphNode* tangramParts[7];
 SceneGraphNode* lightMarker;
-SceneGraphNode* cube;
+SceneGraphNode* scenePlane;
+
 // Lights
 int controllableLight = 0;
 std::vector<Light *> sceneLights;
 
 // Shadows
-bool shadowRenderingActive;
+bool shadowRenderingActive = true;
 std::vector<ShadowRenderer *> shadowRenderers;
-std::vector<GLuint> shadowMapIds;
-std::vector<GLuint> lightViewMatrixIds;
+
+//Post Process Flash
+PostProcessRenderer * postProcessRenderer;
+bool flashActive;
+float flashRatio;
+std::clock_t flashStart;
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
@@ -109,6 +116,14 @@ void createGameScene()
 		object->translate(Vector3f(0, 0, 2.0));
 		object->changeColor(PINK);
 		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
+	}
+	///ONLY FOR DEBUG - NOT NEEDED
+
+	{
+		Mesh mesh = Mesh(std::string("Assets/mesh/quad.obj"));
+		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
+		object->rotate(90, Vector3f(0.0, 0.0, 1.0));
+		scenePlane = new SceneGraphNode(sceneGraph, object, scene);
 	}
 }
 
@@ -323,6 +338,28 @@ void animationTimer(int value)
 	glutTimerFunc(ANIMATION_RATE, animationTimer, 0);
 }
 
+void flashTimer(int value)
+{
+	float totalDuration = 1500;
+	float timeElapsed = (std::clock() - flashStart) / (double)(CLOCKS_PER_SEC / 1000);
+	if (flashActive)
+	{
+		if (timeElapsed < totalDuration)
+		{
+			float ratio = (1 * timeElapsed) / totalDuration;
+
+			postProcessingShader->useShaderProgram();
+			glUniform1f(postProcessingShader->getUniformLocation(std::string("flashRatio")), ratio);
+		}
+		else
+		{
+			flashActive = false;
+		}
+	}
+
+	glutTimerFunc(ANIMATION_RATE, flashTimer, 0);
+}
+
 void updateCamera()
 {
 	if (cameraType == ORTHOGRAPHIC)
@@ -363,15 +400,113 @@ void updateCamera()
 	camera->updateCamera();
 }
 
+//void generatePostProcessFBO()
+//{
+//	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
+//	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
+//
+//	// create a framebuffer object
+//	glGenFramebuffers(1, &fboId);
+//	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+//
+//	// Try to use a texture depth component
+//	glGenTextures(1, &sceneTexture);
+//	glBindTexture(GL_TEXTURE_2D, sceneTexture);
+//
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, shadowMapWidth, shadowMapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0); // o GL_FLOAT pode ser GL_UNSIGNED_BYTE
+//
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//
+//	// The depth buffer
+//
+//	glGenRenderbuffers(1, &depthRenderBuffer);
+//	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, shadowMapWidth, shadowMapHeight);
+//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+//	//attach the texture to FBO depth attachment point
+//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneTexture, 0);
+//	// Set the list of draw buffers.
+//	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+//	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+//
+//	// check FBO status
+//	GLenum FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+//	switch (FBOstatus) {
+//	case GL_FRAMEBUFFER_UNDEFINED:
+//		printf("FBO Undefined\n");
+//		break;
+//	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+//		printf("FBO Incomplete Attachment\n");
+//		break;
+//	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+//		printf("FBO Missing Attachment\n");
+//		break;
+//	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+//		printf("FBO Incomplete Draw Buffer\n");
+//		break;
+//	case GL_FRAMEBUFFER_UNSUPPORTED:
+//		printf("FBO Unsupported\n");
+//		break;
+//	case GL_FRAMEBUFFER_COMPLETE:
+//		printf("FBO OK\n");
+//		break;
+//	default:
+//		printf("FBO Problem?\n");
+//	}
+//
+//	if (FBOstatus != GL_FRAMEBUFFER_COMPLETE)
+//		printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
+//
+//	//	switch back to window-system-provided framebuffer
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//}
+//
+//void renderFlash()
+//{
+//	// Render to our framebuffer
+//	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+//	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+//
+//	// Clear the screen
+//	glClearDepth(1.0f);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//	scene->setActiveShader(shader);
+//	sceneGraph->draw();
+//	scene->setActiveShader(postProcessingShader);
+//
+//	// Send our transformation to the currently bound shader,
+//	// in the "MVP" uniform
+//	postProcessingShader->useShaderProgram();
+//
+//	//Note: texture starts at 7 to create sequential space for shadows and textures
+//	glActiveTexture(GL_TEXTURE0 + 7);
+//	glBindTexture(GL_TEXTURE_2D, sceneTexture);
+//	glUniform1i(sceneUniformId, 7);
+//
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+//								  // Clear the screen
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//}
+
 void drawScene()
 {
 	//NOTE: calculates shadows for up to 2 lights in scene
-	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
+	if (shadowRenderingActive)
 	{
-		shadowRenderers[i]->updateCameraCenter(Vector3f(centerX, centerY, centerZ));
-		shadowRenderers[i]->renderShadows();
+		for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
+		{
+			shadowRenderers[i]->updateCameraCenter(Vector3f(centerX, centerY, centerZ));
+			shadowRenderers[i]->renderShadows();
+		}
 	}
-
+	scene->setActiveShader(shader);
 	if (cameraType == CONTROLLED_PERSP)
 	{
 		updateCamera();
@@ -382,8 +517,18 @@ void drawScene()
 		}
 	}
 
-	lightMarker->draw(); //NOTE: debug sphere for light
-	sceneGraph->draw();
+	if (flashActive)
+	{
+		postProcessRenderer->renderFlash();
+
+		scene->setActiveShader(postProcessingShader);
+		scenePlane->draw();
+		scene->setActiveShader(shader);
+	}
+	else
+	{
+		sceneGraph->draw();
+	}
 }
 
 void createProgram()
@@ -479,25 +624,16 @@ void createProgram()
 	shader->useShaderProgram();
 	GLint lighNumberId = shader->getUniformLocation("numLights");
 	glUniform1i(lighNumberId, sceneLights.size());
-
-	//for performance reasons shader only supports two lights' shadows
-	for (int i = 0; i < 2; i++)
-	{
-		//get shadow's uniforms - for each available light
-		shadowMapIds.push_back(shader->getUniformLocation("shadowMap[" + std::to_string(i) + "]"));
-		lightViewMatrixIds.push_back(shader->getUniformLocation("lightViewMatrix[" + std::to_string(i) + "]"));
-	}
-
 	shader->dropShaderProgram();
 
-	///NEW SHADOW SHADER -- LIGHTER THAN MAIN SHADER
+	///SHADOW SHADER -- LIGHTER THAN MAIN SHADER
 	shadowShader = new Shader();
 	shadowShader->addShader(GL_VERTEX_SHADER, "Assets/shaders/shadowVertexShader.glsl");
 	shadowShader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/shadowFragmentShader.glsl");
 	shadowShader->addAttribute(VERTICES, "in_Position");
 	shadowShader->addAttribute(NORMALS, "in_Normal");
 	shadowShader->addAttribute(TEXCOORDS, "in_UV");
-	shadowShader->addAttribute(TEXCOORDS, "in_Tangents");
+	shadowShader->addAttribute(TANGENTS, "in_Tangents");
 
 	//used while drawing the scene
 	shadowShader->addUniform("materialAmbient");
@@ -518,11 +654,46 @@ void createProgram()
 	shadowShader->addUniformBlock(UBO_BP, "SharedMatrices");
 	shadowShader->createShaderProgram();
 
+	//for performance reasons shader only supports two lights' shadows
 	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
-		shadowRenderers.push_back(new ShadowRenderer(sceneLights[i], i, camera, scene, sceneGraph, shader, shadowShader, lightViewMatrixIds[i], shadowMapIds[i]));
-		shadowRenderers[i]->generateShadowFBO();
+		shadowRenderers.push_back(new ShadowRenderer(sceneLights[i], i, camera, scene, sceneGraph, shader, shadowShader));
+		shadowRenderers[i]->generateShadowFBO(WinX, WinY);
 	}
+
+	///POST PROCESSING SHADER
+	postProcessingShader = new Shader();
+	postProcessingShader->addShader(GL_VERTEX_SHADER, "Assets/shaders/postProcessingVertShader.glsl");
+	postProcessingShader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/postProcessingFragShader.glsl");
+	postProcessingShader->addAttribute(VERTICES, "in_Position");
+	postProcessingShader->addAttribute(NORMALS, "in_Normal");
+	postProcessingShader->addAttribute(TEXCOORDS, "in_UV");
+	postProcessingShader->addAttribute(TANGENTS, "in_Tangents");
+
+	//used while drawing the scene
+	postProcessingShader->addUniform("materialAmbient");
+	postProcessingShader->addUniform("materialDiffuse");
+	postProcessingShader->addUniform("materialSpecular");
+	postProcessingShader->addUniform("ModelMatrix");
+	postProcessingShader->addUniform("NormalMatrix");
+
+	//textures
+	postProcessingShader->addUniform("TextureSampler");
+	postProcessingShader->addUniform("NormalMapSampler");
+	postProcessingShader->addUniform("textureActive");
+
+	//used for setting up the lights
+	postProcessingShader->addUniform("cameraPosition");
+	postProcessingShader->addUniform("numLights");
+
+	//texture for the scene post processing
+	postProcessingShader->addUniform("sceneTexture");
+	postProcessingShader->addUniform("flashRatio");
+
+	postProcessingShader->createShaderProgram();
+
+	postProcessRenderer = new PostProcessRenderer(scene, sceneGraph, shader, postProcessingShader);
+	postProcessRenderer->generatePostProcessFBO(WinX, WinY);
 }
 
 /////////////////////////////////////////////////////////////////////// UTILITIES
@@ -655,6 +826,10 @@ void processKeys(unsigned char key, int xx, int yy)
 
 		animationActive = ANIMATION_ON;
 		break;
+	case ' ':
+		flashActive = true;
+		flashStart = std::clock();
+		break;
 	}
 }
 
@@ -684,6 +859,7 @@ void processSpecialKeys(int key, int xx, int yy)
 		break;
 	case GLUT_KEY_F1:
 		shadowRenderingActive = shadowRenderingActive ? false : true;
+		break;
 	}
 }
 
@@ -821,9 +997,10 @@ void reshape(int w, int h)
 	//switching between number of shadow calculations
 	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
-		shadowRenderers[i]->updateViewport(WinX, WinY);
-		shadowRenderers[i]->generateShadowFBO();
+		shadowRenderers[i]->generateShadowFBO(WinX, WinY);
 	}
+
+	postProcessRenderer->generatePostProcessFBO(WinX, WinY);
 }
 
 void timer(int value)
@@ -848,6 +1025,7 @@ void setupCallbacks()
 	glutTimerFunc(0, timer, 0);
 	glutTimerFunc(0, timedRedisplay, 0);
 	glutTimerFunc(0, animationTimer, 0);
+	glutTimerFunc(0, flashTimer, 0);
 }
 
 void setupOpenGL()

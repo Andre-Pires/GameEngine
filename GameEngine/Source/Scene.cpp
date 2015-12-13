@@ -50,11 +50,9 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
 			glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
 			glUniform1i(textureActiveUnif, 1);
-			shader->checkShaderError("ERROR: Could not draw scene.");
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, normalMap->getTextureID());
 			glUniform1i(normalMap->getTexUniform(shader, TANGENTS), 1);
-			shader->checkShaderError("ERROR: Could not draw scene.");
 		}
 		else
 		{
