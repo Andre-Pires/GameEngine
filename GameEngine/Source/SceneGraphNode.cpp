@@ -60,10 +60,21 @@ SceneGraphNode::SceneGraphNode(Scene * scene)
 	this->normalMap = nullptr;
 }
 
+SceneGraphNode::~SceneGraphNode()
+{
+	if (this->parent != nullptr)
+		this->parent->removeChild(this);
+}
+
 void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
 {
 	(*sceneGraphNode).parent = this;
 	this->childNodes.push_back(sceneGraphNode);
+}
+
+void SceneGraphNode::removeChild(SceneGraphNode* sceneGraphNode)
+{
+	this->childNodes.remove(sceneGraphNode);
 }
 
 void SceneGraphNode::draw(Matrix4f parentTransformations)

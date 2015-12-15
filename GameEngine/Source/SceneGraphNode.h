@@ -23,7 +23,9 @@ public:
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex, Texture * normalMap);
 	SceneGraphNode(Scene * scene);
+	~SceneGraphNode();
 	void add(SceneGraphNode* sceneGraphNode);
+	void removeChild(SceneGraphNode* sceneGraphNode);
 	void draw(Matrix4f parentTransformations = MatrixFactory::Identity4());
 	void translate(Vector3f translation);
 	void scale(Vector3f scale);
