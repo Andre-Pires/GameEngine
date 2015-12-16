@@ -53,61 +53,6 @@ void Bomberman::rotatePlayerRight()
 	_rotationDirection = 1;
 }
 
-//void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader *shader)
-//{
-//	auto wallTexture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
-//	auto destructibleTexture = new Texture(shader, "Assets/textures/text.jpg");
-//	auto playerTexture = new Texture(shader, "Assets/textures/text.jpg");
-//	auto normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
-//
-//	auto row = 0;
-//
-//	for (auto rowVec = _gameCells.begin(); rowVec < _gameCells.end(); ++rowVec)
-//	{
-//		auto col = 0;
-//
-//		for (auto colVec = (*rowVec).begin(); colVec < (*rowVec).end(); ++colVec)
-//		{
-//			if ((*colVec) != CellStatus::clear)
-//			{
-//				GeometricObject *aBox;
-//				Texture *texture;
-//
-//				if ((*colVec) == CellStatus::player)
-//				{
-//					_playerX = col;
-//					_playerY = row;
-//					_playerObject = aBox = new Square(bufferObjects, scene);
-//					aBox->changeColor(BLUE);
-//					aBox->translate(Vector3f(0.5f, 0.5f, 0));
-//					aBox->scale(Vector3f(0.5f, 0.5f, 1));
-//					texture = playerTexture;
-//					(*colVec) = CellStatus::clear;
-//				}
-//				else
-//				{
-//					aBox = new Square(bufferObjects, scene);
-//					aBox->changeColor(((*colVec) == CellStatus::wall) ? GREY : BROWN);
-//					texture = ((*colVec) == CellStatus::wall) ? wallTexture : destructibleTexture;
-//				}
-//
-//				aBox->translate(Vector3f(col - 2, -(row - 2), 0));
-//				aBox->repeatTexture(3.0);
-//				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture, normalMap));
-//			}
-//
-//			auto ground = new Square(bufferObjects, scene);
-//			ground->changeColor(GREEN);
-//			ground->translate(Vector3f(col - 2, -(row - 2), -1));
-//			gameNode->add(new SceneGraphNode(gameNode, ground, scene));
-//
-//			col++;
-//		}
-//
-//		row++;
-//	}
-//}
-
 bool Bomberman::update(unsigned elapsedTime)
 {
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); )

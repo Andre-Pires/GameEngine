@@ -1,7 +1,6 @@
 #include "Bomb.h"
 
 
-
 Bomb::Bomb(GameEntity* entity, unsigned explosionAt, unsigned row, unsigned col): _entity(entity), _explosionAt(explosionAt), _row(row), _col(col)
 {
 }

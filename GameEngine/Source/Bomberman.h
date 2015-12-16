@@ -10,7 +10,6 @@
 #include "GridMap.h"
 #include "Bomb.h"
 
-//enum class CellStatus { clear, wall, player, destructible, bomb };
 typedef void(*CallbackType)();
 
 class Bomberman
@@ -43,8 +42,6 @@ private:
 public:
 	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
-
-	void createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 
 	void playerWalk();
 	void playerWalkBackwards() { movePlayerForward(-_moveStep); }
