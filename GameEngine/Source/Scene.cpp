@@ -23,9 +23,10 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		GLint diffuseUniform = shader->getUniformLocation("materialDiffuse");
 		GLint specularUniform = shader->getUniformLocation("materialSpecular");
 		GLint textureActiveUnif = shader->getUniformLocation("textureActive");
+		GLint woodTextureActiveUnif = shader->getUniformLocation("woodTextureActive");
 		//usar o vertex array object criado
 		obj->bindVao(vao);
-
+		shader->checkShaderError("ERROR: Could not draw scene.");
 		//usar o programa criado
 		shader->useShaderProgram();
 
@@ -47,16 +48,29 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		if (texture != nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-			glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
+			if (texture->textureDim == 0) {
+				glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
+				glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
+				glUniform1i(woodTextureActiveUnif, 0);
+			}
+			else if (texture->textureDim == 1) {
+				glBindTexture(GL_TEXTURE_3D, texture->getTextureID());
+				glUniform1i(texture->getTexUniform(shader, WOOD), 0);
+				glUniform1i(woodTextureActiveUnif, 1);
+				shader->checkShaderError("ERROR: Could not draw scene.");
+			}
 			glUniform1i(textureActiveUnif, 1);
+			shader->checkShaderError("ERROR: Could not draw scene.");
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, normalMap->getTextureID());
 			glUniform1i(normalMap->getTexUniform(shader, TANGENTS), 1);
+			shader->checkShaderError("ERROR: Could not draw scene.");
 		}
 		else
 		{
 			glUniform1i(textureActiveUnif, 0);
+			glUniform1i(woodTextureActiveUnif, 0);
+			shader->checkShaderError("ERROR: Could not draw scene.");
 		}
 
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored

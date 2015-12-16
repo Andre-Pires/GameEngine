@@ -17,6 +17,7 @@ const GLuint UBO_BP = 0;
 #define NORMALS 1
 #define TEXCOORDS 2
 #define TANGENTS 3
+#define WOOD 4
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547
@@ -49,6 +50,10 @@ typedef struct {
 typedef struct {
 	GLfloat TXTYTZ[3];
 } Tangent;
+
+typedef struct {
+	float RGB[3];
+} tex3D;
 
 //colors
 const GLfloat greyAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };

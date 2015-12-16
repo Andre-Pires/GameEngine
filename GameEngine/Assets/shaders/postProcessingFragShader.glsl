@@ -11,8 +11,9 @@ uniform vec4 materialSpecular;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
-uniform sampler2D NormalMapSampler;
+uniform sampler3D WoodSampler;
 uniform int textureActive;
+uniform int woodTextureActive;
 
 uniform vec4 cameraPosition;
 uniform float flashRatio;

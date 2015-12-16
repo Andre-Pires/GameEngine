@@ -6,6 +6,7 @@ in vec3 ex_Normal;
 in vec4 ex_shadowCoord[2];
 in vec2 ex_UV;
 in vec3 ex_Tangent;
+in vec4 mcPosition;
 
 // Out
 //out vec4 out_Color;
@@ -32,7 +33,9 @@ uniform vec4 materialSpecular;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
+uniform sampler3D WoodSampler;
 uniform int textureActive;
+uniform int woodTextureActive;
 
 // Normal Map Samplers
 uniform sampler2D NormalMapSampler;
@@ -72,6 +75,19 @@ uniform sampler2DShadow shadowMap[2];
 
 float shininess;
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
+
+//For wood texture
+const float NoiseScale = 0.4;
+const float Noisiness = 0.5;
+const vec3 LightWood = vec3(0.9, 0.45, 0.1);
+const vec3 DarkWood = vec3(0.4, 0.2, 0.05);
+const float RingFrequency = 12.0;
+const float RingSharpness = 21;
+const float RingScale = 1.5;
+const float GrainScale = 0.5;
+const float GrainThreshold = 0.05;
+const float LightGrains = 0.8;
+const float DarkGrains = 0.2;
 
 layout(location = 0) out vec4 color;
 
@@ -250,7 +266,37 @@ void main(void)
 
     //if we have textures add them
     if(textureActive == 1){
-        colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
+        //if the texture is wood
+        if(woodTextureActive == 1){
+          //colorResult = lightColorResult;
+          //REBENTA SE DESCOMENTAR A LINHA ABAIXO
+          //colorResult = texture(WoodSampler, mcPosition.xyz);
+          vec4 temp = texture(WoodSampler, mcPosition.xyz * NoiseScale) * Noisiness;
+          vec3 noisevec = temp.rgb;
+          vec3 location = mcPosition.xyz + noisevec;
+
+          float dist = sqrt(location.x * location.x + location.z * location.z);
+          dist *= RingFrequency;
+
+          float r = fract(dist + noisevec[0] + noisevec[1] + noisevec[2]) * 2.0;
+
+          if (r > 1.0){
+            r = 2.0 - r;
+          }
+          vec3 colorTemp = mix(LightWood, DarkWood, r);
+
+          r = fract((mcPosition.x + mcPosition.z) * GrainScale + 0.5);
+          noisevec[2] *= r;
+          if (r < GrainThreshold){
+            colorTemp += LightWood * LightGrains * noisevec[2];
+          }else{
+            colorTemp -= LightWood * DarkGrains * noisevec[2];
+          }
+          colorResult = vec4(colorTemp, 1.0) * lightColorResult;
+
+        }else{
+          colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
+        }
     }else{
         colorResult = lightColorResult;
     }

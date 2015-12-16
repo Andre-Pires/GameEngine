@@ -47,12 +47,12 @@ GameEntity* GameManager::createStaticWall(float x, float y)
 
 GameEntity* GameManager::createDestructibleWall(float x, float y)
 {
-	auto destructibleTexture = new Texture(_shader, "Assets/textures/text.jpg");
-	auto normalMap = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
+	auto destructibleTexture = new Texture(_shader);
+	auto normalMap = new Texture(_shader, "Assets/textures/boxNormal.png");
 
 	auto object = new Square(_bufferObjects, _scene);
 	object->changeColor(BROWN);
-	object->repeatTexture(3.0);
+	//object->repeatTexture(3.0);
 	auto node = new SceneGraphNode(_gameNode, object, _scene, destructibleTexture, normalMap);
 	node->translate(Vector3f(x, y, 0));
 	_gameNode->add(node);

@@ -10,6 +10,7 @@ out vec4 ex_Position;
 out vec4 ex_Color;
 out vec3 ex_Normal;
 out vec2 ex_UV;
+out vec4 mcPosition;
 // Used for shadow lookup
 out vec4 ex_shadowCoord[2];
 out vec3 ex_Tangent;
@@ -40,6 +41,7 @@ void main(void)
 	ex_Color = in_Color;
 	ex_Position =   ViewMatrix * ModelMatrix * in_Position;
 	ex_UV = in_UV;
+	mcPosition = in_Position;
 
 	ex_shadowCoord[0] = lightViewMatrix[0] * ModelMatrix * in_Position;
 	if(numLights > 1){

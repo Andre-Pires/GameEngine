@@ -559,8 +559,10 @@ void createProgram()
 
 	//textures
 	shader->addUniform("TextureSampler");
+	shader->addUniform("WoodSampler");
 	shader->addUniform("NormalMapSampler");
 	shader->addUniform("textureActive");
+	shader->addUniform("woodTextureActive");
 	//used for setting up the lights
 	shader->addUniform("cameraPosition");
 	shader->addUniform("numLights");
@@ -652,8 +654,10 @@ void createProgram()
 
 	//textures
 	shadowShader->addUniform("TextureSampler");
+	shadowShader->addUniform("WoodSampler");
 	shadowShader->addUniform("NormalMapSampler");
 	shadowShader->addUniform("textureActive");
+	shadowShader->addUniform("woodTextureActive");
 	//used for setting up the lights
 	shadowShader->addUniform("cameraPosition");
 	shadowShader->addUniform("numLights");
@@ -687,8 +691,10 @@ void createProgram()
 
 	//textures
 	postProcessingShader->addUniform("TextureSampler");
+	postProcessingShader->addUniform("WoodSampler");
 	postProcessingShader->addUniform("NormalMapSampler");
 	postProcessingShader->addUniform("textureActive");
+	postProcessingShader->addUniform("woodTextureActive");
 
 	//used for setting up the lights
 	postProcessingShader->addUniform("cameraPosition");
