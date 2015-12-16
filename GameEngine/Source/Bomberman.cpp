@@ -137,6 +137,8 @@ Vector2f Bomberman::angleTo2D(float angleDeg)
 
 void Bomberman::placeBomb()
 {
+	if (_playerActive) return;
+
 	auto playerOrientation2D = angleTo2D(-_playerOrientation);
 	unsigned bombRow = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
 	unsigned bombCol = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
