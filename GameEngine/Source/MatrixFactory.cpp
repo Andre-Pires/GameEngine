@@ -74,6 +74,15 @@ Matrix4f MatrixFactory::Translation4(Vector3f translate)
 		translate.x,translate.y,translate.z,1 });
 }
 
+Matrix2f MatrixFactory::Rotation2(float angleDeg)
+{
+	float rad = (angleDeg * PI) / 180;
+	
+	return new float[4]{
+		cos(rad), -sin(rad),
+		sin(rad), cos(rad)};
+}
+
 Matrix4f MatrixFactory::Rotation4(float angle, Vector3f axis)
 {
 	Matrix3f I = Identity3();

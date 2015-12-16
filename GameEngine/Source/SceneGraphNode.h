@@ -23,6 +23,7 @@ public:
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex, Texture * normalMap);
 	SceneGraphNode(Scene * scene);
+	SceneGraphNode(GeometricObject* object);
 	~SceneGraphNode();
 	void add(SceneGraphNode* sceneGraphNode);
 	void removeChild(SceneGraphNode* sceneGraphNode);

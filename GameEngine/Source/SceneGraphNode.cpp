@@ -60,6 +60,17 @@ SceneGraphNode::SceneGraphNode(Scene * scene)
 	this->normalMap = nullptr;
 }
 
+SceneGraphNode::SceneGraphNode(GeometricObject *object)
+{
+	this->parent = nullptr;
+	this->object = object;
+	this->transformations = MatrixFactory::Identity4();
+	this->scene = nullptr;
+	this->shader = nullptr;
+	this->texture = nullptr;
+	this->normalMap = nullptr;
+}
+
 SceneGraphNode::~SceneGraphNode()
 {
 	if (this->parent != nullptr)
@@ -68,7 +79,7 @@ SceneGraphNode::~SceneGraphNode()
 
 void SceneGraphNode::add(SceneGraphNode *sceneGraphNode)
 {
-	(*sceneGraphNode).parent = this;
+	sceneGraphNode->parent = this;
 	this->childNodes.push_back(sceneGraphNode);
 }
 
@@ -88,7 +99,7 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 	//uses identity matrix in case there's no parent tranformation (first case only)
 	finalTransformation = parentTransformations * this->transformations;
 
-	if (object != NULL)
+	if (object != nullptr)
 		object->draw(finalTransformation, texture, normalMap);
 
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)

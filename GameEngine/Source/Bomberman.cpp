@@ -1,208 +1,235 @@
 #include "Bomberman.h"
+#include "GameManager.h"
+#include "Bomb.h"
 
-Bomberman::Bomberman(std::string& filename)
+Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0)
 {
-	parseFile(filename);
+	GameManager::getInstance().setScene(scene);
+	GameManager::getInstance().setGameNode(gameNode);
+	GameManager::getInstance().setBufferObjects(bufferObjects);
+	GameManager::getInstance().setShader(shader);
+
+	_gridMap = new GridMap(filename);
+	_playerEntity = _gridMap->getPlayerEntity();
+	_playerPosition = Vector2f(_gridMap->getPlayerCol(), _gridMap->getPlayerRow());
 }
 
 Bomberman::~Bomberman()
 {
 }
 
-void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader *shader)
+//void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader *shader)
+//{
+//	auto wallTexture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
+//	auto destructibleTexture = new Texture(shader, "Assets/textures/text.jpg");
+//	auto playerTexture = new Texture(shader, "Assets/textures/text.jpg");
+//	auto normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
+//
+//	auto row = 0;
+//
+//	for (auto rowVec = _gameCells.begin(); rowVec < _gameCells.end(); ++rowVec)
+//	{
+//		auto col = 0;
+//
+//		for (auto colVec = (*rowVec).begin(); colVec < (*rowVec).end(); ++colVec)
+//		{
+//			if ((*colVec) != CellStatus::clear)
+//			{
+//				GeometricObject *aBox;
+//				Texture *texture;
+//
+//				if ((*colVec) == CellStatus::player)
+//				{
+//					_playerX = col;
+//					_playerY = row;
+//					_playerObject = aBox = new Square(bufferObjects, scene);
+//					aBox->changeColor(BLUE);
+//					aBox->translate(Vector3f(0.5f, 0.5f, 0));
+//					aBox->scale(Vector3f(0.5f, 0.5f, 1));
+//					texture = playerTexture;
+//					(*colVec) = CellStatus::clear;
+//				}
+//				else
+//				{
+//					aBox = new Square(bufferObjects, scene);
+//					aBox->changeColor(((*colVec) == CellStatus::wall) ? GREY : BROWN);
+//					texture = ((*colVec) == CellStatus::wall) ? wallTexture : destructibleTexture;
+//				}
+//
+//				aBox->translate(Vector3f(col - 2, -(row - 2), 0));
+//				aBox->repeatTexture(3.0);
+//				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture, normalMap));
+//			}
+//
+//			auto ground = new Square(bufferObjects, scene);
+//			ground->changeColor(GREEN);
+//			ground->translate(Vector3f(col - 2, -(row - 2), -1));
+//			gameNode->add(new SceneGraphNode(gameNode, ground, scene));
+//
+//			col++;
+//		}
+//
+//		row++;
+//	}
+//}
+
+bool Bomberman::update()
 {
-	auto wallTexture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
-	auto destructibleTexture = new Texture(shader, "Assets/textures/text.jpg");
-	auto playerTexture = new Texture(shader, "Assets/textures/text.jpg");
-	auto normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
-
-	auto row = 0;
-
-	for (auto rowVec = _gameCells.begin(); rowVec < _gameCells.end(); ++rowVec)
+	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); )
 	{
-		auto col = 0;
-
-		for (auto colVec = (*rowVec).begin(); colVec < (*rowVec).end(); ++colVec)
+		if ((*bomb)->getExplosionTime() <= std::chrono::system_clock::now())
 		{
-			if ((*colVec) != CellStatus::clear)
-			{
-				GeometricObject *aBox;
-				Texture *texture;
-
-				if ((*colVec) == CellStatus::player)
-				{
-					_playerX = col;
-					_playerY = row;
-					_playerObject = aBox = new Square(bufferObjects, scene);
-					aBox->changeColor(BLUE);
-					aBox->translate(Vector3f(0.5f, 0.5f, 0));
-					aBox->scale(Vector3f(0.5f, 0.5f, 1));
-					texture = playerTexture;
-					(*colVec) = CellStatus::clear;
-				}
-				else
-				{
-					aBox = new Square(bufferObjects, scene);
-					aBox->changeColor(((*colVec) == CellStatus::wall) ? GREY : BROWN);
-					texture = ((*colVec) == CellStatus::wall) ? wallTexture : destructibleTexture;
-				}
-
-				aBox->translate(Vector3f(col - 2, -(row - 2), 0));
-				aBox->repeatTexture(3.0);
-				gameNode->add(new SceneGraphNode(gameNode, aBox, scene, texture, normalMap));
-			}
-
-			auto ground = new Square(bufferObjects, scene);
-			ground->changeColor(GREEN);
-			ground->translate(Vector3f(col - 2, -(row - 2), -1));
-			gameNode->add(new SceneGraphNode(gameNode, ground, scene));
-
-			col++;
+			explode((*bomb)->getRow(), (*bomb)->getCol());
+			delete (*bomb)->getEntity();
+			_gridMap->setEntity((*bomb)->getRow(), (*bomb)->getCol(), nullptr);
+			bomb = _bombs.erase(bomb);
 		}
-
-		row++;
+		else
+		{
+			++bomb;
+		}
 	}
+
+	return true;
 }
 
-void Bomberman::parseFile(std::string filename)
+Vector2f Bomberman::angleTo2D(float angleDeg)
 {
-	std::ifstream ifile(filename);
-	while (ifile.good()) {
-		std::string line;
-		std::getline(ifile, line);
-		_gameCells.push_back(parseLine(line));
-	}
+	float rad = (angleDeg * PI) / 180;
+
+	return Vector2f(cos(rad), sin(rad));
 }
 
-std::vector<CellStatus> Bomberman::parseLine(std::string line)
+bool Bomberman::placeBomb()
 {
-	std::vector<CellStatus> gameRow;
+	auto playerOrientation2D = angleTo2D(-_playerOrientation);
+	unsigned bombRow = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
+	unsigned bombCol = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
 
-	for (auto& c : line)
+	if (_gridMap->isClear(bombRow, bombCol))
 	{
-		gameRow.push_back(parseCharacter(c));
+		auto bombEntity = GameManager::getInstance().createBomb(bombCol, -float(bombRow));
+		_gridMap->setEntity(bombRow, bombCol, bombEntity);
+
+		_bombs.push_back(new Bomb(bombEntity, bombRow, bombCol));
+
+		return true;
 	}
-
-	return gameRow;
-}
-
-CellStatus Bomberman::parseCharacter(char c)
-{
-	switch (c)
+	else
 	{
-	case ' ':
-		return CellStatus::clear;
-	case '#':
-		return CellStatus::wall;
-	case '+':
-		return CellStatus::destructible;
-	case '1':
-		return CellStatus::player;
-	default:
-		assert(false);
-		return CellStatus::clear;
+		return false;
 	}
 }
 
-bool Bomberman::isCellClear(unsigned row, unsigned col) const
+
+bool Bomberman::movePlayerForward(float distance)
 {
-	return _gameCells[row][col] == CellStatus::clear;
-}
+	auto playerDirection = angleTo2D(-_playerOrientation);
+	auto deltaPos = playerDirection * distance;
+	deltaPos.y = -deltaPos.y;
+	auto newPlayerPos = _playerPosition + deltaPos;
 
-bool Bomberman::setPlayerPos(float x, float y)
-{
-	assert(x >= 0);
-	assert(y >= 0);
+	unsigned newRow = round(newPlayerPos.y);
+	unsigned newCol = round(newPlayerPos.x);
+	unsigned oldRow = _gridMap->getPlayerRow();
+	unsigned oldCol = _gridMap->getPlayerCol();
 
-	unsigned row = int(x);
-	unsigned col = int(y);
+	bool valid = true;
+	
+	if (newRow != oldRow || newCol != oldCol)
+	{
+		valid = _gridMap->isClear(newRow, newCol);
 
-	bool valid = isCellClear(row, col);
+		if (valid)
+		{
+			_gridMap->moveEntity(oldRow, oldCol, newRow, newCol);
+			_gridMap->setPlayerRow(newRow);
+			_gridMap->setPlayerCol(newCol);
+		}
+	}
 
 	if (valid)
 	{
+		_playerEntity->getNode()->translate(Vector3f(deltaPos.x, -deltaPos.y, 0));
+		_playerPosition += Vector2f(deltaPos.x, deltaPos.y);
 	}
 
 	return valid;
 }
 
-std::string Bomberman::dump() const
+void Bomberman::rotatePlayer(float angleDeg)
 {
-	std::string raw = "";
-
-	for (auto rowVec = _gameCells.begin(); rowVec < _gameCells.end(); ++rowVec)
-	{
-		if (rowVec != _gameCells.begin())
-			raw += "\n";
-
-		for (auto colVec = (*rowVec).begin(); colVec < (*rowVec).end(); ++colVec)
-			raw += fromCSToChar(*colVec);
-	}
-	return raw;
+	_playerOrientation += angleDeg;
+	
+	_playerEntity->getNode()->clearTransformations();
+	_playerEntity->getNode()->rotate(-_playerOrientation, Vector3f(0, 0, 1));
+	_playerEntity->getNode()->translate(Vector3f(_playerPosition.x + 0.5f, -_playerPosition.y + 0.5f, 0));
 }
 
-CellStatus Bomberman::fromCharToCS(char c)
+void Bomberman::explode(unsigned row, unsigned col)
 {
-	CellStatus status;
-
-	switch (c)
+	if (!_gridMap->isClear(row - 1, col))
 	{
-	case ' ':
-		status = CellStatus::clear;
-	case '#':
-		status = CellStatus::wall;
-	case '+':
-		status = CellStatus::destructible;
-	case '1':
-		status = CellStatus::player;
-	default:
-		assert(false);
-		status = CellStatus::clear;
+		if (_gridMap->isDestructible(row - 1, col))
+		{
+			_gridMap->clear(row - 1, col);
+		}
+	}
+	else
+	{
+		if (_gridMap->isDestructible(row - 2, col))
+		{
+			_gridMap->clear(row - 2, col);
+		}
 	}
 
-	return status;
+	if (!_gridMap->isClear(row + 1, col))
+	{
+		if (_gridMap->isDestructible(row + 1, col))
+		{
+			_gridMap->clear(row + 1, col);
+		}
+	}
+	else
+	{
+		if (_gridMap->isDestructible(row + 2, col))
+		{
+			_gridMap->clear(row + 2, col);
+		}
+	}
+
+	if (!_gridMap->isClear(row, col - 1))
+	{
+		if (_gridMap->isDestructible(row, col - 1))
+		{
+			_gridMap->clear(row, col - 1);
+		}
+	}
+	else
+	{
+		if (_gridMap->isDestructible(row, col - 2))
+		{
+			_gridMap->clear(row, col - 2);
+		}
+	}
+
+	if (!_gridMap->isClear(row, col + 1))
+	{
+		if (_gridMap->isDestructible(row, col + 1))
+		{
+			_gridMap->clear(row, col + 1);
+		}
+	}
+	else
+	{
+		if (_gridMap->isDestructible(row, col + 2))
+		{
+			_gridMap->clear(row, col + 2);
+		}
+	}
 }
 
-char Bomberman::fromCSToChar(CellStatus cs)
+void Bomberman::debug()
 {
-	char c;
-
-	switch (cs)
-	{
-	case CellStatus::clear:
-		c = ' ';
-		break;
-	case CellStatus::wall:
-		c = '#';
-		break;
-	case CellStatus::destructible:
-		c = '+';
-		break;
-	case CellStatus::player:
-		c = '1';
-		break;
-	default:
-		assert(false);
-		c = ' ';
-		break;
-	}
-
-	return c;
-}
-
-bool Bomberman::movePlayer(float dx, float dy)
-{
-	unsigned row = round(_playerY - dy);
-	unsigned col = round(_playerX + dx);
-
-	bool valid = isCellClear(row, col);
-
-	if (valid)
-	{
-		_playerObject->translate(Vector3f(dx, dy, 0));
-		_playerX += dx;
-		_playerY -= dy;
-	}
-
-	return valid;
+	explode(_gridMap->getPlayerRow(), _gridMap->getPlayerCol());
 }

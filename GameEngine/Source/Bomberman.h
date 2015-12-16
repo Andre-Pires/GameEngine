@@ -7,39 +7,41 @@
 #include "Square.h"
 #include "Diamond.h"
 #include "Triangle.h"
+#include "GridMap.h"
+#include "Bomb.h"
 
-enum class CellStatus { clear, wall, player, destructible };
+//enum class CellStatus { clear, wall, player, destructible, bomb };
 
 class Bomberman
 {
 private:
 	const float _moveStep = 1;
-	std::vector<std::vector<CellStatus>> _gameCells;
-	GeometricObject *_playerObject;
-	float _playerX;
-	float _playerY;
+	//std::vector<std::vector<CellStatus>> _gameCells;
 
-	void parseFile(std::string filename);
-	static std::vector<CellStatus> parseLine(std::string line);
-	static CellStatus parseCharacter(char c);
+	GridMap *_gridMap;
+	std::vector<Bomb*> _bombs;
+	Vector2f _playerPosition;
+	float _playerOrientation;
+	GameEntity *_playerEntity;
 
-	static CellStatus fromCharToCS(char c);
-	static char fromCSToChar(CellStatus cs);
-	bool movePlayer(float dx, float dy);
+	bool movePlayerForward(float distance);
+	void rotatePlayer(float angleDeg);
+	void explode(unsigned row, unsigned col);
 public:
-	Bomberman(std::string& filename);
+	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 	~Bomberman();
 
 	void createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 
-	bool isCellClear(unsigned row, unsigned col) const;
+	bool playerWalk() { return movePlayerForward(_moveStep); }
+	bool playerWalkBackwards() { return movePlayerForward(-_moveStep); }
 
-	bool setPlayerPos(float x, float y);
+	void rotatePlayerLeft() { rotatePlayer(-90); }
+	void rotatePlayerRight() { rotatePlayer(90); }
 
-	bool movePlayerLeft() { return movePlayer(-_moveStep, 0); }
-	bool movePlayerRight() { return movePlayer(_moveStep, 0); }
-	bool movePlayerUp() { return movePlayer(0, _moveStep); }
-	bool movePlayerDown() { return movePlayer(0, -_moveStep); }
+	bool placeBomb();
+	bool update();
 
-	std::string dump() const;
+	static Vector2f angleTo2D(float angleDeg);
+	void debug();
 };

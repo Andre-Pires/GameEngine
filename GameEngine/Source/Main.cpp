@@ -98,13 +98,13 @@ bool flashActive;
 float flashRatio;
 std::clock_t flashStart;
 
+
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"));
-	bomberman->createSceneGraph(scene, gameNode, bufferObjects, shader);
+	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader);
 
 	sceneGraph->add(gameNode);
 
@@ -497,6 +497,8 @@ void updateCamera()
 
 void drawScene()
 {
+	bomberman->update();
+
 	//NOTE: calculates shadows for up to 2 lights in scene
 	if (shadowRenderingActive)
 	{
@@ -830,6 +832,14 @@ void processKeys(unsigned char key, int xx, int yy)
 		flashActive = true;
 		flashStart = std::clock();
 		break;
+
+	case 'x':
+		bomberman->placeBomb();
+		break;
+
+	case 'z':
+		bomberman->debug();
+		break;
 	}
 }
 
@@ -840,22 +850,22 @@ void processSpecialKeys(int key, int xx, int yy)
 	case GLUT_KEY_UP:
 		//sceneGraph->translate(Vector3f(0.0f, 0.1f, 0.0f));
 		//cube->translate(Vector3f(0.0f, 0.1f, 0.0f));
-		bomberman->movePlayerUp();
+		bomberman->playerWalk();
 		break;
 	case GLUT_KEY_DOWN:
 		//sceneGraph->translate(Vector3f(0.0f, -0.1f, 0.0f));
 		//cube->translate(Vector3f(0.0f, -0.1f, 0.0f));
-		bomberman->movePlayerDown();
+		bomberman->playerWalkBackwards();
 		break;
 	case GLUT_KEY_LEFT:
 		//sceneGraph->translate(Vector3f(-0.1f, 0.0f, 0.0f));
 		//cube->translate(Vector3f(-0.1f, 0.0f, 0.0f));
-		bomberman->movePlayerLeft();
+		bomberman->rotatePlayerLeft();
 		break;
 	case GLUT_KEY_RIGHT:
 		//sceneGraph->translate(Vector3f(0.1f, 0.0f, 0.0f));
 		//cube->translate(Vector3f(0.1f, 0.0f, 0.0f));
-		bomberman->movePlayerRight();
+		bomberman->rotatePlayerRight();
 		break;
 	case GLUT_KEY_F1:
 		shadowRenderingActive = shadowRenderingActive ? false : true;

@@ -18,6 +18,7 @@ public:
 	static Matrix4f Identity4();
 	static Matrix4f Scale4(Vector3f scale);
 	static Matrix4f Translation4(Vector3f translate);
+	static Matrix2f Rotation2(float angleDeg);
 	static Matrix4f Rotation4(float angle, Vector3f axis);
 	static Matrix4f Shear4(float shearX, float shearY);
 	static Matrix4f Mat3to4(Matrix3f matrix);
