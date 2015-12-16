@@ -16,6 +16,8 @@ class Bomberman
 {
 private:
 	const float _moveStep = 1;
+	const unsigned WALK_ANIMATION_DURATION = 500;
+	const unsigned ROTATE_ANIMATION_DURATION = 400;
 	//std::vector<std::vector<CellStatus>> _gameCells;
 
 	GridMap *_gridMap;
@@ -24,23 +26,30 @@ private:
 	float _playerOrientation;
 	GameEntity *_playerEntity;
 
+	unsigned _totalWalkTime;
+	unsigned _totalRotationTime;
+	int _rotationDirection;
+	bool _playerActive;
+
+
 	bool movePlayerForward(float distance);
 	void rotatePlayer(float angleDeg);
 	void explode(unsigned row, unsigned col);
+	void animationsUpdate(unsigned elapsedTime);
 public:
 	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 	~Bomberman();
 
 	void createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 
-	bool playerWalk() { return movePlayerForward(_moveStep); }
-	bool playerWalkBackwards() { return movePlayerForward(-_moveStep); }
+	void playerWalk();
+	void playerWalkBackwards() { movePlayerForward(-_moveStep); }
 
-	void rotatePlayerLeft() { rotatePlayer(-90); }
-	void rotatePlayerRight() { rotatePlayer(90); }
+	void rotatePlayerLeft();
+	void rotatePlayerRight();
 
 	bool placeBomb();
-	bool update();
+	bool update(unsigned elapsedTime);
 
 	static Vector2f angleTo2D(float angleDeg);
 	void debug();

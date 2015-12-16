@@ -98,6 +98,8 @@ bool flashActive;
 float flashRatio;
 std::clock_t flashStart;
 
+unsigned _lastUpdateTime = 0;
+
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
@@ -497,7 +499,11 @@ void updateCamera()
 
 void drawScene()
 {
-	bomberman->update();
+	unsigned currentUpdateTime = glutGet(GLUT_ELAPSED_TIME);
+	unsigned elapsed = currentUpdateTime - _lastUpdateTime;
+	_lastUpdateTime = currentUpdateTime;
+
+	bomberman->update(elapsed);
 
 	//NOTE: calculates shadows for up to 2 lights in scene
 	if (shadowRenderingActive)

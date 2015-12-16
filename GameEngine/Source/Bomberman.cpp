@@ -2,7 +2,7 @@
 #include "GameManager.h"
 #include "Bomb.h"
 
-Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0)
+Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false)
 {
 	GameManager::getInstance().setScene(scene);
 	GameManager::getInstance().setGameNode(gameNode);
@@ -16,6 +16,39 @@ Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNo
 
 Bomberman::~Bomberman()
 {
+}
+
+void Bomberman::playerWalk()
+{
+	if (_playerActive) return;
+	
+	auto playerOrientation2D = angleTo2D(-_playerOrientation);
+	unsigned rowAhead = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
+	unsigned colAhead = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
+	
+	if (_gridMap->isClear(rowAhead, colAhead))
+	{
+		_playerActive = true;
+		_totalWalkTime = 0;
+	}
+}
+
+void Bomberman::rotatePlayerLeft()
+{
+	if (_playerActive) return;
+
+	_playerActive = true;
+	_totalRotationTime = 0;
+	_rotationDirection = -1;
+}
+
+void Bomberman::rotatePlayerRight()
+{
+	if (_playerActive) return;
+
+	_playerActive = true;
+	_totalRotationTime = 0;
+	_rotationDirection = 1;
 }
 
 //void Bomberman::createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader *shader)
@@ -73,7 +106,7 @@ Bomberman::~Bomberman()
 //	}
 //}
 
-bool Bomberman::update()
+bool Bomberman::update(unsigned elapsedTime)
 {
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); )
 	{
@@ -89,6 +122,8 @@ bool Bomberman::update()
 			++bomb;
 		}
 	}
+
+	animationsUpdate(elapsedTime);
 
 	return true;
 }
@@ -226,6 +261,51 @@ void Bomberman::explode(unsigned row, unsigned col)
 		{
 			_gridMap->clear(row, col + 2);
 		}
+	}
+}
+
+void Bomberman::animationsUpdate(unsigned elapsedTime)
+{
+	_playerActive = false;
+
+	unsigned walkTime;
+	if (_totalWalkTime + elapsedTime >= WALK_ANIMATION_DURATION)
+	{
+		walkTime = WALK_ANIMATION_DURATION - _totalWalkTime;
+	}
+	else
+	{
+		walkTime = elapsedTime;
+	}
+
+	if (walkTime > 0)
+	{
+		_playerActive = true;
+
+		_totalWalkTime += walkTime;
+		float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
+		movePlayerForward(percentageOfAnimation);
+	}
+
+
+	unsigned rotationTime;
+	if (_totalRotationTime + elapsedTime >= ROTATE_ANIMATION_DURATION)
+	{
+		rotationTime = ROTATE_ANIMATION_DURATION - _totalRotationTime;
+	}
+	else
+	{
+		rotationTime = elapsedTime;
+	}
+
+	if (rotationTime > 0)
+	{
+		_playerActive = true;
+
+		_totalRotationTime += rotationTime;
+		float percentageOfAnimation = float(rotationTime) / ROTATE_ANIMATION_DURATION;
+		auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
+		rotatePlayer(frameAngle);
 	}
 }
 
