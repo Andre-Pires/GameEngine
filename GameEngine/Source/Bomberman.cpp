@@ -135,7 +135,7 @@ Vector2f Bomberman::angleTo2D(float angleDeg)
 	return Vector2f(cos(rad), sin(rad));
 }
 
-bool Bomberman::placeBomb()
+void Bomberman::placeBomb()
 {
 	auto playerOrientation2D = angleTo2D(-_playerOrientation);
 	unsigned bombRow = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
@@ -147,12 +147,6 @@ bool Bomberman::placeBomb()
 		_gridMap->setEntity(bombRow, bombCol, bombEntity);
 
 		_bombs.push_back(new Bomb(bombEntity, bombRow, bombCol));
-
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 

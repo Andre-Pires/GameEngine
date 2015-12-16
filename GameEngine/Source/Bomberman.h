@@ -48,7 +48,7 @@ public:
 	void rotatePlayerLeft();
 	void rotatePlayerRight();
 
-	bool placeBomb();
+	void placeBomb();
 	bool update(unsigned elapsedTime);
 
 	static Vector2f angleTo2D(float angleDeg);
