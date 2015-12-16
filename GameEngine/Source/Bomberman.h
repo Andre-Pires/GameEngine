@@ -19,8 +19,8 @@ private:
 	const float _moveStep = 1;
 	const unsigned WALK_ANIMATION_DURATION = 500;
 	const unsigned ROTATE_ANIMATION_DURATION = 400;
-	//std::vector<std::vector<CellStatus>> _gameCells;
-
+	const unsigned BOMB_EXPLOSION_TIME = 3000;
+	
 	GridMap *_gridMap;
 	std::vector<Bomb*> _bombs;
 	Vector2f _playerPosition;
@@ -56,5 +56,6 @@ public:
 	bool update(unsigned elapsedTime);
 
 	static Vector2f angleTo2D(float angleDeg);
+	static unsigned getCurrentTime();
 	void debug();
 };

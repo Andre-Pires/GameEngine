@@ -112,7 +112,7 @@ bool Bomberman::update(unsigned elapsedTime)
 {
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); )
 	{
-		if ((*bomb)->getExplosionTime() <= std::chrono::system_clock::now())
+		if ((*bomb)->getExplosionTime() <= getCurrentTime())
 		{
 			explode((*bomb)->getRow(), (*bomb)->getCol());
 			delete (*bomb)->getEntity();
@@ -137,6 +137,11 @@ Vector2f Bomberman::angleTo2D(float angleDeg)
 	return Vector2f(cos(rad), sin(rad));
 }
 
+unsigned Bomberman::getCurrentTime()
+{
+	return glutGet(GLUT_ELAPSED_TIME);
+}
+
 void Bomberman::placeBomb()
 {
 	if (_playerActive) return;
@@ -150,7 +155,7 @@ void Bomberman::placeBomb()
 		auto bombEntity = GameManager::getInstance().createBomb(bombCol, -float(bombRow));
 		_gridMap->setEntity(bombRow, bombCol, bombEntity);
 
-		_bombs.push_back(new Bomb(bombEntity, bombRow, bombCol));
+		_bombs.push_back(new Bomb(bombEntity, getCurrentTime() + BOMB_EXPLOSION_TIME, bombRow, bombCol));
 	}
 }
 
@@ -311,9 +316,6 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); ++bomb)
 	{
-		if ((*bomb)->getExplosionTime() <= std::chrono::system_clock::now())
-		{
-		}
 	}
 }
 

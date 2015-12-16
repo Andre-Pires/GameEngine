@@ -2,9 +2,8 @@
 
 
 
-Bomb::Bomb(GameEntity* entity, unsigned row, unsigned col): _entity(entity), _row(row), _col(col)
+Bomb::Bomb(GameEntity* entity, unsigned explosionAt, unsigned row, unsigned col): _entity(entity), _explosionAt(explosionAt), _row(row), _col(col)
 {
-	_explosionAt = std::chrono::system_clock::now() + std::chrono::seconds(3);
 }
 
 Bomb::~Bomb()
@@ -12,7 +11,7 @@ Bomb::~Bomb()
 }
 
 
-std::chrono::system_clock::time_point Bomb::getExplosionTime() const
+unsigned Bomb::getExplosionTime() const
 {
 	return _explosionAt;
 }
