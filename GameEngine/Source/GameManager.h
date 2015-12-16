@@ -8,7 +8,12 @@ class GameManager
 	SceneGraphNode *_gameNode;
 	Shader *_shader;
 	BufferObjects *_bufferObjects;
-	
+
+	SceneGraphNode *_rightHand;
+	SceneGraphNode *_leftHand;
+	SceneGraphNode *_rightFoot;
+	SceneGraphNode *_leftFoot;
+
 	GameManager();
 
 public:
@@ -28,5 +33,10 @@ public:
 	GameEntity* createDestructibleWall(float x, float y);
 	GameEntity* createPlayer(float x, float y);
 	GameEntity* createBomb(float x, float y);
+
+	SceneGraphNode* getRightHand() const { return _rightHand; }
+	SceneGraphNode* getLeftHand() const { return _leftHand; }
+	SceneGraphNode* getRightFoot() const { return _rightFoot; }
+	SceneGraphNode* getLeftFoot() const { return _leftFoot; }
 };
 

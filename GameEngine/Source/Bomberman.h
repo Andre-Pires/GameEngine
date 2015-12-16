@@ -30,12 +30,14 @@ private:
 	unsigned _totalRotationTime;
 	int _rotationDirection;
 	bool _playerActive;
+	int _startingFoot;
 
 
 	bool movePlayerForward(float distance);
 	void rotatePlayer(float angleDeg);
 	void explode(unsigned row, unsigned col);
 	void animationsUpdate(unsigned elapsedTime);
+	void wavePlayerMembers(float harmonicPercentage);
 public:
 	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
 	~Bomberman();

@@ -2,7 +2,7 @@
 #include "GameManager.h"
 #include "Bomb.h"
 
-Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false)
+Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
 {
 	GameManager::getInstance().setScene(scene);
 	GameManager::getInstance().setGameNode(gameNode);
@@ -29,6 +29,7 @@ void Bomberman::playerWalk()
 	if (_gridMap->isClear(rowAhead, colAhead))
 	{
 		_playerActive = true;
+		_startingFoot = -_startingFoot;
 		_totalWalkTime = 0;
 	}
 }
@@ -281,6 +282,7 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 		_totalWalkTime += walkTime;
 		float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
 		movePlayerForward(percentageOfAnimation);
+		wavePlayerMembers(sin(float(_totalWalkTime) / WALK_ANIMATION_DURATION * PI) * _startingFoot);
 	}
 
 
@@ -303,6 +305,31 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 		auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
 		rotatePlayer(frameAngle);
 	}
+
+	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); ++bomb)
+	{
+		if ((*bomb)->getExplosionTime() <= std::chrono::system_clock::now())
+		{
+		}
+	}
+}
+
+void Bomberman::wavePlayerMembers(float harmonicPercentage)
+{
+	auto rotAxis = Vector3f(1, 0, 0);
+	auto rotMultiplier = 20;
+
+	GameManager::getInstance().getRightHand()->clearTransformations();
+	GameManager::getInstance().getRightHand()->rotate(harmonicPercentage * rotMultiplier, rotAxis);
+
+	GameManager::getInstance().getLeftHand()->clearTransformations();
+	GameManager::getInstance().getLeftHand()->rotate(-harmonicPercentage * rotMultiplier, rotAxis);
+
+	GameManager::getInstance().getRightFoot()->clearTransformations();
+	GameManager::getInstance().getRightFoot()->rotate(-harmonicPercentage * rotMultiplier, rotAxis);
+
+	GameManager::getInstance().getLeftFoot()->clearTransformations();
+	GameManager::getInstance().getLeftFoot()->rotate(harmonicPercentage * rotMultiplier, rotAxis);
 }
 
 void Bomberman::debug()
