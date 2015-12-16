@@ -11,6 +11,7 @@
 #include "Bomb.h"
 
 //enum class CellStatus { clear, wall, player, destructible, bomb };
+typedef void(*CallbackType)();
 
 class Bomberman
 {
@@ -31,6 +32,7 @@ private:
 	int _rotationDirection;
 	bool _playerActive;
 	int _startingFoot;
+	CallbackType _activateFlash;
 
 
 	bool movePlayerForward(float distance);
@@ -39,7 +41,7 @@ private:
 	void animationsUpdate(unsigned elapsedTime);
 	void wavePlayerMembers(float harmonicPercentage);
 public:
-	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
+	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
 
 	void createSceneGraph(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);

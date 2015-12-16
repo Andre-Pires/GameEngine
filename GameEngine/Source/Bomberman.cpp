@@ -2,7 +2,7 @@
 #include "GameManager.h"
 #include "Bomb.h"
 
-Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader): _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
+Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash): _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
 {
 	GameManager::getInstance().setScene(scene);
 	GameManager::getInstance().setGameNode(gameNode);
@@ -12,6 +12,7 @@ Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNo
 	_gridMap = new GridMap(filename);
 	_playerEntity = _gridMap->getPlayerEntity();
 	_playerPosition = Vector2f(_gridMap->getPlayerCol(), _gridMap->getPlayerRow());
+	_activateFlash = activateFlash;
 }
 
 Bomberman::~Bomberman()
@@ -200,6 +201,8 @@ void Bomberman::rotatePlayer(float angleDeg)
 
 void Bomberman::explode(unsigned row, unsigned col)
 {
+	_activateFlash();
+
 	if (!_gridMap->isClear(row - 1, col))
 	{
 		if (_gridMap->isDestructible(row - 1, col))

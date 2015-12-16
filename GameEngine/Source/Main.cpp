@@ -97,16 +97,18 @@ PostProcessRenderer * postProcessRenderer;
 bool flashActive;
 float flashRatio;
 std::clock_t flashStart;
+typedef void (*CallbackType)();
 
 unsigned _lastUpdateTime = 0;
 
+void activateFlash();
 
 /////////////////////////////////////////////////////////////////////// SCENE
 // correct order -> scale * rotation * translation
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader);
+	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
@@ -338,6 +340,12 @@ void animationTimer(int value)
 	}
 
 	glutTimerFunc(ANIMATION_RATE, animationTimer, 0);
+}
+
+void activateFlash()
+{
+	flashActive = true;
+	flashStart = std::clock();
 }
 
 void flashTimer(int value)
@@ -841,8 +849,7 @@ void processKeys(unsigned char key, int xx, int yy)
 		animationActive = ANIMATION_ON;
 		break;
 	case ' ':
-		flashActive = true;
-		flashStart = std::clock();
+		activateFlash();
 		break;
 
 	case 'x':
