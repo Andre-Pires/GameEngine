@@ -74,6 +74,7 @@ GameEntity* GridMap::parseChar(char c, unsigned row, unsigned col)
 	switch (c)
 	{
 	case ' ':
+		GameManager::getInstance().createEmpty(col, -float(row));
 		return nullptr;
 	case '#':
 		return GameManager::getInstance().createStaticWall(col, -float(row));

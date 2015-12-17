@@ -5,8 +5,6 @@
 #include <cassert>
 
 
-class SceneGraphNode;
-
 GameManager::GameManager(): _gameNode(nullptr)
 {
 }
@@ -19,6 +17,27 @@ GameManager& GameManager::getInstance()
 	return instance;
 }
 
+
+void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader)
+{
+	_scene = scene;
+	_gameNode = gameNode;
+	_bufferObjects = bufferObjects;
+	_shader = shader;
+
+	Mesh quadMesh = Mesh(std::string("Assets/mesh/quad.obj"));
+	_floorObject = new GeometricObject(_bufferObjects, _scene, quadMesh);
+	_floorObject->scale(Vector3f(0.5f, 0.5f, 0.5f));
+	_floorObject->rotate(90, Vector3f(0, 0, 1));
+	_floorObject->changeColor(GREEN);
+
+	/*auto floorNode = new SceneGraphNode(_gameNode, _floorObject, _scene);
+	floorNode->translate(Vector3f(0.5f, -0.5f, 0));
+	floorNode->scale(Vector3f(9, 7, 0));
+	floorNode->translate(Vector3f(1, 0, 0));
+	_gameNode->add(floorNode);*/
+}
+
 GameEntity* GameManager::createEntity(GeometricObject *object)
 {
 	assert(_gameNode != nullptr);
@@ -28,6 +47,18 @@ GameEntity* GameManager::createEntity(GeometricObject *object)
 	_gameNode->add(entityNode);
 
 	return entity;
+}
+
+void GameManager::createEmpty(float x, float y)
+{
+	createFloor(x, y);
+}
+
+void GameManager::createFloor(float x, float y)
+{
+	auto floorNode = new SceneGraphNode(_gameNode, _floorObject, _scene);
+	floorNode->translate(Vector3f(x + 0.5f, y + 0.5f, 0));
+	_gameNode->add(floorNode);
 }
 
 GameEntity* GameManager::createStaticWall(float x, float y)
@@ -47,6 +78,8 @@ GameEntity* GameManager::createStaticWall(float x, float y)
 
 GameEntity* GameManager::createDestructibleWall(float x, float y)
 {
+	createFloor(x, y);
+
 	auto destructibleTexture = new Texture(_shader);
 	auto normalMap = new Texture(_shader, "Assets/textures/boxNormal.png");
 
@@ -62,7 +95,8 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 
 GameEntity* GameManager::createPlayer(float x, float y)
 {
-	auto angle = -20;
+	createFloor(x, y);
+	
 	SceneGraphNode * character = new SceneGraphNode(_gameNode, _scene);
 
 	{
