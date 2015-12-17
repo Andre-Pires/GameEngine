@@ -33,7 +33,6 @@
 
 #define CAPTION "Game Engine"
 #define ANIMATION_RATE 1000 / 60
-#define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
 
 int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
@@ -68,18 +67,8 @@ float r = 5.25f;
 float rotateX, rotateY = 0.0f;
 float zoom = 3.0f;
 
-// Animation state
-float interpolationRatio = 0.0f;
-float interpolationStep = ANIMATION_RATE;
-AnimationState animationState = ANIMATION_REVERSE;
-AnimationState animationActive = ANIMATION_OFF;
-
 SceneGraphNode* gameNode;
 SceneGraphNode* sceneGraph;
-SceneGraphNode* tangramNode;
-SceneGraphNode* tableNode;
-SceneGraphNode* tangramParts[7];
-SceneGraphNode* lightMarker;
 SceneGraphNode* scenePlane;
 
 // Lights
@@ -93,7 +82,6 @@ std::vector<ShadowRenderer *> shadowRenderers;
 //Post Process Flash
 PostProcessRenderer * postProcessRenderer;
 bool flashActive;
-float flashRatio;
 std::clock_t flashStart;
 typedef void(*CallbackType)();
 
@@ -110,223 +98,10 @@ void createGameScene()
 
 	sceneGraph->add(gameNode);
 
-	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/quad.obj"));
-		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->rotate(90, Vector3f(0.0, 0.0, 1.0));
-		scenePlane = new SceneGraphNode(sceneGraph, object, scene);
-	}
-}
-
-void createTangram()
-{
-	tangramNode = new SceneGraphNode(sceneGraph, scene);
-
-	//head
-	GeometricObject * diamond = new Diamond(bufferObjects, scene);
-	diamond->scale(Vector3f(0.5, 0.5, 0.5));
-	diamond->translate(Vector3f(0.0, 0.5, 0.0));
-	diamond->changeColor(WHITE);
-	tangramParts[0] = new SceneGraphNode(sceneGraph, diamond, scene);
-	tangramNode->add(tangramParts[0]);
-
-	//right ear
-	{
-		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-		triangle->scale(Vector3f(0.5, 0.5, 0.4));
-		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.35, 1.55, 0.0));
-		triangle->changeColor(RED);
-		tangramParts[1] = new SceneGraphNode(sceneGraph, triangle, scene);
-		tangramNode->add(tangramParts[1]);
-	}
-
-	//left ear
-	{
-		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-		triangle->scale(Vector3f(0.5, 0.5, 0.4));
-		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(-0.35, 0.85, 0.0));
-		triangle->changeColor(RED);
-		tangramParts[2] = new SceneGraphNode(sceneGraph, triangle, scene);
-		tangramNode->add(tangramParts[2]);
-	}
-
-	//neck
-	{
-		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-		triangle->scale(Vector3f(0.7143, 0.7143, 0.4));
-		triangle->rotate(-135, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.25, 0.75, 0.0));
-		triangle->changeColor(GREEN);
-		tangramParts[3] = new SceneGraphNode(sceneGraph, triangle, scene);
-		tangramNode->add(tangramParts[3]);
-	}
-
-	//body
-	{
-		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-		triangle->scale(Vector3f(1, 1, 0.6));
-		triangle->rotate(45, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(0.25, -0.65, 0.0));
-		triangle->changeColor(BLUE);
-		tangramParts[4] = new SceneGraphNode(sceneGraph, triangle, scene);
-		tangramNode->add(tangramParts[4]);
-	}
-
-	//legs
-	{
-		GeometricObject * triangle = new Triangle(bufferObjects, scene);
-		triangle->scale(Vector3f(1, 1, 0.45));
-		triangle->rotate(0, Vector3f(0.0, 0.0, 1.0));
-		triangle->translate(Vector3f(-0.05, -0.95, 0.0));
-		triangle->changeColor(WHITE);
-		tangramParts[5] = new SceneGraphNode(sceneGraph, triangle, scene);
-		tangramNode->add(tangramParts[5]);
-	}
-
-	//tail
-	GeometricObject * square = new Square(bufferObjects, scene);
-	square->scale(Vector3f(0.71, 0.35, 0.6));
-	square->shear(1.0, 0);
-	square->translate(Vector3f(0.95, -0.95, 0));
-	square->changeColor(ORANGE);
-	tangramParts[6] = new SceneGraphNode(sceneGraph, square, scene);
-	tangramNode->add(tangramParts[6]);
-
-	//to create a bigger tangram figure
-	tangramNode->scale(Vector3f(1.5, 1.5, 1.5));
-
-	//TODO: tangram node
-	//sceneGraph->add(tangramNode);
-
-	// table
-	texture = new Texture(shader, "Assets/textures/stone_wall_texture.jpg");
-	Texture* normalMap = new Texture(shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
-	tableNode = new SceneGraphNode(sceneGraph, scene, texture, normalMap);
-	//tableNode = new SceneGraphNode(sceneGraph, scene);
-
-	GeometricObject * tableTop = new Square(bufferObjects, scene);
-	tableTop->scale(Vector3f(7.0, 5.0, 0.5));
-	tableTop->translate(Vector3f(-3.5, -2.5, -0.51));
-	tableTop->changeColor(WHITE);
-	tableTop->repeatTexture(3.0);
-	tableNode->add(new SceneGraphNode(tableNode, tableTop, scene));
-
-	{
-		GeometricObject * tableLeg = new Square(bufferObjects, scene);
-		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
-		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
-		tableLeg->translate(Vector3f(-3.5, -2.0, -5.51));
-		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(3.0);
-		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
-	}
-
-	{
-		GeometricObject * tableLeg = new Square(bufferObjects, scene);
-		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
-		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
-		tableLeg->translate(Vector3f(2.5, -2.0, -5.51));
-		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(3.0);
-		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
-	}
-
-	{
-		GeometricObject * tableLeg = new Square(bufferObjects, scene);
-		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
-		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
-		tableLeg->translate(Vector3f(-3.5, 2.5, -5.51));
-		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(3.0);
-		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
-	}
-
-	{
-		GeometricObject * tableLeg = new Square(bufferObjects, scene);
-		tableLeg->scale(Vector3f(1.0, 5.0, 0.5));
-		tableLeg->rotate(90, Vector3f(1.0, 0.0, 0.0));
-		tableLeg->translate(Vector3f(2.5, 2.5, -5.51));
-		tableLeg->changeColor(WHITE);
-		tableLeg->repeatTexture(3.0);
-		tableNode->add(new SceneGraphNode(tableNode, tableLeg, scene));
-	}
-
-	//tableNode->rotate(180, Vector3f(1.0, 0.0, 0.0));
-	//sceneGraph->add(tableNode);
-
-	/*{
-		texture = new Texture(shader, "Assets/textures/stone_texture_2.jpg");
-		Mesh mesh = Mesh(std::string("Assets/mesh/cube.obj"));
-		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->repeatTexture(2.0);
-		object->translate(Vector3f(0, 0, 2));
-		object->scale(Vector3f(1, 1, 1));
-		cube = new SceneGraphNode(sceneGraph, object, scene, texture);
-		sceneGraph->add(cube);
-	}*/
-
-	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
-		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->scale(Vector3f(1.0, 1.0, 1.0));
-		object->translate(Vector3f(0, 0, 0.5));
-		object->changeColor(RED);
-		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
-	}
-
-	/*{
-	Mesh mesh = Mesh(std::string("Assets/mesh/plane.obj"));
+	Mesh mesh = Mesh(std::string("Assets/mesh/quad.obj"));
 	GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-	object->scale(Vector3f(10, 10, 1));
-	object->rotate(180, Vector3f(1.0, 0.0, 0.0));
-	object->changeColor(WHITE);
-	plane = new SceneGraphNode(sceneGraph, object, scene);
-	}*/
-}
-
-//interpolation : ratio * x + (1 - ratio) * y
-void interpolateTangram(float ratio)
-{
-	for (int i = 0; i < 7; i++)
-		tangramParts[i]->clearTransformations();
-
-	tangramParts[0]->translate(Vector3f::lerp(Vector3f(0.36, -1.15, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[1]->translate(Vector3f::lerp(Vector3f(0.36, -1.15, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[2]->rotate(Utilities::lerp(90, 0, ratio), Vector3f(0.0, 0.0, 1.0));
-	tangramParts[2]->translate(Vector3f::lerp(Vector3f(1.2, -0.305, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[3]->rotate(135 * ratio + (1 - ratio) * 0, Vector3f(0.0, 0.0, 1.0));
-	tangramParts[3]->translate(Vector3f::lerp(Vector3f(0.705, -0.65, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[4]->translate(Vector3f::lerp(Vector3f(-0.95, -0.35, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[5]->rotate(Utilities::lerp(-45, 0, ratio), Vector3f(0.0, 0.0, 1.0));
-	tangramParts[5]->translate(Vector3f::lerp(Vector3f(0.0, 1.05, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-	tangramParts[6]->translate(Vector3f::lerp(Vector3f(-1.65, -0.05, 0.0), Vector3f(0.0, 0.0, 0.0), ratio));
-}
-
-void animationTimer(int value)
-{
-	if (animationActive != ANIMATION_OFF)
-	{
-		if (abs(interpolationRatio - 1.0f) < slackThreshold && ANIMATION_STANDARD == animationState)
-		{
-			animationActive = ANIMATION_OFF;
-			interpolationStep = -ANIMATION_STEP;
-		}
-		else if (abs(interpolationRatio - 0.0f) < slackThreshold && ANIMATION_REVERSE == animationState)
-		{
-			animationActive = ANIMATION_OFF;
-			interpolationStep = ANIMATION_STEP;
-		}
-		else
-		{
-			interpolationRatio += interpolationStep;
-
-			interpolateTangram(interpolationRatio);
-		}
-	}
-
-	glutTimerFunc(ANIMATION_RATE, animationTimer, 0);
+	object->rotate(90, Vector3f(0.0, 0.0, 1.0));
+	scenePlane = new SceneGraphNode(sceneGraph, object, scene);
 }
 
 void activateFlash()
@@ -504,8 +279,7 @@ void createProgram()
 
 	sceneGraph = new SceneGraphNode(scene);
 
-	//creating our figure's objects
-	//createTangram();
+	//creating our game's objects
 	createGameScene();
 
 	//NOTE: code for the point light
@@ -675,29 +449,20 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'w':
 	case 'W':
 		centerY += 0.25;
-		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
-		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 
 	case 'a':
 	case 'A':
 		centerX -= 0.25;
-		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
-		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 
 	case 's':
 	case 'S':
 		centerY -= 0.25;
-		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
-		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 	case 'd':
 	case 'D':
 		centerX += 0.25;
-		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
-		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
-		cout << "rotateX:" << rotateX << ", " << "rotateY:" << rotateY << "zoom: " << zoom << endl;
 		break;
 	case '+':
 		sceneLights[controllableLight]->position.y += 0.1f;
@@ -708,25 +473,21 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'h':
 	case 'H':
 		sceneLights[controllableLight]->position.x -= 0.1f;
-		lightMarker->translate(Vector3f(-0.1f, 0, 0));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'j':
 	case 'J':
 		sceneLights[controllableLight]->position.x += 0.1f;
-		lightMarker->translate(Vector3f(0.1f, 0, 0));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'k':
 	case 'K':
 		sceneLights[controllableLight]->position.z += 0.1f;
-		lightMarker->translate(Vector3f(0, 0, 0.1));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'l':
 	case 'L':
 		sceneLights[controllableLight]->position.z -= 0.1f;
-		lightMarker->translate(Vector3f(0, 0, -0.1f));
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case '\\':
@@ -734,29 +495,9 @@ void processKeys(unsigned char key, int xx, int yy)
 		controllableLight = (controllableLight + 1) % sceneLights.size();
 		cout << "Controlling light number: " << controllableLight << endl;
 		break;
-	case 'i':
-	case 'I':
-		if (animationState == ANIMATION_REVERSE)
-		{
-			animationState = ANIMATION_STANDARD;
-			interpolationStep = ANIMATION_STEP;
-		}
-		else
-		{
-			animationState = ANIMATION_REVERSE;
-			interpolationStep = -ANIMATION_STEP;
-		}
-
-		animationActive = ANIMATION_ON;
-		break;
 	case ' ':
 		bomberman->placeBomb();
 		break;
-
-	case 'x':
-		bomberman->placeBomb();
-		break;
-
 	case 'z':
 		bomberman->debug();
 		break;
@@ -946,7 +687,6 @@ void setupCallbacks()
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0, timer, 0);
 	glutTimerFunc(0, timedRedisplay, 0);
-	glutTimerFunc(0, animationTimer, 0);
 	glutTimerFunc(0, flashTimer, 0);
 }
 

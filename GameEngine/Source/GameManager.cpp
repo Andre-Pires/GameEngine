@@ -4,11 +4,9 @@
 
 #include <cassert>
 
-
-GameManager::GameManager(): _gameNode(nullptr)
+GameManager::GameManager() : _gameNode(nullptr)
 {
 }
-
 
 GameManager& GameManager::getInstance()
 {
@@ -16,7 +14,6 @@ GameManager& GameManager::getInstance()
 
 	return instance;
 }
-
 
 void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader)
 {
@@ -31,11 +28,11 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	_floorObject->rotate(90, Vector3f(0, 0, 1));
 	_floorObject->changeColor(GREEN);
 
-	/*auto floorNode = new SceneGraphNode(_gameNode, _floorObject, _scene);
-	floorNode->translate(Vector3f(0.5f, -0.5f, 0));
-	floorNode->scale(Vector3f(9, 7, 0));
-	floorNode->translate(Vector3f(1, 0, 0));
-	_gameNode->add(floorNode);*/
+	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.jpg");
+	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
+
+	this->textures["wood"] = new Texture(_shader); // perlin noise texture
+	this->normals["wood"] = new Texture(_shader, "Assets/textures/boxNormal.png");
 }
 
 GameEntity* GameManager::createEntity(GeometricObject *object)
@@ -63,13 +60,10 @@ void GameManager::createFloor(float x, float y)
 
 GameEntity* GameManager::createStaticWall(float x, float y)
 {
-	auto wallTexture = new Texture(_shader, "Assets/textures/stone_wall_texture.jpg");
-	auto normalMap = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
-
 	auto object = new Square(_bufferObjects, _scene);
 	object->changeColor(GREY);
 	object->repeatTexture(3.0);
-	auto node = new SceneGraphNode(_gameNode, object, _scene, wallTexture, normalMap);
+	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["stone"], this->normals["stone"]);
 	node->translate(Vector3f(x, y, 0));
 	_gameNode->add(node);
 
@@ -80,13 +74,9 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 {
 	createFloor(x, y);
 
-	auto destructibleTexture = new Texture(_shader);
-	auto normalMap = new Texture(_shader, "Assets/textures/boxNormal.png");
-
 	auto object = new Square(_bufferObjects, _scene);
 	object->changeColor(BROWN);
-	//object->repeatTexture(3.0);
-	auto node = new SceneGraphNode(_gameNode, object, _scene, destructibleTexture, normalMap);
+	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["wood"], this->normals["wood"]);
 	node->translate(Vector3f(x, y, 0));
 	_gameNode->add(node);
 
@@ -96,7 +86,7 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 GameEntity* GameManager::createPlayer(float x, float y)
 {
 	createFloor(x, y);
-	
+
 	SceneGraphNode * character = new SceneGraphNode(_gameNode, _scene);
 
 	{

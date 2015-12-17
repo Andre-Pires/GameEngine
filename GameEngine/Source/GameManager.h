@@ -8,7 +8,8 @@ class GameManager
 	SceneGraphNode *_gameNode;
 	Shader *_shader;
 	BufferObjects *_bufferObjects;
-
+	std::map<std::string, Texture *> textures;
+	std::map<std::string, Texture *> normals;
 	SceneGraphNode *_rightHand;
 	SceneGraphNode *_leftHand;
 	SceneGraphNode *_rightFoot;
@@ -22,9 +23,9 @@ public:
 	GameManager(GameManager const&) = delete;
 	void operator=(GameManager const&) = delete;
 	static GameManager& getInstance();
-	
+
 	void init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
-	
+
 	GameEntity* createEntity(GeometricObject* object);
 
 	void createEmpty(float x, float y);
@@ -39,4 +40,3 @@ public:
 	SceneGraphNode* getRightFoot() const { return _rightFoot; }
 	SceneGraphNode* getLeftFoot() const { return _leftFoot; }
 };
-
