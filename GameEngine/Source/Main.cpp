@@ -190,6 +190,10 @@ void drawScene()
 	}
 	scene->setActiveShader(shader);
 
+	//make the spotlight follow the player
+	sceneLights[0]->position.x = bomberman->getPlayerPosition().x;
+	sceneLights[0]->position.y = -bomberman->getPlayerPosition().y;
+
 	//NOTE: shadow rendering borrows the camera for calculations so we have to put it back
 	if (cameraType == CONTROLLED_PERSP || shadowRenderingActive)
 	{
@@ -283,14 +287,14 @@ void createProgram()
 	createGameScene();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(0, 0, 5.8, 1.0);
+	pointLight->position = Vector4f(6, 0.5, 7.0, 1.0);
 	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
 	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
-	pointLight->lightRange = 50.0f;
+	pointLight->lightRange = 20.0f;
 
 	//NOTE: code for the spotlight
-	spotLight->position = Vector4f(-1.0, 0, 4.0, 1.0);
+	spotLight->position = Vector4f(bomberman->getPlayerPosition().x, bomberman->getPlayerPosition().y, 4.0, 1.0);
 	spotLight->ambientColor = Vector4f(0.05, 0.05, 0.05, 1.0);
 	spotLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
 	spotLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
