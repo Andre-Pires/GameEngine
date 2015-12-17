@@ -84,8 +84,8 @@ void BufferObjects::createCameraBufferObjects(GLuint * camVboId)
 void BufferObjects::updateCamera(GLuint * camVboId, Matrix4f view, Matrix4f projection)
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, *camVboId);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GLfloat) * 16, MatrixFactory::Mat4toGLfloat(view));
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat) * 16, sizeof(GLfloat) * 16, MatrixFactory::Mat4toGLfloat(projection));
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GLfloat) * 16, view.getMatrix());
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLfloat) * 16, sizeof(GLfloat) * 16, projection.getMatrix());
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	Shader::checkGenericOpenGLError("ERROR: Problem updating camera.");

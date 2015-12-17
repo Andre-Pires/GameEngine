@@ -6,6 +6,19 @@ Matrix3f::Matrix3f(float * SourceMatrix)
 	memcpy(matrix, SourceMatrix, sizeof(float) * MATRIX_LENGTH);
 }
 
+Matrix3f::Matrix3f(float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8)
+{
+	matrix[0] = f0;
+	matrix[1] = f1;
+	matrix[2] = f2;
+	matrix[3] = f3;
+	matrix[4] = f4;
+	matrix[5] = f5;
+	matrix[6] = f6;
+	matrix[7] = f7;
+	matrix[8] = f8;
+}
+
 Matrix3f::Matrix3f()
 {
 }
@@ -241,7 +254,7 @@ Matrix3f Matrix3f::operator*(Matrix3f& matrix2)
 		}
 	}
 
-	/*Matrix3f returnMat = new float[9]{ 0,0,0,0,0,0,0,0,0 };
+	/*Matrix3f returnMat { 0,0,0,0,0,0,0,0,0 };
 
 	returnMat.setValue(1, 1, (*this)(1, 1) * matrix2(1, 1) + (*this)(2, 1) * matrix2(1, 2) + (*this)(3, 1) * matrix2(1, 3));
 	returnMat.setValue(2, 1, (*this)(1, 2) * matrix2(1, 1) + (*this)(2, 2) * matrix2(1, 2) + (*this)(3, 2) * matrix2(1, 3));
@@ -293,7 +306,7 @@ void Matrix3f::operator*=(Matrix3f& matrix2)
 Matrix3f Matrix3f::Transpose()
 {
 	int row, col;
-	Matrix3f returnMat = new float[9]{ 0,0,0,0,0,0,0,0,0 };
+	Matrix3f returnMat { 0,0,0,0,0,0,0,0,0 };
 
 	for (col = 1; col <= MATRIX_COLUMN_LENGTH; col++) {
 		for (row = 1; row <= MATRIX_ROW_LENGTH; row++) {

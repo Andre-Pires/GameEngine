@@ -127,13 +127,12 @@ void ShadowRenderer::renderShadows()
 	Matrix4f depthViewMatrix = camera->getViewMatrix();
 	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
 
-	Matrix4f biasMatrix = Matrix4f(new float[16]
-	{
+	Matrix4f biasMatrix {
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0
-	});
+	};
 
 	scene->setActiveShader(shadowShader);
 	sceneGraph->draw();
@@ -143,7 +142,7 @@ void ShadowRenderer::renderShadows()
 	// in the "MVP" uniform
 	shader->useShaderProgram();
 
-	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(biasMatrix * depthMVP));
+	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, (biasMatrix * depthMVP).getMatrix());
 	//Note: texture starts at 2 since index 0 & 1 are already in use
 	glActiveTexture(GL_TEXTURE2 + lightIndex);
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);

@@ -23,5 +23,4 @@ public:
 	static Matrix4f Shear4(float shearX, float shearY);
 	static Matrix4f Mat3to4(Matrix3f matrix);
 	static Matrix3f Mat4to3(Matrix4f matrix);
-	static GLfloat* Mat4toGLfloat(Matrix4f matrix);
 };

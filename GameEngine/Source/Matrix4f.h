@@ -15,6 +15,7 @@ private:
 public:
 
 	Matrix4f(float * matrix);
+	Matrix4f(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float);
 	Matrix4f();
 	~Matrix4f();
 	float* getMatrix();

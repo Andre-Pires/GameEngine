@@ -7,6 +7,26 @@ Matrix4f::Matrix4f(float * SourceMatrix)
 	memcpy(matrix, SourceMatrix, sizeof(float) * MATRIX_LENGTH);
 }
 
+Matrix4f::Matrix4f(float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15)
+{
+	matrix[0] = f0;
+	matrix[1] = f1;
+	matrix[2] = f2;
+	matrix[3] = f3;
+	matrix[4] = f4;
+	matrix[5] = f5;
+	matrix[6] = f6;
+	matrix[7] = f7;
+	matrix[8] = f8;
+	matrix[9] = f9;
+	matrix[10] = f10;
+	matrix[11] = f11;
+	matrix[12] = f12;
+	matrix[13] = f13;
+	matrix[14] = f14;
+	matrix[15] = f15;
+}
+
 Matrix4f::Matrix4f()
 {
 }

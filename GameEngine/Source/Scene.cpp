@@ -40,9 +40,9 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 
 		//usar o id do uniform "matrix" criado para passar a matrix model
 		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
-		glUniformMatrix4fv(normalUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(normalMat));
-		//passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(modelMatrix));
+		glUniformMatrix4fv(normalUniform, 1, GL_FALSE, normalMat.getMatrix());
+		////passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, modelMatrix.getMatrix());
 
 		//texturas
 		if (texture != nullptr)

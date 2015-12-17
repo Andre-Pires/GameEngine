@@ -246,7 +246,7 @@ void Matrix2f::operator*=(Matrix2f& matrix2)
 Matrix2f Matrix2f::Transpose()
 {
 	int col, row;
-	Matrix2f returnMat = new float[4]{ 0,0,0,0 };
+	Matrix2f returnMat { 0,0,0,0 };
 
 	for (col = 1; col <= MATRIX_COLUMN_LENGTH; col++) {
 		for (row = 1; row <= MATRIX_ROW_LENGTH; row++) {

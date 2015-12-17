@@ -34,8 +34,7 @@ void Camera::lookAt(Vector3f eye, Vector3f center, Vector3f up)
 	Vector3f u = side.Cross(view);
 
 	//the minuses are due to opengl's norm of an inverted z
-	Matrix4f rotation = Matrix4f(
-		new float[16]{
+	Matrix4f rotation = Matrix4f({
 		side.x, u.x, -view.x, 0,
 		side.y, u.y, -view.y, 0,
 		side.z, u.z, -view.z, 0,
@@ -134,9 +133,7 @@ void Camera::perspective(float fov, float ratio, float nearp, float farp)
 
 	auto d = 1 / tan(radians / 2);
 
-	this->Projection = Matrix4f(
-
-		new float[16]{
+	this->Projection = Matrix4f({
 		d / ratio, 0, 0, 0,
 		0, d, 0, 0,
 		0, 0, (nearp + farp) / (nearp - farp), -1,

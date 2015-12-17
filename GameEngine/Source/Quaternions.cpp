@@ -149,12 +149,12 @@ Matrix4f Quaternion::ToMatrix4()
 	float zz = qn.z * qn.z;
 	float zt = qn.z * qn.t;
 
-	Matrix4f matrix = Matrix4f(new float[16]{
+	Matrix4f matrix {
 		1.0f - 2.0f * (yy + zz), 2.0f * (xy + zt), 2.0f * (xz - yt), 0.0f,
 		2.0f * (xy - zt), 1.0f - 2.0f * (xx + zz), 2.0f * (yz + xt), 0.0f,
 		2.0f * (xz + yt), 2.0f * (yz - xt), 1.0f - 2.0f * (xx + yy), 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-	});
+	};
 
 	return matrix;
 }

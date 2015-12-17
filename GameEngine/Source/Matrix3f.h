@@ -13,6 +13,7 @@ private:
 public:
 
 	Matrix3f(float * matrix);
+	Matrix3f(float, float, float, float, float, float, float, float, float);
 	Matrix3f();
 	~Matrix3f();
 	float* getMatrix();
