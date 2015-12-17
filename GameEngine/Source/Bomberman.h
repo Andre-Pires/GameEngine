@@ -19,7 +19,7 @@ private:
 	const unsigned WALK_ANIMATION_DURATION = 500;
 	const unsigned ROTATE_ANIMATION_DURATION = 400;
 	const unsigned BOMB_EXPLOSION_TIME = 3000;
-	
+
 	GridMap *_gridMap;
 	std::vector<Bomb*> _bombs;
 	Vector2f _playerPosition;
@@ -33,7 +33,6 @@ private:
 	int _startingFoot;
 	CallbackType _activateFlash;
 
-
 	bool movePlayerForward(float distance);
 	void rotatePlayer(float angleDeg);
 	void explode(unsigned row, unsigned col);
@@ -42,7 +41,7 @@ private:
 public:
 	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
-
+	Vector2f getPlayerPosition();
 	void playerWalk();
 	void playerWalkBackwards() { movePlayerForward(-_moveStep); }
 

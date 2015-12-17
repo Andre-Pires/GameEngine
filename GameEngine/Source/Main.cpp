@@ -26,6 +26,7 @@
 #include "Texture.h"
 #include "Bomberman.h"
 #include "ShadowRenderer.h"
+#include "PostProcessRenderer.h"
 
 #include "..\Dependencies\glew\glew.h"
 #include "..\Dependencies\freeglut\freeglut.h"
@@ -33,9 +34,6 @@
 #define CAPTION "Game Engine"
 #define ANIMATION_RATE 1000 / 60
 #define ANIMATION_STEP (ANIMATION_RATE * 1.0)/ 2000
-#define LIGHTS_IN_SCENE 1
-#define SHADOW_MAP_RATIO 1.0
-#include "PostProcessRenderer.h"
 
 int WinX = 1024, WinY = 576;
 int WindowHandle = 0;
@@ -97,7 +95,7 @@ PostProcessRenderer * postProcessRenderer;
 bool flashActive;
 float flashRatio;
 std::clock_t flashStart;
-typedef void (*CallbackType)();
+typedef void(*CallbackType)();
 
 unsigned _lastUpdateTime = 0;
 
@@ -111,17 +109,6 @@ void createGameScene()
 	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
-
-	///ONLY FOR DEBUG - NOT NEEDED
-	{
-		Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
-		GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
-		object->scale(Vector3f(0.5, 0.5, 0.5));
-		object->translate(Vector3f(0, 0, 2.0));
-		object->changeColor(PINK);
-		lightMarker = new SceneGraphNode(sceneGraph, object, scene);
-	}
-	///ONLY FOR DEBUG - NOT NEEDED
 
 	{
 		Mesh mesh = Mesh(std::string("Assets/mesh/quad.obj"));
@@ -374,7 +361,7 @@ void updateCamera()
 {
 	if (cameraType == ORTHOGRAPHIC)
 	{
-		camera->ortho(-3.0f + centerX, 3.0f + centerX, -3.0f + centerY, 3.0f + centerY, -3.0f, 3.0f);
+		camera->ortho(-6.0f + centerX, 6.0f + centerX, -6.0f + centerY, 6.0f + centerY, -3.0f, 3.0f);
 	}
 	else if (cameraType == PERSPECTIVE)
 	{
@@ -383,127 +370,31 @@ void updateCamera()
 		if (gimbalState == GIMBAL_LOCK_ON)
 		{
 			// set the camera using a function similar to gluLookAt
-			camera->lookAt(Vector3f(0, 0, 7), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+			camera->lookAt(Vector3f(4.0, -6.0, 11), Vector3f(4.0, -4.0, 0), Vector3f(0, 1, 0));
 		}
 		else if (gimbalState == GIMBAL_LOCK_OFF)
 		{
-			camera->quaternionLookAt(0, 0, 0, Vector3f(0, 0, 7), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+			camera->quaternionLookAt(0, 35, 8, Vector3f(0, 0, 5), Vector3f(-5.5, 3.0, 0), Vector3f(0, 1, 0));
 		}
 	}
-
 	else if (cameraType == CONTROLLED_PERSP)
 	{
 		camera->perspective(45.0f, viewportRatio, 0.1f, 100.0f);
+		Vector2f playerPosition = bomberman->getPlayerPosition();
 		// set the camera using a function similar to gluLookAt
-
 		if (gimbalState == GIMBAL_LOCK_ON)
 		{
 			// set the camera using a function similar to gluLookAt
-			camera->lookAt(Vector3f(eyeX, eyeY, eyeZ), Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+			camera->lookAt(Vector3f(playerPosition.x, -playerPosition.y, eyeZ), Vector3f(playerPosition.x, -playerPosition.y, centerZ), Vector3f(0, 1, 0));
 		}
 		else if (gimbalState == GIMBAL_LOCK_OFF)
 		{
-			camera->quaternionLookAt(rotateX, rotateY, zoom, Vector3f(0, 0, 5), Vector3f(centerX, centerY, centerZ), Vector3f(0, 1, 0));
+			camera->quaternionLookAt(rotateX, rotateY, zoom, Vector3f(0, 0, 5), Vector3f(-playerPosition.x, playerPosition.y, centerZ), Vector3f(0, 1, 0));
 		}
 	}
 
 	camera->updateCamera();
 }
-
-//void generatePostProcessFBO()
-//{
-//	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
-//	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
-//
-//	// create a framebuffer object
-//	glGenFramebuffers(1, &fboId);
-//	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-//
-//	// Try to use a texture depth component
-//	glGenTextures(1, &sceneTexture);
-//	glBindTexture(GL_TEXTURE_2D, sceneTexture);
-//
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, shadowMapWidth, shadowMapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0); // o GL_FLOAT pode ser GL_UNSIGNED_BYTE
-//
-//	glGenerateMipmap(GL_TEXTURE_2D);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//
-//	// The depth buffer
-//
-//	glGenRenderbuffers(1, &depthRenderBuffer);
-//	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, shadowMapWidth, shadowMapHeight);
-//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
-//	//attach the texture to FBO depth attachment point
-//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneTexture, 0);
-//	// Set the list of draw buffers.
-//	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-//	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-//
-//	// check FBO status
-//	GLenum FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-//	switch (FBOstatus) {
-//	case GL_FRAMEBUFFER_UNDEFINED:
-//		printf("FBO Undefined\n");
-//		break;
-//	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-//		printf("FBO Incomplete Attachment\n");
-//		break;
-//	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-//		printf("FBO Missing Attachment\n");
-//		break;
-//	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-//		printf("FBO Incomplete Draw Buffer\n");
-//		break;
-//	case GL_FRAMEBUFFER_UNSUPPORTED:
-//		printf("FBO Unsupported\n");
-//		break;
-//	case GL_FRAMEBUFFER_COMPLETE:
-//		printf("FBO OK\n");
-//		break;
-//	default:
-//		printf("FBO Problem?\n");
-//	}
-//
-//	if (FBOstatus != GL_FRAMEBUFFER_COMPLETE)
-//		printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
-//
-//	//	switch back to window-system-provided framebuffer
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//}
-//
-//void renderFlash()
-//{
-//	// Render to our framebuffer
-//	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-//	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-//
-//	// Clear the screen
-//	glClearDepth(1.0f);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//	scene->setActiveShader(shader);
-//	sceneGraph->draw();
-//	scene->setActiveShader(postProcessingShader);
-//
-//	// Send our transformation to the currently bound shader,
-//	// in the "MVP" uniform
-//	postProcessingShader->useShaderProgram();
-//
-//	//Note: texture starts at 7 to create sequential space for shadows and textures
-//	glActiveTexture(GL_TEXTURE0 + 7);
-//	glBindTexture(GL_TEXTURE_2D, sceneTexture);
-//	glUniform1i(sceneUniformId, 7);
-//
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//	glViewport(0, 0, WinX, WinY); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-//								  // Clear the screen
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//}
 
 void drawScene()
 {
@@ -523,7 +414,9 @@ void drawScene()
 		}
 	}
 	scene->setActiveShader(shader);
-	if (cameraType == CONTROLLED_PERSP)
+
+	//NOTE: shadow rendering borrows the camera for calculations so we have to put it back
+	if (cameraType == CONTROLLED_PERSP || shadowRenderingActive)
 	{
 		updateCamera();
 
@@ -777,32 +670,40 @@ void processKeys(unsigned char key, int xx, int yy)
 			gimbalState = GIMBAL_LOCK_ON;
 			cout << "Gimbal status: " << endl << " - Camera is gimbal locked." << endl;
 		}
+		updateCamera();
 		break;
 	case 'w':
 	case 'W':
 		centerY += 0.25;
+		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
+		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 
 	case 'a':
 	case 'A':
 		centerX -= 0.25;
+		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
+		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 
 	case 's':
 	case 'S':
 		centerY -= 0.25;
+		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
+		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
 		break;
 	case 'd':
 	case 'D':
 		centerX += 0.25;
+		cout << "center: " << centerX << ", " << centerY << ", " << centerZ << endl;
+		cout << "eye: " << eyeX << ", " << eyeY << ", " << eyeZ << endl;
+		cout << "rotateX:" << rotateX << ", " << "rotateY:" << rotateY << "zoom: " << zoom << endl;
 		break;
 	case '+':
 		sceneLights[controllableLight]->position.y += 0.1f;
-		//sceneGraph->translate(Vector3f(0.0f, 0.0f, 0.1f));
 		break;
 	case '-':
 		sceneLights[controllableLight]->position.y -= 0.1f;
-		//sceneGraph->translate(Vector3f(0.0f, 0.0f, -0.1f));
 		break;
 	case 'h':
 	case 'H':
@@ -849,7 +750,7 @@ void processKeys(unsigned char key, int xx, int yy)
 		animationActive = ANIMATION_ON;
 		break;
 	case ' ':
-		activateFlash();
+		bomberman->placeBomb();
 		break;
 
 	case 'x':
@@ -867,23 +768,15 @@ void processSpecialKeys(int key, int xx, int yy)
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		//sceneGraph->translate(Vector3f(0.0f, 0.1f, 0.0f));
-		//cube->translate(Vector3f(0.0f, 0.1f, 0.0f));
 		bomberman->playerWalk();
 		break;
 	case GLUT_KEY_DOWN:
-		//sceneGraph->translate(Vector3f(0.0f, -0.1f, 0.0f));
-		//cube->translate(Vector3f(0.0f, -0.1f, 0.0f));
 		bomberman->playerWalkBackwards();
 		break;
 	case GLUT_KEY_LEFT:
-		//sceneGraph->translate(Vector3f(-0.1f, 0.0f, 0.0f));
-		//cube->translate(Vector3f(-0.1f, 0.0f, 0.0f));
 		bomberman->rotatePlayerLeft();
 		break;
 	case GLUT_KEY_RIGHT:
-		//sceneGraph->translate(Vector3f(0.1f, 0.0f, 0.0f));
-		//cube->translate(Vector3f(0.1f, 0.0f, 0.0f));
 		bomberman->rotatePlayerRight();
 		break;
 	case GLUT_KEY_F1:
