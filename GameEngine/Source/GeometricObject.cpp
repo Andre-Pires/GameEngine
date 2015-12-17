@@ -24,6 +24,7 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * V
 	VboId = bufferObjects->getVboId();
 	VaoId = bufferObjects->getVaoId();
 
+	this->materialShininess = 0.3f;
 	calculateTangents();
 	updateBuffer();
 }
@@ -38,6 +39,7 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene)
 
 	calculateTangents();
 
+	this->materialShininess = 0.3f;
 	transformations = MatrixFactory::Identity4();
 }
 
@@ -64,12 +66,14 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 
 	calculateTangents();
 
-	changeColor(WHITE);
+	this->materialShininess = 0.3f;
+
+	updateBuffer();
 }
 
 void GeometricObject::draw(Matrix4f parentNodeTransformations, Texture* texture, Texture* normalMap)
 {
-	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors, texture, normalMap);
+	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors, materialShininess, texture, normalMap);
 }
 
 void GeometricObject::updateBuffer()
@@ -177,6 +181,11 @@ void GeometricObject::changeColor(Color color)
 	memcpy(MaterialColors.SPECULAR, specularToUse, 4 * sizeof(GLfloat));
 
 	updateBuffer();
+}
+
+void GeometricObject::changeShininess(float shininess)
+{
+	this->materialShininess = shininess;
 }
 
 void GeometricObject::clearObjectFromBuffer()

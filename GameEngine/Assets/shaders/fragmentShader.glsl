@@ -9,7 +9,6 @@ in vec3 ex_Tangent;
 in vec4 mcPosition;
 
 // Out
-//out vec4 out_Color;
 
 // array of lights
 #define MAX_LIGHTS 10
@@ -30,6 +29,7 @@ uniform struct Light {
 uniform vec4 materialAmbient;
 uniform vec4 materialDiffuse;
 uniform vec4 materialSpecular;
+uniform float materialShininess;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
@@ -73,7 +73,7 @@ vec2 poissonDisk[16] = vec2[](
 //shadow uniform
 uniform sampler2DShadow shadowMap[2];
 
-float shininess;
+
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
 
 //For wood texture
@@ -205,15 +205,15 @@ vec4 calculateLight(int index){
 		vec3 halfDir = normalize(lightDir  + viewDir);
 
         //Blinn-Phong
-        //shininess = 32.0;
+        //materialShininess = 32.0;
 		//float specAngle = max(dot(halfDir, mappedNormal), 0.0);
-		//specularCoefficient = pow(specAngle, shininess);
+		//specularCoefficient = pow(specAngle, materialShininess);
 
         //Gaussian
-        shininess = 0.3;
+        //materialShininess = 0.3;
         float NdotH = clamp(dot(mappedNormal, halfDir), 0.0, 1.0);
         float angle = acos(NdotH);
-        specularCoefficient = exp(- pow (angle/ shininess, 2));
+        specularCoefficient = exp(- pow (angle/ materialShininess, 2));
 	}
 
     //return mix(vec4(0.9,0.0,0.0,1.0),vec4(0.0,0.9,0.0,1.0), specularCoefficient);

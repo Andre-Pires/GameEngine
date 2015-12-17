@@ -234,6 +234,7 @@ void createProgram()
 	shader->addUniform("materialAmbient");
 	shader->addUniform("materialDiffuse");
 	shader->addUniform("materialSpecular");
+	shader->addUniform("materialShininess");
 	shader->addUniform("ModelMatrix");
 	shader->addUniform("NormalMatrix");
 
@@ -328,6 +329,7 @@ void createProgram()
 	shadowShader->addUniform("materialAmbient");
 	shadowShader->addUniform("materialDiffuse");
 	shadowShader->addUniform("materialSpecular");
+	shadowShader->addUniform("materialShininess");
 	shadowShader->addUniform("ModelMatrix");
 	shadowShader->addUniform("NormalMatrix");
 
@@ -365,6 +367,7 @@ void createProgram()
 	postProcessingShader->addUniform("materialAmbient");
 	postProcessingShader->addUniform("materialDiffuse");
 	postProcessingShader->addUniform("materialSpecular");
+	postProcessingShader->addUniform("materialShininess");
 	postProcessingShader->addUniform("ModelMatrix");
 	postProcessingShader->addUniform("NormalMatrix");
 

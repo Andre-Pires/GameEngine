@@ -13,6 +13,7 @@ protected:
 	Scene * scene;
 	std::vector<Vertex> Vertices;
 	Material MaterialColors;
+	float materialShininess;
 	std::vector <Texcoord> Texcoords;
 	std::vector <Normal> Normals;
 	std::vector <GLuint> Indices;
@@ -24,7 +25,6 @@ protected:
 	//Usados apenas como forma de nomear os diferentes buffers
 	GLuint VaoId;
 	GLuint *VboId;
-
 	GeometricObject(BufferObjects* buffer, Scene* scene);
 public:
 
@@ -37,6 +37,7 @@ public:
 	void scale(Vector3f scale);
 	void shear(float shearX, float shearY);
 	void changeColor(Color color);
+	void changeShininess(float shininess);
 	void clearObjectFromBuffer();
 	virtual void shadeColor();
 	void repeatTexture(float repeat);

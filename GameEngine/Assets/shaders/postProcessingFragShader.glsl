@@ -4,11 +4,6 @@
 out vec4 out_Color;
 in vec2 ex_UV;
 
-// Material Attributes
-uniform vec4 materialAmbient;
-uniform vec4 materialDiffuse;
-uniform vec4 materialSpecular;
-
 // Texture Samplers
 uniform sampler2D TextureSampler;
 uniform sampler3D WoodSampler;

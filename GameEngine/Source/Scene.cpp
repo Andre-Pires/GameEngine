@@ -12,7 +12,7 @@ Scene::Scene(Shader * shader, char * modelName, char * normalName)
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, Texture* texture, Texture* normalMap)
+void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap)
 {
 	if (shader != nullptr)
 	{
@@ -22,6 +22,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		GLint ambientUniform = shader->getUniformLocation("materialAmbient");
 		GLint diffuseUniform = shader->getUniformLocation("materialDiffuse");
 		GLint specularUniform = shader->getUniformLocation("materialSpecular");
+		GLint shininessUniform = shader->getUniformLocation("materialShininess");
 		GLint textureActiveUnif = shader->getUniformLocation("textureActive");
 		GLint woodTextureActiveUnif = shader->getUniformLocation("woodTextureActive");
 		//usar o vertex array object criado
@@ -33,7 +34,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 		glUniform4fv(ambientUniform, 1, materialColors.AMBIENT);
 		glUniform4fv(diffuseUniform, 1, materialColors.DIFFUSE);
 		glUniform4fv(specularUniform, 1, materialColors.SPECULAR);
-		//glUniformMatrix4fv(normalUniform, 1, GL_FALSE, MatrixFactory::Mat4toGLfloat(normalMat));
+		glUniform1f(shininessUniform, materialShininess);
 
 		Matrix3f tempMat = MatrixFactory::Mat4to3(modelMatrix);
 		Matrix4f normalMat = MatrixFactory::Mat3to4(tempMat.Inverse().Transpose());
