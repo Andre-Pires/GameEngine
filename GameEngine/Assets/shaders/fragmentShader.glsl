@@ -79,8 +79,8 @@ const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB c
 //For wood texture
 const float NoiseScale = 0.1;
 const float Noisiness = 0.1;
-const vec3 LightWood = vec3(0.9, 0.45, 0.1);
-const vec3 DarkWood = vec3(0.4, 0.2, 0.05);
+const vec3 LightWood = vec3(0.9, 0.54, 0.22);
+const vec3 DarkWood = vec3(0.43, 0.25, 0.09);
 const float RingFrequency = 12.0;
 const float RingSharpness = 21;
 const float RingScale = 1.5;
