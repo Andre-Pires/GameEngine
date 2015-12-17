@@ -16,6 +16,7 @@ public:
 	GridMap(std::string& filename);
 	~GridMap();
 
+	bool isValid(unsigned row, unsigned col) const;
 	bool isClear(unsigned, unsigned) const;
 
 	void clear(unsigned, unsigned);

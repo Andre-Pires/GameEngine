@@ -15,9 +15,14 @@ GridMap::~GridMap()
 {
 }
 
+bool GridMap::isValid(unsigned row, unsigned col) const
+{
+	return _grid.size() > row && _grid[row].size() > col;
+}
+
 bool GridMap::isClear(unsigned row, unsigned col) const
 {
-	return _grid[row][col] == nullptr;
+	return isValid(row, col) && _grid[row][col] == nullptr;
 }
 
 void GridMap::clear(unsigned row, unsigned col)
