@@ -77,8 +77,8 @@ uniform sampler2DShadow shadowMap[2];
 const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
 
 //For wood texture
-const float NoiseScale = 0.4;
-const float Noisiness = 0.5;
+const float NoiseScale = 0.1;
+const float Noisiness = 0.1;
 const vec3 LightWood = vec3(0.9, 0.45, 0.1);
 const vec3 DarkWood = vec3(0.4, 0.2, 0.05);
 const float RingFrequency = 12.0;

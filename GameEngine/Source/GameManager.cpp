@@ -29,8 +29,8 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	_floorObject->changeColor(GREEN);
 	_floorObject->changeShininess(0.2f);
 
-	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.jpg");
-	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.jpg");
+	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.png");
+	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.png");
 
 	this->textures["wood"] = new Texture(_shader); // perlin noise texture
 	this->normals["wood"] = new Texture(_shader, "Assets/textures/boxNormal.png");
@@ -63,7 +63,7 @@ GameEntity* GameManager::createStaticWall(float x, float y)
 {
 	auto object = new Square(_bufferObjects, _scene);
 	object->changeColor(GREY);
-	object->repeatTexture(3.0);
+	//object->repeatTexture(2.0);
 	object->changeShininess(0.3f);
 	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["stone"], this->normals["stone"]);
 	node->translate(Vector3f(x, y, 0));
