@@ -10,8 +10,10 @@ float Linear_Interpolate(float a, float b, float x) {
 float Noise(int x, int y, int z) {
 	int n = x + y * 57 + z * 131;
 	n = (n << 13) ^ n;
+	float r3 = 0.000000000731322574615478515625 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.000000000931322574615478515625 - 0.000000000831322574615478515625)));
+	int r4 = 15000 + rand() % (16500 - 15000);
 
-	return (1.0f - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff)* 0.000000000931322574615478515625f);
+	return (1.0f - ((n * (n * n * r4 + 789221) + 1376312589) & 0x7fffffff)* r3);
 }
 
 float SmoothedNoise(float x, float y, float z) {
@@ -112,8 +114,6 @@ Texture::Texture(Shader* shader, char* filename) {
 }
 
 Texture::Texture(Shader* shader) {
-
-
 	float n;
 	int size = 32;
 	for (int x = 0; x < size; x++) {

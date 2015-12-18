@@ -32,8 +32,12 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.png");
 	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.png");
 
-	this->textures["wood"] = new Texture(_shader); // perlin noise texture
-	this->normals["wood"] = new Texture(_shader, "Assets/textures/boxNormal.png");
+	//NOTE: creating "TEXTURE_NUMBER" different textures to introduce variety in scene
+	for (int i = 0; i < TEXTURE_NUMBER; i++)
+	{
+		this->textures[std::string("wood" + i)] = new Texture(_shader); // perlin noise texture
+	}
+	this->normals[std::string("wood")] = new Texture(_shader, "Assets/textures/boxNormal.png");
 }
 
 GameEntity* GameManager::createEntity(GeometricObject *object)
@@ -74,12 +78,13 @@ GameEntity* GameManager::createStaticWall(float x, float y)
 
 GameEntity* GameManager::createDestructibleWall(float x, float y)
 {
+	int randomTexture = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / TEXTURE_NUMBER));
 	createFloor(x, y);
 
 	auto object = new Square(_bufferObjects, _scene);
 	object->changeColor(BROWN);
 	object->changeShininess(0.7f);
-	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["wood"], this->normals["wood"]);
+	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures[std::string("wood" + randomTexture)], this->normals[std::string("wood")]);
 	node->translate(Vector3f(x, y, 0));
 	_gameNode->add(node);
 
@@ -176,13 +181,13 @@ GameEntity* GameManager::createBomb(float x, float y)
 	object->scale(Vector3f(0.25f, 0.25f, 0.25f));
 	object->changeColor(BLACK);
 	object->changeShininess(0.6f);
-	
+
 	auto node = new SceneGraphNode(_gameNode, object, _scene);
 
 	auto nodeWrapper = new SceneGraphNode(_scene);
 	nodeWrapper->add(node);
 	nodeWrapper->translate(Vector3f(x + 0.5f, y + 0.5f, 0.35f));
-	
+
 	_gameNode->add(nodeWrapper);
 
 	return new GameEntity(node, false);

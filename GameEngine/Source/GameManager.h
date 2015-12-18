@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneGraphNode.h"
 #include "GameEntity.h"
+#define TEXTURE_NUMBER 4
 
 class GameManager
 {
