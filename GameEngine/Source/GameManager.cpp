@@ -174,12 +174,16 @@ GameEntity* GameManager::createBomb(float x, float y)
 	Mesh mesh = Mesh(std::string("Assets/mesh/sphere.obj"));
 	auto object = new GeometricObject(_bufferObjects, _scene, mesh);
 	object->scale(Vector3f(0.25f, 0.25f, 0.25f));
-	object->translate(Vector3f(0.5f, 0.5f, 0.35f));
 	object->changeColor(BLACK);
 	object->changeShininess(0.6f);
+	
 	auto node = new SceneGraphNode(_gameNode, object, _scene);
-	node->translate(Vector3f(x, y, 0));
-	_gameNode->add(node);
+
+	auto nodeWrapper = new SceneGraphNode(_scene);
+	nodeWrapper->add(node);
+	nodeWrapper->translate(Vector3f(x + 0.5f, y + 0.5f, 0.35f));
+	
+	_gameNode->add(nodeWrapper);
 
 	return new GameEntity(node, false);
 }

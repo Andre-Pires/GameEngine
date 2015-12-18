@@ -261,6 +261,9 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); ++bomb)
 	{
+		auto timeUntillExplosion = (*bomb)->getExplosionTime() - getCurrentTime();
+		auto timeSincePlaced = BOMB_EXPLOSION_TIME - timeUntillExplosion;
+		animateBomb((*bomb)->getEntity()->getNode(), float(timeSincePlaced) / BOMB_EXPLOSION_TIME);
 	}
 }
 
@@ -280,6 +283,14 @@ void Bomberman::wavePlayerMembers(float harmonicPercentage)
 
 	GameManager::getInstance().getLeftFoot()->clearTransformations();
 	GameManager::getInstance().getLeftFoot()->rotate(harmonicPercentage * rotMultiplier, rotAxis);
+}
+
+void Bomberman::animateBomb(SceneGraphNode* node, float percentage)
+{
+	auto scale = 1 -sin(percentage * 1.1f * PI) * percentage*percentage;
+
+	node->clearTransformations();
+	node->scale(Vector3f(scale, scale, scale));
 }
 
 void Bomberman::debug()

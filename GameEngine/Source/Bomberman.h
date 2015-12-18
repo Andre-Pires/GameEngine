@@ -38,6 +38,7 @@ private:
 	void explode(unsigned row, unsigned col);
 	void animationsUpdate(unsigned elapsedTime);
 	void wavePlayerMembers(float harmonicPercentage);
+	void animateBomb(SceneGraphNode* node, float percentage);
 public:
 	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
