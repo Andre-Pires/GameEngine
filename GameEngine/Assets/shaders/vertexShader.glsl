@@ -16,7 +16,7 @@ out vec4 ex_shadowCoord[2];
 out vec3 ex_Tangent;
 
 uniform mat4 ModelMatrix;
-uniform mat4 NormalMatrix;
+uniform mat3 NormalMatrix;
 
 uniform SharedMatrices
 {
@@ -32,10 +32,7 @@ uniform mat4 lightViewMatrix[2];
 
 void main(void)
 {
-	//ex_Normal = normalize(NormalMatrix * in_Normal);
-	//NOTE:this should be moved to the application
-	mat3 nMat = transpose(inverse(mat3(ViewMatrix * ModelMatrix)));
-	ex_Normal = normalize(nMat * in_Normal.xyz);
+	ex_Normal = normalize(NormalMatrix * in_Normal.xyz);
 
 	gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * in_Position;
 	ex_Color = in_Color;

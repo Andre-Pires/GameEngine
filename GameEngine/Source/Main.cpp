@@ -276,11 +276,11 @@ void createProgram()
 	//generating vao
 	bufferObjects = BufferObjects::getInstance();
 
-	//creating new scene object for further drawing
-	scene = new Scene(shader, "ModelMatrix", "NormalMatrix");
-
 	//should be initialized after light camera since this camera should occupy the shared UBOs
 	camera = new Camera(bufferObjects, scene, shader);
+
+	//creating new scene object for further drawing
+	scene = new Scene(shader, camera, "ModelMatrix", "NormalMatrix");
 
 	sceneGraph = new SceneGraphNode(scene);
 

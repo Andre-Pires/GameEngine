@@ -306,7 +306,7 @@ void Matrix3f::operator*=(Matrix3f& matrix2)
 Matrix3f Matrix3f::Transpose()
 {
 	int row, col;
-	Matrix3f returnMat { 0,0,0,0,0,0,0,0,0 };
+	Matrix3f returnMat{ 0,0,0,0,0,0,0,0,0 };
 
 	for (col = 1; col <= MATRIX_COLUMN_LENGTH; col++) {
 		for (row = 1; row <= MATRIX_ROW_LENGTH; row++) {
@@ -319,14 +319,14 @@ Matrix3f Matrix3f::Transpose()
 
 Matrix3f Matrix3f::Adjoint()
 {
-	Matrix3f mat = (*this).Transpose();
+	Matrix3f mat = (*this);
 	Matrix3f adjoint;
 
 	adjoint.setValue(1, 1, (mat(2, 2) * mat(3, 3)) - (mat(3, 2) * mat(2, 3)));
-	adjoint.setValue(1, 2, -((mat(2, 1) * mat(3, 3)) - (mat(3, 2) * mat(1, 3))));
+	adjoint.setValue(1, 2, -((mat(1, 2) * mat(3, 3)) - (mat(1, 3) * mat(3, 2))));
 	adjoint.setValue(1, 3, (mat(1, 2) * mat(2, 3)) - (mat(2, 2) * mat(1, 3)));
 
-	adjoint.setValue(2, 1, -((mat(1, 2) * mat(3, 3)) - (mat(1, 3) * mat(3, 2))));
+	adjoint.setValue(2, 1, -((mat(2, 1) * mat(3, 3)) - (mat(3, 2) * mat(1, 3))));
 	adjoint.setValue(2, 2, (mat(1, 1) * mat(3, 3)) - (mat(3, 1) * mat(1, 3)));
 	adjoint.setValue(2, 3, -((mat(1, 1) * mat(2, 3)) - (mat(2, 1) * mat(1, 3))));
 
