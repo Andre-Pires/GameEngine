@@ -1,12 +1,11 @@
 #version 330 core
 // In
 in vec4 ex_Position;
-in vec4 ex_Color;
 in vec3 ex_Normal;
 in vec4 ex_shadowCoord[2];
 in vec2 ex_UV;
 in vec3 ex_Tangent;
-in vec4 mcPosition;
+in vec4 ex_mcPosition;
 
 // array of lights
 #define MAX_LIGHTS 10
@@ -227,8 +226,34 @@ vec4 calculateLight(int index){
 
 }
 
+vec4 generateWoodTexture(){
+    vec4 temp = texture(WoodSampler, ex_mcPosition.xyz * NoiseScale) * Noisiness;
+    vec3 noisevec = temp.rgb;
+    vec3 location = ex_mcPosition.xyz + noisevec;
+
+    float dist = sqrt(location.x * location.x + location.z * location.z);
+    dist *= RingFrequency;
+
+    float r = fract(dist + noisevec[0] + noisevec[1] + noisevec[2]) * 2.0;
+
+    if (r > 1.0){
+      r = 2.0 - r;
+    }
+    vec3 colorTemp = mix(LightWood, DarkWood, r);
+
+    r = fract((ex_mcPosition.x + ex_mcPosition.z) * GrainScale + 0.5);
+    noisevec[2] *= r;
+    if (r < GrainThreshold){
+      colorTemp += LightWood * LightGrains * noisevec[2];
+    }else{
+      colorTemp -= LightWood * DarkGrains * noisevec[2];
+    }
+
+    return vec4(colorTemp, 1.0);
+}
+
 //calculate new normal
-vec3 CalculateBumpedNormal()
+vec3 calculateBumpedNormal()
 {
     vec3 Normal = normalize(ex_Normal.xyz);
     vec3 Tangent = normalize(ex_Tangent);
@@ -246,7 +271,7 @@ vec3 CalculateBumpedNormal()
 void main(void)
 {
     if(textureActive == 1){
-        mappedNormal = CalculateBumpedNormal();
+        mappedNormal = calculateBumpedNormal();
     } else {
         mappedNormal = ex_Normal;
     }
@@ -265,28 +290,8 @@ void main(void)
     if(textureActive == 1){
         //if the texture is wood
         if(woodTextureActive == 1){
-          vec4 temp = texture(WoodSampler, mcPosition.xyz * NoiseScale) * Noisiness;
-          vec3 noisevec = temp.rgb;
-          vec3 location = mcPosition.xyz + noisevec;
-
-          float dist = sqrt(location.x * location.x + location.z * location.z);
-          dist *= RingFrequency;
-
-          float r = fract(dist + noisevec[0] + noisevec[1] + noisevec[2]) * 2.0;
-
-          if (r > 1.0){
-            r = 2.0 - r;
-          }
-          vec3 colorTemp = mix(LightWood, DarkWood, r);
-
-          r = fract((mcPosition.x + mcPosition.z) * GrainScale + 0.5);
-          noisevec[2] *= r;
-          if (r < GrainThreshold){
-            colorTemp += LightWood * LightGrains * noisevec[2];
-          }else{
-            colorTemp -= LightWood * DarkGrains * noisevec[2];
-          }
-          colorResult = vec4(colorTemp, 1.0) * lightColorResult;
+          vec4 textureResult = generateWoodTexture();
+          colorResult = textureResult * lightColorResult;
 
         }else{
           colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;

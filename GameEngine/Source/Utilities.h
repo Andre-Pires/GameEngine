@@ -39,8 +39,7 @@ typedef struct {
 } Texcoord;
 
 typedef struct {
-	//ultima coordenada sempre a 1.0
-	GLfloat NXNYNZ[4];
+	GLfloat NXNYNZ[3];
 } Normal;
 
 typedef struct {
