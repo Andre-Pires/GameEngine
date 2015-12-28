@@ -28,6 +28,7 @@ private:
 public:
 	ShadowRenderer(Light* light, int lightIndex, Camera* camera, Scene* scene, SceneGraphNode* sceneGraph, Shader* shader, Shader* shadowShader);
 	void generateShadowFBO(int viewX, int viewY);
+	void destroyShadowFBO();
 	void renderShadows();
 	void updateViewport(int x, int y);
 	void updateCameraCenter(Vector3f center);

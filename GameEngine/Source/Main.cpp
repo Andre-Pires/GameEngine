@@ -631,9 +631,11 @@ void reshape(int w, int h)
 	//switching between number of shadow calculations
 	for (int i = 0; i < min((int)sceneLights.size(), 2); i++)
 	{
+		shadowRenderers[i]->destroyShadowFBO();
 		shadowRenderers[i]->generateShadowFBO(WinX, WinY);
 	}
 
+	postProcessRenderer->destroyPostProcessFBO();
 	postProcessRenderer->generatePostProcessFBO(WinX, WinY);
 }
 

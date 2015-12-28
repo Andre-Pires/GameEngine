@@ -85,6 +85,15 @@ void PostProcessRenderer::generatePostProcessFBO(int viewX, int viewY)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void PostProcessRenderer::destroyPostProcessFBO()
+{
+	glDeleteTextures(1, &sceneTexture);
+	glDeleteRenderbuffers(1, &depthRenderBuffer);
+	//Bind 0, which means render to back buffer, as a result, fb is unbound
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &fboId);
+}
+
 void PostProcessRenderer::renderFlash()
 {
 	// Render to our framebuffer

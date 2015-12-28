@@ -19,6 +19,7 @@ private:
 public:
 	PostProcessRenderer(Scene* scene, SceneGraphNode* sceneGraph, Shader* shader, Shader* postProcessShader);
 	void generatePostProcessFBO(int viewX, int viewY);
+	void destroyPostProcessFBO();
 	void renderFlash();
 	void updateViewport(int x, int y);
 };
