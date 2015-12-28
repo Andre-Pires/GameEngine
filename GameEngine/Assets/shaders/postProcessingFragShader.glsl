@@ -4,13 +4,6 @@
 out vec4 out_Color;
 in vec2 ex_UV;
 
-// Texture Samplers
-uniform sampler2D TextureSampler;
-uniform sampler3D WoodSampler;
-uniform int textureActive;
-uniform int woodTextureActive;
-
-uniform vec4 cameraPosition;
 uniform float flashRatio;
 uniform sampler2D sceneTexture;
 

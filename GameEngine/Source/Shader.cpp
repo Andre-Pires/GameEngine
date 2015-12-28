@@ -1,10 +1,10 @@
 #include "Shader.h"
-#include <string>
 
-Shader::Shader()
+Shader::Shader(ShaderType type)
 {
 	//cria o programa guardando o id do mesmo
-	ProgramId = glCreateProgram();
+	this->ProgramId = glCreateProgram();
+	this->shaderType = type;
 }
 
 void Shader::addShader(GLenum shaderType, char * shaderLocation)
@@ -71,9 +71,13 @@ void Shader::createShaderProgram()
 
 	for (int atribLocation = 0; atribLocation < shaderAttributes.size(); atribLocation++)
 	{
-		//"binda" um dado indice, do programa criado, a um atributo que vamos usar
+		// "binda" um dado indice, do programa criado, a um atributo que vamos usar
 		// segundo campo e o indice e o terceiro o nome do atributo
-		glBindAttribLocation(ProgramId, atribLocation, shaderAttributes[atribLocation]);
+
+		if (shaderAttributes[atribLocation] != nullptr)		// verifica se uma dada localizacao tem um atributo associado
+		{
+			glBindAttribLocation(ProgramId, atribLocation, shaderAttributes[atribLocation]);
+		}
 	}
 
 	glLinkProgram(ProgramId);
@@ -184,4 +188,9 @@ void Shader::checkGenericOpenGLError(std::string error) {
 		std::cerr << error << std::endl;
 		exit(EXIT_FAILURE);
 	}
+}
+
+ShaderType Shader::getShaderType()
+{
+	return shaderType;
 }

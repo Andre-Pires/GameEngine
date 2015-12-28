@@ -81,7 +81,7 @@ std::vector<ShadowRenderer *> shadowRenderers;
 
 //Post Process Flash
 PostProcessRenderer * postProcessRenderer;
-bool flashActive;
+bool flashActive = false;
 std::clock_t flashStart;
 typedef void(*CallbackType)();
 
@@ -222,7 +222,7 @@ void drawScene()
 void createProgram()
 {
 	//creating and linking shader program with respective shaders
-	shader = new Shader();
+	shader = new Shader(MAIN_SHADER);
 	shader->addShader(GL_VERTEX_SHADER, "Assets/shaders/vertexShader.glsl");
 	shader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/fragmentShader.glsl");
 	shader->addAttribute(VERTICES, "in_Position");
@@ -317,31 +317,13 @@ void createProgram()
 	shader->dropShaderProgram();
 
 	///SHADOW SHADER -- LIGHTER THAN MAIN SHADER
-	shadowShader = new Shader();
+	shadowShader = new Shader(SHADOW_SHADER);
 	shadowShader->addShader(GL_VERTEX_SHADER, "Assets/shaders/shadowVertexShader.glsl");
 	shadowShader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/shadowFragmentShader.glsl");
 	shadowShader->addAttribute(VERTICES, "in_Position");
-	shadowShader->addAttribute(NORMALS, "in_Normal");
-	shadowShader->addAttribute(TEXCOORDS, "in_UV");
-	shadowShader->addAttribute(TANGENTS, "in_Tangents");
 
 	//used while drawing the scene
-	shadowShader->addUniform("materialAmbient");
-	shadowShader->addUniform("materialDiffuse");
-	shadowShader->addUniform("materialSpecular");
-	shadowShader->addUniform("materialShininess");
 	shadowShader->addUniform("ModelMatrix");
-	shadowShader->addUniform("NormalMatrix");
-
-	//textures
-	shadowShader->addUniform("TextureSampler");
-	shadowShader->addUniform("WoodSampler");
-	shadowShader->addUniform("NormalMapSampler");
-	shadowShader->addUniform("textureActive");
-	shadowShader->addUniform("woodTextureActive");
-	//used for setting up the lights
-	shadowShader->addUniform("cameraPosition");
-	shadowShader->addUniform("numLights");
 
 	//used for the camera's matrixes
 	shadowShader->addUniformBlock(UBO_BP, "SharedMatrices");
@@ -355,32 +337,14 @@ void createProgram()
 	}
 
 	///POST PROCESSING SHADER
-	postProcessingShader = new Shader();
+	postProcessingShader = new Shader(POSTPROCESS_SHADER);
 	postProcessingShader->addShader(GL_VERTEX_SHADER, "Assets/shaders/postProcessingVertShader.glsl");
 	postProcessingShader->addShader(GL_FRAGMENT_SHADER, "Assets/shaders/postProcessingFragShader.glsl");
 	postProcessingShader->addAttribute(VERTICES, "in_Position");
-	postProcessingShader->addAttribute(NORMALS, "in_Normal");
 	postProcessingShader->addAttribute(TEXCOORDS, "in_UV");
-	postProcessingShader->addAttribute(TANGENTS, "in_Tangents");
 
 	//used while drawing the scene
-	postProcessingShader->addUniform("materialAmbient");
-	postProcessingShader->addUniform("materialDiffuse");
-	postProcessingShader->addUniform("materialSpecular");
-	postProcessingShader->addUniform("materialShininess");
 	postProcessingShader->addUniform("ModelMatrix");
-	postProcessingShader->addUniform("NormalMatrix");
-
-	//textures
-	postProcessingShader->addUniform("TextureSampler");
-	postProcessingShader->addUniform("WoodSampler");
-	postProcessingShader->addUniform("NormalMapSampler");
-	postProcessingShader->addUniform("textureActive");
-	postProcessingShader->addUniform("woodTextureActive");
-
-	//used for setting up the lights
-	postProcessingShader->addUniform("cameraPosition");
-	postProcessingShader->addUniform("numLights");
 
 	//texture for the scene post processing
 	postProcessingShader->addUniform("sceneTexture");

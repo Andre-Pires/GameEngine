@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "SceneGraphNode.h"
+#define TEXTURE_RATIO 1.0
 
 class PostProcessRenderer
 {

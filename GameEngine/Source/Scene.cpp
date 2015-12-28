@@ -14,6 +14,28 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 {
 	if (shader != nullptr)
 	{
+		switch (shader->getShaderType())
+		{
+		case MAIN_SHADER:
+			standardDraw(vertices, vao, modelMatrix, materialColors, materialShininess, texture, normalMap);
+			break;
+		case SHADOW_SHADER:
+			drawShadowMap(vertices, vao, modelMatrix);
+			break;
+		case POSTPROCESS_SHADER:
+			drawPostProcess(vertices, vao, modelMatrix);
+			break;
+		default:
+			cout << "ERROR: Invalid shader type." << endl;
+			break;
+		}
+	}
+}
+
+void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap)
+{
+	if (shader != nullptr)
+	{
 		BufferObjects * obj = BufferObjects::getInstance();
 		GLint modelUniform = shader->getUniformLocation(modelName);
 		GLint normalUniform = shader->getUniformLocation(normalName);
@@ -67,6 +89,64 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 			glUniform1i(textureActiveUnif, 0);
 			glUniform1i(woodTextureActiveUnif, 0);
 		}
+
+		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
+		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);
+
+		//fazemos unbind do programa e Vao
+		//usar o vertex array object criado
+		obj->unbindVao();
+
+		//usar o programa criado
+		shader->dropShaderProgram();
+
+		shader->checkShaderError("ERROR: Could not draw scene.");
+	}
+}
+
+void Scene::drawShadowMap(int vertices, GLuint vao, Matrix4f modelMatrix)
+{
+	if (shader != nullptr)
+	{
+		BufferObjects * obj = BufferObjects::getInstance();
+		GLint modelUniform = shader->getUniformLocation(modelName);
+
+		//usar o vertex array object criado
+		obj->bindVao(vao);
+		//usar o programa criado
+		shader->useShaderProgram();
+
+		////passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, modelMatrix.getMatrix());
+
+		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
+		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);
+
+		//fazemos unbind do programa e Vao
+		//usar o vertex array object criado
+		obj->unbindVao();
+
+		//usar o programa criado
+		shader->dropShaderProgram();
+
+		shader->checkShaderError("ERROR: Could not draw scene.");
+	}
+}
+
+void Scene::drawPostProcess(int vertices, GLuint vao, Matrix4f modelMatrix)
+{
+	if (shader != nullptr)
+	{
+		BufferObjects * obj = BufferObjects::getInstance();
+		GLint modelUniform = shader->getUniformLocation(modelName);
+
+		//usar o vertex array object criado
+		obj->bindVao(vao);
+		//usar o programa criado
+		shader->useShaderProgram();
+
+		////passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
+		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, modelMatrix.getMatrix());
 
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);

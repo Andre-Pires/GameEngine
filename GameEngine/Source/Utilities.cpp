@@ -1,6 +1,5 @@
 ﻿#include "Utilities.h"
 #include <sstream>
-#include "Shader.h"
 
 float Utilities::lerp(float val1, float val2, float ratio) {
 	return ratio * val1 + (1 - ratio) * val2;

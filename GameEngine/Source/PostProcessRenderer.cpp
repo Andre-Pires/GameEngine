@@ -1,6 +1,4 @@
 ﻿#include "PostProcessRenderer.h"
-
-#include "ShadowRenderer.h"
 #include "Light.h"
 #include "Camera.h"
 #include "SceneGraphNode.h"
@@ -24,8 +22,8 @@ void PostProcessRenderer::generatePostProcessFBO(int viewX, int viewY)
 {
 	updateViewport(viewX, viewY);
 
-	int shadowMapWidth = WinX * SHADOW_MAP_RATIO;
-	int shadowMapHeight = WinY * SHADOW_MAP_RATIO;
+	int textureMapWidth = WinX * TEXTURE_RATIO;
+	int textureMapHeight = WinY * TEXTURE_RATIO;
 
 	// create a framebuffer object
 	glGenFramebuffers(1, &fboId);
@@ -35,7 +33,7 @@ void PostProcessRenderer::generatePostProcessFBO(int viewX, int viewY)
 	glGenTextures(1, &sceneTexture);
 	glBindTexture(GL_TEXTURE_2D, sceneTexture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, shadowMapWidth, shadowMapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0); // o GL_FLOAT pode ser GL_UNSIGNED_BYTE
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureMapWidth, textureMapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0); // o GL_FLOAT pode ser GL_UNSIGNED_BYTE
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -47,7 +45,7 @@ void PostProcessRenderer::generatePostProcessFBO(int viewX, int viewY)
 
 	glGenRenderbuffers(1, &depthRenderBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, shadowMapWidth, shadowMapHeight);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, textureMapWidth, textureMapHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 	//attach the texture to FBO depth attachment point
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneTexture, 0);

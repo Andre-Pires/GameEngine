@@ -8,8 +8,6 @@ in vec2 ex_UV;
 in vec3 ex_Tangent;
 in vec4 mcPosition;
 
-// Out
-
 // array of lights
 #define MAX_LIGHTS 10
 uniform int numLights;
@@ -230,7 +228,6 @@ vec4 calculateLight(int index){
 }
 
 //calculate new normal
-
 vec3 CalculateBumpedNormal()
 {
     vec3 Normal = normalize(ex_Normal.xyz);
@@ -268,9 +265,6 @@ void main(void)
     if(textureActive == 1){
         //if the texture is wood
         if(woodTextureActive == 1){
-          //colorResult = lightColorResult;
-          //REBENTA SE DESCOMENTAR A LINHA ABAIXO
-          //colorResult = texture(WoodSampler, mcPosition.xyz);
           vec4 temp = texture(WoodSampler, mcPosition.xyz * NoiseScale) * Noisiness;
           vec3 noisevec = temp.rgb;
           vec3 location = mcPosition.xyz + noisevec;
@@ -302,6 +296,4 @@ void main(void)
     }
 
     color = colorResult;
-
-    //out_Color = colorResult;
 }

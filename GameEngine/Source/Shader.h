@@ -1,15 +1,17 @@
 #pragma once
 #include "../Dependencies/glew/glew.h"
-#include "Utilities.h"
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <array>
 #include <list>
+#include <string>
+#include "Utilities.h"
 
 class Shader
 {
 private:
+
 	GLuint ProgramId;
 	GLint UniformId;
 	GLint UboId;
@@ -26,8 +28,10 @@ private:
 	std::list<char *> uniformBlockName;
 	std::map<char *, GLuint> uniformBlockLocation;
 	std::map<char *, GLint> uniformBlockId;
+
 public:
-	Shader();
+	ShaderType shaderType;
+	Shader(ShaderType type);
 	void addShader(GLenum shaderType, char* shaderLocation);
 	void addAttribute(GLuint location, char* atributeName);
 	void addUniform(std::string uniformName);
@@ -42,4 +46,5 @@ public:
 	void checkShaderError(std::string error);
 	static bool isOpenGLError();
 	static void checkGenericOpenGLError(std::string error);
+	ShaderType getShaderType();
 };

@@ -127,7 +127,7 @@ void ShadowRenderer::renderShadows()
 	Matrix4f depthViewMatrix = camera->getViewMatrix();
 	Matrix4f depthMVP = depthProjectionMatrix * depthViewMatrix;
 
-	Matrix4f biasMatrix {
+	Matrix4f biasMatrix{
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
 		0.0, 0.0, 0.5, 0.0,

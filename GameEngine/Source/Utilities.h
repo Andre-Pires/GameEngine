@@ -6,14 +6,10 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
-#include "Shader.h"
 
 //shader locations
 const GLuint UBO_BP = 0;
 #define VERTICES 0
-//#define AMBIENT_COLOR 1
-//#define DIFFUSE_COLOR 2
-//#define SPECULAR_COLOR 3
 #define NORMALS 1
 #define TEXCOORDS 2
 #define TANGENTS 3
@@ -105,6 +101,7 @@ enum CameraType { ORTHOGRAPHIC, PERSPECTIVE, CONTROLLED_PERSP };
 enum GimbalLockState { GIMBAL_LOCK_ON, GIMBAL_LOCK_OFF };
 enum AnimationState { ANIMATION_STANDARD, ANIMATION_REVERSE, ANIMATION_OFF, ANIMATION_ON };
 enum LightType { POINT_LIGHT, SPOTLIGHT, DIRECTIONAL_LIGHT };
+enum ShaderType { MAIN_SHADER, SHADOW_SHADER, POSTPROCESS_SHADER };
 
 class Utilities
 {

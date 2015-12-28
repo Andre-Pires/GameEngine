@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include "../Dependencies/glew/glew.h"
 #include "Vector3f.h"
-#include "Utilities.h"
-#include <ratio>
 #include "Matrix4f.h"
 #include "Camera.h"
 #include "Light.h"
