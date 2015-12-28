@@ -19,6 +19,6 @@ public:
 	void draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap);
 	void standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap);
 	void drawShadowMap(int vertices, GLuint vao, Matrix4f modelMatrix);
-	void drawPostProcess(int vertices, GLuint vao, Matrix4f modelMatrix);
+	void drawPostProcess(int vertices, GLuint vao);
 	void setActiveShader(Shader* shader);
 };

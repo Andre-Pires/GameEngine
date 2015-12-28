@@ -23,7 +23,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 			drawShadowMap(vertices, vao, modelMatrix);
 			break;
 		case POSTPROCESS_SHADER:
-			drawPostProcess(vertices, vao, modelMatrix);
+			drawPostProcess(vertices, vao);
 			break;
 		default:
 			cout << "ERROR: Invalid shader type." << endl;
@@ -133,7 +133,7 @@ void Scene::drawShadowMap(int vertices, GLuint vao, Matrix4f modelMatrix)
 	}
 }
 
-void Scene::drawPostProcess(int vertices, GLuint vao, Matrix4f modelMatrix)
+void Scene::drawPostProcess(int vertices, GLuint vao)
 {
 	if (shader != nullptr)
 	{
@@ -144,9 +144,6 @@ void Scene::drawPostProcess(int vertices, GLuint vao, Matrix4f modelMatrix)
 		obj->bindVao(vao);
 		//usar o programa criado
 		shader->useShaderProgram();
-
-		////passamos o id do atributo, o numero de matrizes, se deve ser transposta e a matriz
-		glUniformMatrix4fv(modelUniform, 1, GL_FALSE, modelMatrix.getMatrix());
 
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
 		glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, (GLvoid*)0);

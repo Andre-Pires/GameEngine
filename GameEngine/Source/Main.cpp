@@ -343,9 +343,6 @@ void createProgram()
 	postProcessingShader->addAttribute(VERTICES, "in_Position");
 	postProcessingShader->addAttribute(TEXCOORDS, "in_UV");
 
-	//used while drawing the scene
-	postProcessingShader->addUniform("ModelMatrix");
-
 	//texture for the scene post processing
 	postProcessingShader->addUniform("sceneTexture");
 	postProcessingShader->addUniform("flashRatio");

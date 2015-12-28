@@ -7,8 +7,6 @@ in vec2 in_UV;
 //out
 out vec2 ex_UV;
 
-uniform mat4 ModelMatrix;
-
 void main(void)
 {
 	gl_Position = in_Position;
