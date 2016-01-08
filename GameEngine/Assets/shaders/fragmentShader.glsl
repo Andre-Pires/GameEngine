@@ -30,9 +30,10 @@ uniform float materialShininess;
 
 // Texture Samplers
 uniform sampler2D TextureSampler;
-uniform sampler3D WoodSampler;
+uniform sampler3D NoiseSampler;
 uniform int textureActive;
 uniform int woodTextureActive;
+uniform int marbleTextureActive;
 
 // Normal Map Samplers
 uniform sampler2D NormalMapSampler;
@@ -85,6 +86,15 @@ const float GrainScale = 0.5;
 const float GrainThreshold = 0.05;
 const float LightGrains = 0.8;
 const float DarkGrains = 0.2;
+
+//For marble texture
+const float NoiseScaleMarble = 0.4;
+const int noiseLevel = 4;
+const vec3 MarbleColor = vec3(0.98,0.95,0.83);
+const vec3 VeinColor = vec3(0.52,0.51,0.46);
+const float NoiseFactor = 0.8;
+const float PositionFactor = 10;
+const float IntensityFactor = 14;
 
 layout(location = 0) out vec4 color;
 
@@ -227,7 +237,7 @@ vec4 calculateLight(int index){
 }
 
 vec4 generateWoodTexture(){
-    vec4 temp = texture(WoodSampler, ex_mcPosition.xyz * NoiseScale) * Noisiness;
+    vec4 temp = texture(NoiseSampler, ex_mcPosition.xyz * NoiseScale) * Noisiness;
     vec3 noisevec = temp.rgb;
     vec3 location = ex_mcPosition.xyz + noisevec;
 
@@ -250,6 +260,31 @@ vec4 generateWoodTexture(){
     }
 
     return vec4(colorTemp, 1.0);
+}
+
+vec4 noise(float f){
+  return texture(NoiseSampler, ex_mcPosition.xyz * NoiseScale * f);
+}
+
+vec4 generateMarbleTexture(){
+    float marble=0.0;
+    float f = 1.0;
+    for(int i=0; i < noiseLevel; i++) {
+      marble += noise(f).x/f;
+      f *= 2.17;
+    }
+    vec3 colortemp = vec3(marble);
+
+    vec3 p = ex_mcPosition.xyz * 0.5 + 0.5;
+    float noise = texture(NoiseSampler, p).r * 0.5 + 0.5;
+
+    float intensity = clamp(noise * NoiseFactor, 0.0, 1.0);
+    intensity = cos(ex_Position.x * PositionFactor + intensity * IntensityFactor) * 0.5 + 0.5;   
+    vec3 a = mix(MarbleColor, colortemp, intensity);
+    vec3 b = mix(colortemp, VeinColor, intensity);
+    vec3 color = mix(a, b, 0.5);
+
+    return vec4(color, 1.0);
 }
 
 //calculate new normal
@@ -292,7 +327,9 @@ void main(void)
         if(woodTextureActive == 1){
           vec4 textureResult = generateWoodTexture();
           colorResult = textureResult * lightColorResult;
-
+        } else if(marbleTextureActive == 1){
+          vec4 textureResult = generateMarbleTexture();
+          colorResult = textureResult * lightColorResult;
         }else{
           colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
         }

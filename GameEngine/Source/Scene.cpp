@@ -45,6 +45,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		GLint shininessUniform = shader->getUniformLocation("materialShininess");
 		GLint textureActiveUnif = shader->getUniformLocation("textureActive");
 		GLint woodTextureActiveUnif = shader->getUniformLocation("woodTextureActive");
+		GLint marbleTextureActiveUnif = shader->getUniformLocation("marbleTextureActive");
 
 		//usar o vertex array object criado
 		obj->bindVao(vao);
@@ -73,11 +74,13 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 				glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
 				glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
 				glUniform1i(woodTextureActiveUnif, 0);
+				glUniform1i(marbleTextureActiveUnif, 0);
 			}
 			else if (texture->textureDim == 1) {
 				glBindTexture(GL_TEXTURE_3D, texture->getTextureID());
 				glUniform1i(texture->getTexUniform(shader, WOOD), 0);
 				glUniform1i(woodTextureActiveUnif, 1);
+				glUniform1i(marbleTextureActiveUnif, 0);
 			}
 			glUniform1i(textureActiveUnif, 1);
 			glActiveTexture(GL_TEXTURE1);
@@ -88,6 +91,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		{
 			glUniform1i(textureActiveUnif, 0);
 			glUniform1i(woodTextureActiveUnif, 0);
+			glUniform1i(marbleTextureActiveUnif, 0);
 		}
 
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
