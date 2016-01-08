@@ -4,9 +4,9 @@
 Texture::Texture(Shader* shader, char* filename) {
 	int width, height;
 
-	unsigned char *image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
+	data = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
 
-	if (image == 0) {
+	if (data == 0) {
 		exit(1);
 	}
 
@@ -15,7 +15,7 @@ Texture::Texture(Shader* shader, char* filename) {
 	//this means it is a 2D texture with an image associated
 	textureDim = 0;
 
-	SOIL_free_image_data(image);
+	SOIL_free_image_data(data);
 }
 
 //Contructor for 3D Textures - generated using procedural calculations
@@ -35,15 +35,15 @@ Texture::Texture(Shader* shader) {
 	textureDim = 1;
 }
 
-void Texture::prepareTexture(GLenum type, int size1, int size2 ) {
+void Texture::prepareTexture(GLenum type, int size1, int size2) {
 	glGenTextures(1, &textureID);
 	this->textureID = textureID;
-	
+
 	bind(type);
 
-	if(type == GL_TEXTURE_2D)
+	if (type == GL_TEXTURE_2D)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size1, size2, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	if(type == GL_TEXTURE_3D)
+	if (type == GL_TEXTURE_3D)
 		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, size1, size1, size1, 0, GL_RGB, GL_FLOAT, noise);
 
 	glGenerateMipmap(type);
@@ -75,7 +75,11 @@ GLint Texture::getTexUniform(Shader * shader, int type) {
 	else if (type == TANGENTS) {
 		return shader->getUniformLocation("NormalMapSampler");
 	}
-	else if (type == WOOD) {
-		return shader->getUniformLocation("WoodSampler");
+	else if (type == PROCEDURAL) {
+		return shader->getUniformLocation("NoiseSampler");
+	}
+	else
+	{
+		std::cerr << "ERROR: No texture type corresponds to this value!" << std::endl;
 	}
 }

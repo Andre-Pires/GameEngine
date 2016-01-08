@@ -279,7 +279,7 @@ vec4 generateMarbleTexture(){
     float noise = texture(NoiseSampler, p).r * 0.5 + 0.5;
 
     float intensity = clamp(noise * NoiseFactor, 0.0, 1.0);
-    intensity = cos(ex_Position.x * PositionFactor + intensity * IntensityFactor) * 0.5 + 0.5;   
+    intensity = cos(ex_Position.x * PositionFactor + intensity * IntensityFactor) * 0.5 + 0.5;
     vec3 a = mix(MarbleColor, colortemp, intensity);
     vec3 b = mix(colortemp, VeinColor, intensity);
     vec3 color = mix(a, b, 0.5);
@@ -327,7 +327,7 @@ void main(void)
         if(woodTextureActive == 1){
           vec4 textureResult = generateWoodTexture();
           colorResult = textureResult * lightColorResult;
-        } else if(marbleTextureActive == 1){
+        }else if(marbleTextureActive == 1){
           vec4 textureResult = generateMarbleTexture();
           colorResult = textureResult * lightColorResult;
         }else{

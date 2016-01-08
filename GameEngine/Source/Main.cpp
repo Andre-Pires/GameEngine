@@ -240,7 +240,7 @@ void createProgram()
 
 	//textures
 	shader->addUniform("TextureSampler");
-	shader->addUniform("WoodSampler");
+	shader->addUniform("NoiseSampler");
 	shader->addUniform("NormalMapSampler");
 	shader->addUniform("textureActive");
 	shader->addUniform("woodTextureActive");

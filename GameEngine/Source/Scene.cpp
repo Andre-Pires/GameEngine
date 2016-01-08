@@ -78,7 +78,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 			}
 			else if (texture->textureDim == 1) {
 				glBindTexture(GL_TEXTURE_3D, texture->getTextureID());
-				glUniform1i(texture->getTexUniform(shader, WOOD), 0);
+				glUniform1i(texture->getTexUniform(shader, PROCEDURAL), 0);
 				glUniform1i(woodTextureActiveUnif, 1);
 				glUniform1i(marbleTextureActiveUnif, 0);
 			}

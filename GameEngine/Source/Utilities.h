@@ -13,7 +13,7 @@ const GLuint UBO_BP = 0;
 #define NORMALS 1
 #define TEXCOORDS 2
 #define TANGENTS 3
-#define WOOD 4
+#define PROCEDURAL 4
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547
