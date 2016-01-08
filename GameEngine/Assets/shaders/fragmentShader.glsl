@@ -31,9 +31,7 @@ uniform float materialShininess;
 // Texture Samplers
 uniform sampler2D TextureSampler;
 uniform sampler3D NoiseSampler;
-uniform int textureActive;
-uniform int woodTextureActive;
-uniform int marbleTextureActive;
+uniform int textureType;
 
 // Normal Map Samplers
 uniform sampler2D NormalMapSampler;
@@ -263,7 +261,7 @@ vec4 generateWoodTexture(){
 }
 
 vec4 noise(float f){
-  return texture(NoiseSampler, ex_mcPosition.xyz * NoiseScale * f);
+  return texture(NoiseSampler, ex_mcPosition.xyz * NoiseScaleMarble * f);
 }
 
 vec4 generateMarbleTexture(){
@@ -305,7 +303,7 @@ vec3 calculateBumpedNormal()
 
 void main(void)
 {
-    if(textureActive == 1){
+    if(textureType != 0){
         mappedNormal = calculateBumpedNormal();
     } else {
         mappedNormal = ex_Normal;
@@ -322,14 +320,16 @@ void main(void)
 	lightColorResult = pow(lightColorResult, vec4(1.0/screenGamma));
 
     //if we have textures add them
-    if(textureActive == 1){
+    if(textureType != 0){
         //if the texture is wood
-        if(woodTextureActive == 1){
+        if(textureType == 2){
           vec4 textureResult = generateWoodTexture();
           colorResult = textureResult * lightColorResult;
-        }else if(marbleTextureActive == 1){
+        //if the texture if marble
+        }else if(textureType == 3){
           vec4 textureResult = generateMarbleTexture();
           colorResult = textureResult * lightColorResult;
+        //else it is an image texture
         }else{
           colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
         }

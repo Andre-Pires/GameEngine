@@ -242,9 +242,7 @@ void createProgram()
 	shader->addUniform("TextureSampler");
 	shader->addUniform("NoiseSampler");
 	shader->addUniform("NormalMapSampler");
-	shader->addUniform("textureActive");
-	shader->addUniform("woodTextureActive");
-	shader->addUniform("marbleTextureActive");
+	shader->addUniform("textureType");
 	//used for setting up the lights
 	shader->addUniform("cameraPosition");
 	shader->addUniform("numLights");

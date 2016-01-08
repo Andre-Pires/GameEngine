@@ -12,8 +12,8 @@ Texture::Texture(Shader* shader, char* filename) {
 
 	prepareTexture(GL_TEXTURE_2D, width, height);
 
-	//this means it is a 2D texture with an image associated
-	textureDim = 0;
+	//image texture
+	textureType = 1;
 
 	SOIL_free_image_data(data);
 }
@@ -31,8 +31,8 @@ Texture::Texture(Shader* shader) {
 	//3D texture only need the size, thefore the use of 0
 	prepareTexture(GL_TEXTURE_3D, size, 0);
 
-	//this means it is a 3D texture created by noise
-	textureDim = 1;
+	//default - wood texture
+	textureType = 2;
 }
 
 void Texture::prepareTexture(GLenum type, int size1, int size2) {
@@ -82,4 +82,8 @@ GLint Texture::getTexUniform(Shader * shader, int type) {
 	{
 		std::cerr << "ERROR: No texture type corresponds to this value!" << std::endl;
 	}
+}
+
+void Texture::setTextureType(int type) {
+	textureType = type;
 }

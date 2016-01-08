@@ -26,17 +26,24 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	_floorObject = new GeometricObject(_bufferObjects, _scene, quadMesh);
 	_floorObject->scale(Vector3f(0.5f, 0.5f, 0.5f));
 	_floorObject->rotate(90, Vector3f(0, 0, 1));
-	_floorObject->changeColor(GREEN);
 	_floorObject->changeShininess(0.2f);
 
+	//Floor
+	this->normals["marble"] = new Texture(_shader, "Assets/textures/floorNormal.png");
+
+	//Walls
 	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.png");
 	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.png");
 
-	//NOTE: creating "TEXTURE_NUMBER" different textures to introduce variety in scene
+	//NOTE: creating "TEXTURE_NUMBER" different noise textures for wood and marble to introduce variety in scene
 	for (int i = 0; i < TEXTURE_NUMBER; i++)
 	{
 		this->textures[std::string("wood" + i)] = new Texture(_shader); // perlin noise texture
+		this->textures[std::string("wood" + i)]->setTextureType(2);
+		this->textures[std::string("marble" + i)] = new Texture(_shader);
+		this->textures[std::string("marble" + i)]->setTextureType(3);
 	}
+	//Boxes
 	this->normals[std::string("wood")] = new Texture(_shader, "Assets/textures/boxNormal.png");
 }
 
@@ -58,7 +65,8 @@ void GameManager::createEmpty(float x, float y)
 
 void GameManager::createFloor(float x, float y)
 {
-	auto floorNode = new SceneGraphNode(_gameNode, _floorObject, _scene);
+	int randomTexture = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / TEXTURE_NUMBER));
+	auto floorNode = new SceneGraphNode(_gameNode, _floorObject, _scene, this->textures[std::string("marble" + randomTexture)], this->normals[std::string("marble")]);
 	floorNode->translate(Vector3f(x + 0.5f, y + 0.5f, 0));
 	_gameNode->add(floorNode);
 }

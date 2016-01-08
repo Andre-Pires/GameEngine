@@ -12,7 +12,12 @@
 class Texture {
 public:
 	GLuint textureID;
-	int textureDim;
+	//Possible texture types:
+	// 0 - no texture
+	// 1 - image texture
+	// 2 - procedural wood texture
+	// 3 - procedural marble texture
+	int textureType;
 public:
 	Texture(Shader* shader, char* filename);
 	Texture(Shader* shader);
@@ -20,6 +25,7 @@ public:
 	void unbind(GLenum type);
 	GLuint getTextureID();
 	GLint getTexUniform(Shader* shader, int type);
+	void setTextureType(int type);
 private:
 	unsigned char *data;
 	tex3D noise[32 * 32 * 32];

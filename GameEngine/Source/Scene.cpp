@@ -43,9 +43,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		GLint diffuseUniform = shader->getUniformLocation("materialDiffuse");
 		GLint specularUniform = shader->getUniformLocation("materialSpecular");
 		GLint shininessUniform = shader->getUniformLocation("materialShininess");
-		GLint textureActiveUnif = shader->getUniformLocation("textureActive");
-		GLint woodTextureActiveUnif = shader->getUniformLocation("woodTextureActive");
-		GLint marbleTextureActiveUnif = shader->getUniformLocation("marbleTextureActive");
+		GLint textureTypeUnif = shader->getUniformLocation("textureType");
 
 		//usar o vertex array object criado
 		obj->bindVao(vao);
@@ -70,28 +68,23 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		if (texture != nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0);
-			if (texture->textureDim == 0) {
+			if (texture->textureType == 1) {
 				glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
 				glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
-				glUniform1i(woodTextureActiveUnif, 0);
-				glUniform1i(marbleTextureActiveUnif, 0);
+				glUniform1i(textureTypeUnif, 1);
 			}
-			else if (texture->textureDim == 1) {
+			else if (texture->textureType == 2 || texture->textureType == 3) {
 				glBindTexture(GL_TEXTURE_3D, texture->getTextureID());
 				glUniform1i(texture->getTexUniform(shader, PROCEDURAL), 0);
-				glUniform1i(woodTextureActiveUnif, 1);
-				glUniform1i(marbleTextureActiveUnif, 0);
+				glUniform1i(textureTypeUnif, texture->textureType);
 			}
-			glUniform1i(textureActiveUnif, 1);
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, normalMap->getTextureID());
 			glUniform1i(normalMap->getTexUniform(shader, TANGENTS), 1);
 		}
 		else
 		{
-			glUniform1i(textureActiveUnif, 0);
-			glUniform1i(woodTextureActiveUnif, 0);
-			glUniform1i(marbleTextureActiveUnif, 0);
+			glUniform1i(textureTypeUnif, 0);
 		}
 
 		//definimos a primitiva a renderizar, numero de elementos a renderizar (vertices), o tipo do valor, um ponteiro para a posição onde está stored
