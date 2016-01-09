@@ -23,4 +23,6 @@ public:
 	int lightIndex;
 	Light(Shader * shader, int lightIndex, LightType type);
 	void setLightShaderValues();
+	void setPosition(float x, float y, float z);
+	void setPosition(float x, float y);
 };

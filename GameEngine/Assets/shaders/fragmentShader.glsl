@@ -37,8 +37,6 @@ uniform int textureType;
 uniform sampler2D NormalMapSampler;
 vec3 mappedNormal;
 
-uniform vec4 cameraPosition;
-
 // Matrix
 uniform mat4 ModelMatrix;
 uniform SharedMatrices
@@ -140,7 +138,6 @@ float calculateShadow(int lightIndex){
 		//    The position is rounded to the millimeter to avoid too much aliasing
         // int index = int(16.0*random(floor(ex_Position.xyz*1000.0), i))%16;
 
-        //NOTE: acho que serve assim, tenho de estudar pq é que isto funciona e descrever depois na dicsussao
         vec4 shadowCoordW = ex_shadowCoord[lightIndex] / ex_shadowCoord[lightIndex].w;
 
         shadowCoordW.xy += poissonDisk[index]/700.0;

@@ -63,3 +63,16 @@ void Light::setLightShaderValues()
 	shader->dropShaderProgram();
 	shader->checkShaderError("ERROR: Could not create light.");
 }
+
+void Light::setPosition(float x, float y, float z)
+{
+	this->position.x = x;
+	this->position.y = y;
+	this->position.z = z;
+}
+
+void Light::setPosition(float x, float y)
+{
+	this->position.x = x;
+	this->position.y = y;
+}

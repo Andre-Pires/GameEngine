@@ -94,7 +94,7 @@ void activateFlash();
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
+	bomberman = new Bomberman(std::string("Assets/layouts/3.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
@@ -191,8 +191,7 @@ void drawScene()
 	scene->setActiveShader(shader);
 
 	//make the spotlight follow the player
-	sceneLights[0]->position.x = bomberman->getPlayerPosition().x;
-	sceneLights[0]->position.y = -bomberman->getPlayerPosition().y;
+	sceneLights[0]->setPosition(bomberman->getPlayerPosition().x, -bomberman->getPlayerPosition().y);
 
 	//NOTE: shadow rendering borrows the camera for calculations so we have to put it back
 	if (cameraType == CONTROLLED_PERSP || shadowRenderingActive)
@@ -244,7 +243,6 @@ void createProgram()
 	shader->addUniform("NormalMapSampler");
 	shader->addUniform("textureType");
 	//used for setting up the lights
-	shader->addUniform("cameraPosition");
 	shader->addUniform("numLights");
 
 	//used for the camera's matrixes
@@ -433,9 +431,11 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case '+':
 		sceneLights[controllableLight]->position.y += 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case '-':
 		sceneLights[controllableLight]->position.y -= 0.1f;
+		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
 	case 'h':
 	case 'H':
