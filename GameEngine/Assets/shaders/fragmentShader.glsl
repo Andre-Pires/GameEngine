@@ -94,27 +94,7 @@ const float IntensityFactor = 14;
 
 layout(location = 0) out vec4 color;
 
-float chebyshevUpperBound(vec4 shadowCoordW, int lightIndex)
-{
-
-    float distance = shadowCoordW.z;
-
-    float moments = textureProj(shadowMap[lightIndex],shadowCoordW);
-
-	// Surface is fully lit. as the current fragment is before the light occluder
-	if (distance <= moments)
-		return 1.0 ;
-
-	float variance = (moments * moments);
-	variance = max(variance,0.00002); //NOTE: this variance looks good in my case
-
-	float d = distance - moments;
-	float p_max = variance / (variance + d*d);
-
-	return p_max;
-}
-
-// Returns a random number based on a vec3 and an int.
+//NOTE: Returns a random number based on a vec3 and an int.
 float random(vec3 seed, int i){
 	vec4 seed4 = vec4(seed,i);
 	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
@@ -124,10 +104,10 @@ float random(vec3 seed, int i){
 float calculateShadow(int lightIndex){
 
     float visibility=1.0;
-    float bias = 0.0003;
+    float bias = 0.00005;
 
-    for (int i=0;i<6;i++){
-		// use either :
+    for (int i=0;i<16;i++){
+
 		//  - Always the same samples.
 		//    Gives a fixed pattern in the shadow, but no noise
         int index = i;
@@ -136,13 +116,13 @@ float calculateShadow(int lightIndex){
 		// int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
 		//  - A random sample, based on the pixel's position in world space.
 		//    The position is rounded to the millimeter to avoid too much aliasing
-        // int index = int(16.0*random(floor(ex_Position.xyz*1000.0), i))%16;
+        // int index = int(6.0*random(floor(ex_Position.xyz*1000.0), i))%6;
 
         vec4 shadowCoordW = ex_shadowCoord[lightIndex] / ex_shadowCoord[lightIndex].w;
 
         shadowCoordW.xy += poissonDisk[index]/700.0;
         shadowCoordW.z -= bias;
-        visibility -= 0.15*(1.0- chebyshevUpperBound(shadowCoordW, lightIndex));
+        visibility -= 0.06*(1.0- textureProj(shadowMap[lightIndex],shadowCoordW));
     }
 
     if(visibility < 1.0){
@@ -176,7 +156,7 @@ vec4 calculateLight(int index){
 
 		if(light.lightType == 1){ //spotlight
 
-            vec3 lightDirWorld = normalize(light.position.xyz - vec3(inverse(ViewMatrix) *ex_Position));
+            vec3 lightDirWorld = normalize(light.position.xyz - vec3(inverse(ViewMatrix) * ex_Position));
 			float lightToSurfaceAngle = degrees(acos(dot(- lightDirWorld, normalize(light.coneDirection.xyz))));
 
 			float innerConeAngle = light.coneAngle;
