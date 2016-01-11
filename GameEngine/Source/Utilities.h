@@ -23,12 +23,12 @@ const GLuint UBO_BP = 0;
 const float slackThreshold = (float)1.0e-5;
 
 //estrutura usada para guardar a informacao dos vertices
-// por enquanto as posicoes e cores dos vertices
 typedef struct {
 	GLfloat XYZW[4];
 } Vertex;
 
 typedef struct {
+	GLfloat EMISSIVE[4];
 	GLfloat AMBIENT[4];
 	GLfloat DIFFUSE[4];
 	GLfloat SPECULAR[4];

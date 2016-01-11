@@ -23,6 +23,7 @@ uniform struct Light {
 } sceneLights[MAX_LIGHTS];
 
 // Material Attributes
+uniform vec4 materialEmissive;
 uniform vec4 materialAmbient;
 uniform vec4 materialDiffuse;
 uniform vec4 materialSpecular;
@@ -120,9 +121,9 @@ float calculateShadow(int lightIndex){
 
         vec4 shadowCoordW = ex_shadowCoord[lightIndex] / ex_shadowCoord[lightIndex].w;
 
-        shadowCoordW.xy += poissonDisk[index]/700.0;
+        shadowCoordW.xy += poissonDisk[index]/500.0;
         shadowCoordW.z -= bias;
-        visibility -= 0.06*(1.0- textureProj(shadowMap[lightIndex],shadowCoordW));
+        visibility -= 0.06*(1.0 - textureProj(shadowMap[lightIndex],shadowCoordW));
     }
 
     if(visibility < 1.0){
@@ -314,5 +315,7 @@ void main(void)
         colorResult = lightColorResult;
     }
 
-    color = colorResult;
+    //add the material's emissive color to make an object shine
+    // even if it isn't lit
+    color = colorResult + materialEmissive;
 }

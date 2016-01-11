@@ -4,31 +4,6 @@
 #include "MatrixFactory.h"
 #include "Mesh.h"
 
-//TODO: never been used, might have bugs
-GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Vertex * Vertices, int verticesSize, GLuint * Indices, int indicesSize)
-{
-	this->bufferObjects = buffer;
-	this->scene = scene;
-
-	//number of vertices
-	this->indicesCount = indicesSize;
-	this->verticesCount = verticesSize;
-
-	memcpy(this->Indices.data(), Indices, indicesSize * sizeof(GLuint));
-
-	for (int i = 0; i < verticesCount; i++)
-	{
-		this->Vertices.push_back(Vertices[i]);
-	}
-
-	VboId = bufferObjects->getVboId();
-	VaoId = bufferObjects->getVaoId();
-
-	this->materialShininess = 0.3f;
-	calculateTangents();
-	updateBuffer();
-}
-
 //used by inheriting object
 GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene)
 {
@@ -39,11 +14,14 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene)
 
 	calculateTangents();
 
+	//standard color and lighting values
+	GLfloat * emissive = new GLfloat[4]{ 0.0f,0.0f,0.0f,0.0f };
+	memcpy(MaterialColors.EMISSIVE, emissive, 4 * sizeof(GLfloat));
 	this->materialShininess = 0.3f;
+
 	transformations = MatrixFactory::Identity4();
 }
 
-//TODO: falta testar a questão das texturas e normais
 GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 {
 	this->bufferObjects = buffer;
@@ -64,10 +42,12 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 		this->Indices.push_back(i);
 	}
 
-	calculateTangents();
-
+	//standard color and lighting values
+	GLfloat * emissive = new GLfloat[4]{ 0.0f,0.0f,0.0f,0.0f };
+	memcpy(MaterialColors.EMISSIVE, emissive, 4 * sizeof(GLfloat));
 	this->materialShininess = 0.3f;
 
+	calculateTangents();
 	updateBuffer();
 }
 
@@ -180,6 +160,56 @@ void GeometricObject::changeColor(Color color)
 	memcpy(MaterialColors.DIFFUSE, diffuseToUse, 4 * sizeof(GLfloat));
 	memcpy(MaterialColors.SPECULAR, specularToUse, 4 * sizeof(GLfloat));
 
+	delete(ambientToUse);
+	delete(diffuseToUse);
+	delete(specularToUse);
+	updateBuffer();
+}
+
+void GeometricObject::changeEmmissiveColor(Color color)
+{
+	GLfloat * emissiveToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
+
+	switch (color)
+	{
+	case RED:
+		memcpy(emissiveToUse, redSpecular, sizeof(GLfloat) * 4);
+		break;
+	case GREEN:
+		memcpy(emissiveToUse, greenSpecular, sizeof(GLfloat) * 4);
+		break;
+	case BLUE:
+		memcpy(emissiveToUse, blueSpecular, sizeof(GLfloat) * 4);
+		break;
+	case GREY:
+		memcpy(emissiveToUse, greySpecular, sizeof(GLfloat) * 4);
+		break;
+	case ORANGE:
+		memcpy(emissiveToUse, orangeSpecular, sizeof(GLfloat) * 4);
+		break;
+	case PINK:
+		memcpy(emissiveToUse, pinkSpecular, sizeof(GLfloat) * 4);
+		break;
+	case YELLOW:
+		memcpy(emissiveToUse, yellowSpecular, sizeof(GLfloat) * 4);
+		break;
+	case PURPLE:
+		memcpy(emissiveToUse, purpleSpecular, sizeof(GLfloat) * 4);
+		break;
+	case BROWN:
+		memcpy(emissiveToUse, brownSpecular, sizeof(GLfloat) * 4);
+		break;
+	case BLACK:
+		memcpy(emissiveToUse, blackSpecular, sizeof(GLfloat) * 4);
+	case WHITE:
+		memcpy(emissiveToUse, whiteSpecular, sizeof(GLfloat) * 4);
+		break;
+	default: break;
+	}
+
+	memcpy(MaterialColors.EMISSIVE, emissiveToUse, 4 * sizeof(GLfloat));
+
+	delete(emissiveToUse);
 	updateBuffer();
 }
 

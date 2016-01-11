@@ -39,6 +39,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		BufferObjects * obj = BufferObjects::getInstance();
 		GLint modelUniform = shader->getUniformLocation(modelName);
 		GLint normalUniform = shader->getUniformLocation(normalName);
+		GLint emissiveUniform = shader->getUniformLocation("materialEmissive");
 		GLint ambientUniform = shader->getUniformLocation("materialAmbient");
 		GLint diffuseUniform = shader->getUniformLocation("materialDiffuse");
 		GLint specularUniform = shader->getUniformLocation("materialSpecular");
@@ -50,6 +51,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		//usar o programa criado
 		shader->useShaderProgram();
 
+		glUniform4fv(emissiveUniform, 1, materialColors.EMISSIVE);
 		glUniform4fv(ambientUniform, 1, materialColors.AMBIENT);
 		glUniform4fv(diffuseUniform, 1, materialColors.DIFFUSE);
 		glUniform4fv(specularUniform, 1, materialColors.SPECULAR);

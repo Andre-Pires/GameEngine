@@ -94,7 +94,7 @@ void activateFlash();
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman(std::string("Assets/layouts/3.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
+	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
@@ -190,7 +190,7 @@ void drawScene()
 	}
 	scene->setActiveShader(shader);
 
-	//make the spotlight follow the player
+	//make the main light follow the player
 	sceneLights[0]->setPosition(bomberman->getPlayerPosition().x, -bomberman->getPlayerPosition().y);
 
 	//NOTE: shadow rendering borrows the camera for calculations so we have to put it back
@@ -230,6 +230,7 @@ void createProgram()
 	shader->addAttribute(TANGENTS, "in_Tangent");
 
 	//used while drawing the scene
+	shader->addUniform("materialEmissive");
 	shader->addUniform("materialAmbient");
 	shader->addUniform("materialDiffuse");
 	shader->addUniform("materialSpecular");

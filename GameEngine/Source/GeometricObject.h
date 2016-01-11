@@ -29,7 +29,6 @@ protected:
 public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
-	GeometricObject(BufferObjects* buffer, Scene* scene, Vertex* Vertices, int verticesSize, GLuint* Indices, int indicesSize);
 	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr, Texture* normalMap = nullptr);
 	void updateBuffer();
 	void translate(Vector3f translation);
@@ -37,6 +36,7 @@ public:
 	void scale(Vector3f scale);
 	void shear(float shearX, float shearY);
 	void changeColor(Color color);
+	void changeEmissiveColor(Color color);
 	void changeShininess(float shininess);
 	void clearObjectFromBuffer();
 	virtual void shadeColor();
