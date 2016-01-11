@@ -166,7 +166,7 @@ void GeometricObject::changeColor(Color color)
 	updateBuffer();
 }
 
-void GeometricObject::changeEmmissiveColor(Color color)
+void GeometricObject::changeEmissiveColor(Color color)
 {
 	GLfloat * emissiveToUse = new GLfloat[4]{ 1.0,1.0,1.0,0.0 };
 
