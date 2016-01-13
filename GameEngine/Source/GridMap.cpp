@@ -33,7 +33,7 @@ void GridMap::clear(unsigned row, unsigned col)
 
 bool GridMap::isDestructible(unsigned row, unsigned col)
 {
-	return _grid[row][col] != nullptr && _grid[row][col]->isDestructible();
+	return isValid(row, col) && _grid[row][col] != nullptr && _grid[row][col]->isDestructible();
 }
 
 void GridMap::setEntity(unsigned row, unsigned col, GameEntity* gameEntity)
