@@ -254,7 +254,6 @@ void Bomberman::animationsUpdate(unsigned elapsed_time)
 
 void Bomberman::playerUpdate(unsigned elapsed_time)
 {
-	auto should_walk = false;
 	auto rotation_finished = (total_rotation_time_ == ROTATE_ANIMATION_DURATION);
 	
 	if (!rotation_finished)
@@ -287,12 +286,15 @@ void Bomberman::playerUpdate(unsigned elapsed_time)
 		}
 	}
 
-	if (rotation_finished && elapsed_time > 0)
+	auto walking_finished = (total_walk_time_ == WALK_ANIMATION_DURATION);
+
+	if (rotation_finished && !walking_finished && elapsed_time > 0)
 	{
 		unsigned walkTime;
 		if (total_walk_time_ + elapsed_time >= WALK_ANIMATION_DURATION)
 		{
 			walkTime = WALK_ANIMATION_DURATION - total_walk_time_;
+			walking_finished = true;
 		}
 		else
 		{
@@ -309,7 +311,7 @@ void Bomberman::playerUpdate(unsigned elapsed_time)
 		}
 	}
 
-	_playerActive = (elapsed_time == 0);
+	_playerActive = !rotation_finished || !walking_finished;
 }
 
 void Bomberman::wavePlayerMembers(float harmonicPercentage)
