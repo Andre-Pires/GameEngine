@@ -43,8 +43,8 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 	}
 
 	//standard color and lighting values
-	GLfloat * emissive = new GLfloat[4]{ 0.0f,0.0f,0.0f,0.0f };
-	memcpy(MaterialColors.EMISSIVE, emissive, 4 * sizeof(GLfloat));
+	changeColor(WHITE);
+	changeEmissiveColor(CLEAR_COLOR);
 	this->materialShininess = 0.3f;
 
 	calculateTangents();
@@ -148,10 +148,16 @@ void GeometricObject::changeColor(Color color)
 		memcpy(ambientToUse, blackAmbient, sizeof(GLfloat) * 4);
 		memcpy(diffuseToUse, blackDiffuse, sizeof(GLfloat) * 4);
 		memcpy(specularToUse, blackSpecular, sizeof(GLfloat) * 4);
+		break;
 	case WHITE:
 		memcpy(ambientToUse, whiteAmbient, sizeof(GLfloat) * 4);
 		memcpy(diffuseToUse, whiteDiffuse, sizeof(GLfloat) * 4);
 		memcpy(specularToUse, whiteSpecular, sizeof(GLfloat) * 4);
+		break;
+	case CLEAR_COLOR:
+		memcpy(ambientToUse, clearColor, sizeof(GLfloat) * 4);
+		memcpy(diffuseToUse, clearColor, sizeof(GLfloat) * 4);
+		memcpy(specularToUse, clearColor, sizeof(GLfloat) * 4);
 		break;
 	default: break;
 	}
@@ -160,10 +166,11 @@ void GeometricObject::changeColor(Color color)
 	memcpy(MaterialColors.DIFFUSE, diffuseToUse, 4 * sizeof(GLfloat));
 	memcpy(MaterialColors.SPECULAR, specularToUse, 4 * sizeof(GLfloat));
 
+	updateBuffer();
+
 	delete(ambientToUse);
 	delete(diffuseToUse);
 	delete(specularToUse);
-	updateBuffer();
 }
 
 void GeometricObject::changeEmissiveColor(Color color)
@@ -201,8 +208,12 @@ void GeometricObject::changeEmissiveColor(Color color)
 		break;
 	case BLACK:
 		memcpy(emissiveToUse, blackSpecular, sizeof(GLfloat) * 4);
+		break;
 	case WHITE:
 		memcpy(emissiveToUse, whiteSpecular, sizeof(GLfloat) * 4);
+		break;
+	case CLEAR_COLOR:
+		memcpy(emissiveToUse, clearColor, sizeof(GLfloat) * 4);
 		break;
 	default: break;
 	}

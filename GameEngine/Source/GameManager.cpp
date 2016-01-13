@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-GameManager::GameManager() : _gameNode(nullptr), cube_mesh_(Mesh("Assets/mesh/cube.obj")), quad_mesh_(Mesh("Assets/mesh/quad.obj")), sphere_mesh_(Mesh("Assets/mesh/sphere.obj"))
+GameManager::GameManager() : _gameNode(nullptr), cube_mesh_(Mesh("Assets/mesh/cube.obj")), quad_mesh_(Mesh("Assets/mesh/quad.obj")), sphere_mesh_(Mesh("Assets/mesh/sphere.obj")), cylinder_mesh_(Mesh("Assets/mesh/cylinder.obj"))
 {
 }
 
@@ -25,7 +25,7 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	_floorObject = new GeometricObject(_bufferObjects, _scene, quad_mesh_);
 	_floorObject->scale(Vector3f(0.5f, 0.5f, 0.5f));
 	_floorObject->rotate(90, Vector3f(0, 0, 1));
-	_floorObject->changeShininess(0.2f);
+	_floorObject->changeColor(GREY);
 
 	//Floor
 	this->normals["marble"] = new Texture(_shader, "Assets/textures/floorNormal.png");
@@ -190,17 +190,18 @@ GameEntity* GameManager::createBomb(float x, float y)
 		auto object = new GeometricObject(_bufferObjects, _scene, sphere_mesh_);
 		object->scale(Vector3f(0.25f, 0.25f, 0.25f));
 		object->changeColor(BLACK);
-		object->changeShininess(0.6f);
+		object->changeShininess(0.2f);
 		auto node = new SceneGraphNode(_gameNode, object, _scene);
 		bomb->add(node);
 	}
 
 	{
-		auto object = new GeometricObject(_bufferObjects, _scene, sphere_mesh_);
-		object->scale(Vector3f(0.05f, 0.05f, 0.1f));
+		auto object = new GeometricObject(_bufferObjects, _scene, cylinder_mesh_);
+		object->scale(Vector3f(0.07f, 0.15f, 0.07f));
+		object->rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
 		object->translate(Vector3f(0, 0, 0.2f));
 		object->changeColor(BLACK);
-		object->changeShininess(0.6f);
+		object->changeShininess(0.2f);
 		auto node = new SceneGraphNode(_gameNode, object, _scene);
 		bomb->add(node);
 	}

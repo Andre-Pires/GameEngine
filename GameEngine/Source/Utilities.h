@@ -52,8 +52,8 @@ typedef struct {
 
 //colors
 const GLfloat greyAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
-const GLfloat greyDiffuse[4] = { 0.4f, 0.4f, 0.4f, 1.0f };
-const GLfloat greySpecular[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
+const GLfloat greyDiffuse[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
+const GLfloat greySpecular[4] = { 0.4f, 0.4f, 0.4f, 1.0f };
 
 const GLfloat orangeAmbient[4] = { 0.15f, 0.25f, 0.0f, 1.0f };
 const GLfloat orangeDiffuse[4] = { 0.7f, 0.4f, 0.0f, 1.0f };
@@ -87,15 +87,17 @@ const GLfloat brownAmbient[4] = { 0.1254902f, 0.0643138f, 0.0352942f, 1.0f };
 const GLfloat brownDiffuse[4] = { 0.513725f, 0.10784f, 0.088235f, 1.0f };
 const GLfloat brownSpecular[4] = { 0.627451f, 0.321569f, 0.176471f, 1.0f };
 
-const GLfloat blackAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat blackDiffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat blackSpecular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+const GLfloat blackAmbient[4] = { 0.001f, 0.001f, 0.001f, 1.0f };
+const GLfloat blackDiffuse[4] = { 0.001f, 0.001f, 0.001f, 1.0f };
+const GLfloat blackSpecular[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 const GLfloat whiteAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
 const GLfloat whiteDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 const GLfloat whiteSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK, BROWN, WHITE };
+const GLfloat clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+enum Color { GREY, ORANGE, RED, GREEN, BLUE, PINK, YELLOW, PURPLE, BLACK, BROWN, WHITE, CLEAR_COLOR };
 enum CameraType { ORTHOGRAPHIC, PERSPECTIVE, CONTROLLED_PERSP };
 enum GimbalLockState { GIMBAL_LOCK_ON, GIMBAL_LOCK_OFF };
 enum AnimationState { ANIMATION_STANDARD, ANIMATION_REVERSE, ANIMATION_OFF, ANIMATION_ON };

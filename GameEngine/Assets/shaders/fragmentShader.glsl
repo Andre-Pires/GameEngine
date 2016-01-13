@@ -126,10 +126,10 @@ float calculateShadow(int lightIndex){
         visibility -= 0.06*(1.0 - textureProj(shadowMap[lightIndex],shadowCoordW));
     }
 
-    if(visibility < 1.0){
+    if(visibility > 0.0){
         return visibility;
     }else{
-        return 1.0;
+        return 0.0;
     }
 }
 
@@ -201,8 +201,7 @@ vec4 calculateLight(int index){
 
     //return mix(vec4(0.9,0.0,0.0,1.0),vec4(0.0,0.9,0.0,1.0), specularCoefficient);
 
-    //NOTE: removed the specular contribution from the material (made the highlight hard to see)
-	vec4 lightIntensity = light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor);
+	vec4 lightIntensity = light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 
     if(spot == 0 || attenuation == 0){
         return lightIntensity;
@@ -261,7 +260,7 @@ vec4 generateMarbleTexture(){
     vec3 a = mix(MarbleColor, VeinColor, intensity);
     vec3 b = mix(colortemp, VeinColor, 0.7);
     vec3 color = mix(a, colortemp, 0.3);
-    //vec3 color = mix(MarbleColor, VeinColor, intensity); 
+    //vec3 color = mix(MarbleColor, VeinColor, intensity);
 
     return vec4(color, 1.0);
 }

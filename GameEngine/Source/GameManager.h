@@ -21,6 +21,7 @@ class GameManager
 	const Mesh cube_mesh_;
 	const Mesh quad_mesh_;
 	const Mesh sphere_mesh_;
+	const Mesh cylinder_mesh_;
 
 	GameManager();
 
