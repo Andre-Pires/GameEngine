@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-GameManager::GameManager() : _gameNode(nullptr), cube_mesh_(Mesh("Assets/mesh/cube.obj")), quad_mesh_(Mesh("Assets/mesh/quad.obj")), sphere_mesh_(Mesh("Assets/mesh/sphere.obj")), cylinder_mesh_(Mesh("Assets/mesh/cylinder.obj"))
+GameManager::GameManager() : _gameNode(nullptr), cube_mesh_(Mesh("Assets/mesh/cube-original.obj")), quad_mesh_(Mesh("Assets/mesh/quad.obj")), sphere_mesh_(Mesh("Assets/mesh/sphere.obj")), cylinder_mesh_(Mesh("Assets/mesh/cylinder.obj"))
 {
 }
 
