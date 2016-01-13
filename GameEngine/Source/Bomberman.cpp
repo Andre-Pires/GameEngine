@@ -7,7 +7,6 @@ Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameN
 	GameManager::getInstance().init(scene, gameNode, bufferObjects, shader);
 
 	_gridMap = new GridMap(filename);
-	_playerEntity = _gridMap->getPlayerEntity();
 	_playerPosition = Vector2f(_gridMap->getPlayerCol(), _gridMap->getPlayerRow());
 	_activateFlash = activateFlash;
 }
