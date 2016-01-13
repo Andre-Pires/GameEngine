@@ -99,7 +99,7 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		//usar o programa criado
 		shader->dropShaderProgram();
 
-		shader->checkShaderError("ERROR: Could not draw scene.");
+		shader->checkShaderError("ERROR: Could not draw scene (standard).");
 	}
 }
 
@@ -128,7 +128,7 @@ void Scene::drawShadowMap(int vertices, GLuint vao, Matrix4f modelMatrix)
 		//usar o programa criado
 		shader->dropShaderProgram();
 
-		shader->checkShaderError("ERROR: Could not draw scene.");
+		shader->checkShaderError("ERROR: Could not draw scene (shadow map).");
 	}
 }
 
@@ -154,7 +154,7 @@ void Scene::drawPostProcess(int vertices, GLuint vao)
 		//usar o programa criado
 		shader->dropShaderProgram();
 
-		shader->checkShaderError("ERROR: Could not draw scene.");
+		shader->checkShaderError("ERROR: Could not draw scene (post-process).");
 	}
 }
 
