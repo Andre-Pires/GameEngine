@@ -184,18 +184,32 @@ GameEntity* GameManager::createPlayer(float x, float y)
 
 GameEntity* GameManager::createBomb(float x, float y)
 {
+	auto bomb = new SceneGraphNode(_gameNode, _scene);
+
+	{
 		auto object = new GeometricObject(_bufferObjects, _scene, sphere_mesh_);
 		object->scale(Vector3f(0.25f, 0.25f, 0.25f));
 		object->changeColor(BLACK);
 		object->changeShininess(0.6f);
+		auto node = new SceneGraphNode(_gameNode, object, _scene);
+		bomb->add(node);
+	}
 
-	auto node = new SceneGraphNode(_gameNode, object, _scene);
+	{
+		auto object = new GeometricObject(_bufferObjects, _scene, sphere_mesh_);
+		object->scale(Vector3f(0.05f, 0.05f, 0.1f));
+		object->translate(Vector3f(0, 0, 0.2f));
+		object->changeColor(BLACK);
+		object->changeShininess(0.6f);
+		auto node = new SceneGraphNode(_gameNode, object, _scene);
+		bomb->add(node);
+	}
 
 	auto nodeWrapper = new SceneGraphNode(_scene);
-	nodeWrapper->add(node);
+	nodeWrapper->add(bomb);
 	nodeWrapper->translate(Vector3f(x + 0.5f, y + 0.5f, 0.35f));
 
 	_gameNode->add(nodeWrapper);
 
-	return new GameEntity(node, false);
+	return new GameEntity(bomb, false);
 }
