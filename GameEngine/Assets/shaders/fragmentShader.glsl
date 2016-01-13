@@ -85,7 +85,7 @@ const float LightGrains = 0.8;
 const float DarkGrains = 0.2;
 
 //For marble texture
-const float NoiseScaleMarble = 0.4;
+const float NoiseScaleMarble = 0.3;
 const int noiseLevel = 4;
 const vec3 MarbleColor = vec3(0.98,0.95,0.83);
 const vec3 VeinColor = vec3(0.52,0.51,0.46);
@@ -244,21 +244,24 @@ vec4 noise(float f){
 
 vec4 generateMarbleTexture(){
     float marble=0.0;
-    float f = 1.0;
+    float f = 0.5;
     for(int i=0; i < noiseLevel; i++) {
       marble += noise(f).x/f;
       f *= 2.17;
     }
     vec3 colortemp = vec3(marble);
 
-    vec3 p = ex_mcPosition.xyz * 0.5 + 0.5;
+    vec3 wcPosition = vec3(ModelMatrix * ex_mcPosition);
+
+    vec3 p = wcPosition * 0.5 + 0.5;
     float noise = texture(NoiseSampler, p).r * 0.5 + 0.5;
 
     float intensity = clamp(noise * NoiseFactor, 0.0, 1.0);
-    intensity = cos(ex_Position.x * PositionFactor + intensity * IntensityFactor) * 0.5 + 0.5;
-    vec3 a = mix(MarbleColor, colortemp, intensity);
-    vec3 b = mix(colortemp, VeinColor, intensity);
-    vec3 color = mix(a, b, 0.5);
+    intensity = cos(ex_mcPosition.x * PositionFactor + intensity * IntensityFactor) * 0.5 + 0.5;
+    vec3 a = mix(MarbleColor, VeinColor, intensity);
+    vec3 b = mix(colortemp, VeinColor, 0.7);
+    vec3 color = mix(a, colortemp, 0.3);
+    //vec3 color = mix(MarbleColor, VeinColor, intensity); 
 
     return vec4(color, 1.0);
 }
