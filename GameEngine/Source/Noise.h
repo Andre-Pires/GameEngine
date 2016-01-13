@@ -14,7 +14,7 @@ private:
 	float PerlinNoise3D(float x, float y, float z);
 
 public:
-	tex3D noise[32 * 32 * 32];
+	float noise[32 * 32 * 32];
 
 	PerlinNoise(float persistence, int octaves);
 	void calculateNoise(int size);

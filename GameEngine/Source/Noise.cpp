@@ -16,9 +16,7 @@ void PerlinNoise::calculateNoise(int size) {
 				n = n - floor(n);
 
 				float color = floor(255 * n);
-				noise[x + (y * size) + (z * size * size)].RGB[0] = color / 256;
-				noise[x + (y * size) + (z * size * size)].RGB[1] = color / 256;
-				noise[x + (y * size) + (z * size * size)].RGB[2] = color / 256;
+				noise[x + (y * size) + (z * size * size)] = color / 256;
 			}
 		}
 	}

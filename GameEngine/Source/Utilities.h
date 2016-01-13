@@ -46,10 +46,6 @@ typedef struct {
 	GLfloat TXTYTZ[3];
 } Tangent;
 
-typedef struct {
-	float RGB[3];
-} tex3D;
-
 //colors
 const GLfloat greyAmbient[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
 const GLfloat greyDiffuse[4] = { 0.3f, 0.3f, 0.3f, 1.0f };

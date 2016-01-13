@@ -44,7 +44,7 @@ void Texture::prepareTexture(GLenum type, int size1, int size2) {
 	if (type == GL_TEXTURE_2D)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size1, size2, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	if (type == GL_TEXTURE_3D)
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, size1, size1, size1, 0, GL_RGB, GL_FLOAT, noise);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, size1, size1, size1, 0, GL_RED, GL_FLOAT, noise);
 
 	glGenerateMipmap(type);
 

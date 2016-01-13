@@ -27,6 +27,6 @@ public:
 	void setTextureType(int type);
 private:
 	unsigned char *data;
-	tex3D noise[32 * 32 * 32];
+	float noise[32 * 32 * 32];
 	void prepareTexture(GLenum type, int size1, int size2);
 };
