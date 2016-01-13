@@ -18,6 +18,10 @@ class GameManager
 
 	GeometricObject *_floorObject;
 
+	const Mesh cube_mesh_;
+	const Mesh quad_mesh_;
+	const Mesh sphere_mesh_;
+
 	GameManager();
 
 public:
