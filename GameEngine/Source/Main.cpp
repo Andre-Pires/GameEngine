@@ -94,11 +94,11 @@ void activateFlash();
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman(std::string("Assets/layouts/1.txt"), scene, gameNode, bufferObjects, shader, &activateFlash);
+	bomberman = new Bomberman("Assets/layouts/1.txt", scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
-	Mesh mesh = Mesh(std::string("Assets/mesh/quad.obj"));
+	Mesh mesh = Mesh("Assets/mesh/quad.obj");
 	GeometricObject * object = new GeometricObject(bufferObjects, scene, mesh);
 	object->rotate(90, Vector3f(0.0, 0.0, 1.0));
 	scenePlane = new SceneGraphNode(sceneGraph, object, scene);

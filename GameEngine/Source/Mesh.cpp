@@ -1,10 +1,11 @@
 ﻿#include "Mesh.h"
 
-/////////////////////////////////////////////////////////////////////// MESH
 
-Mesh::Mesh(std::string& filename)
+Mesh::Mesh(std::string&& filename)
 {
-	createMesh(filename);
+	loadMeshData(filename);
+	processMeshData();
+	freeMeshData();
 }
 
 void Mesh::parseVertex(std::stringstream& sin)
@@ -42,7 +43,7 @@ void Mesh::parseFace(std::stringstream& sin)
 	}
 }
 
-void Mesh::parseLine(std::stringstream& sin)
+void Mesh::parseLine(std::stringstream&& sin)
 {
 	std::string s;
 	sin >> s;
@@ -91,11 +92,4 @@ void Mesh::freeMeshData()
 	vertexIdx.clear();
 	texcoordIdx.clear();
 	normalIdx.clear();
-}
-
-const void Mesh::createMesh(std::string& filename)
-{
-	loadMeshData(filename);
-	processMeshData();
-	freeMeshData();
 }

@@ -40,7 +40,7 @@ private:
 	void wavePlayerMembers(float harmonicPercentage);
 	void animateBomb(SceneGraphNode* node, float percentage);
 public:
-	Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
+	Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
 	Vector2f getPlayerPosition();
 	void playerWalk();

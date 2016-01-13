@@ -20,14 +20,15 @@ public:
 	std::vector<GLuint> vertexIdx, texcoordIdx, normalIdx;
 
 	bool TexcoordsLoaded, NormalsLoaded;
-	Mesh(std::string& filename);
+	
+	explicit Mesh(std::string&& filename);
+
 	void parseVertex(std::stringstream& sin);
 	void parseTexcoord(std::stringstream& sin);
 	void parseNormal(std::stringstream& sin);
 	void parseFace(std::stringstream& sin);
-	void parseLine(std::stringstream& sin);
+	void parseLine(std::stringstream&& sin);
 	void loadMeshData(std::string& filename);
 	void processMeshData();
 	void freeMeshData();
-	const void createMesh(std::string& filename);
 };

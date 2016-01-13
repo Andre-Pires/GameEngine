@@ -2,7 +2,7 @@
 #include "GameManager.h"
 #include "Bomb.h"
 
-Bomberman::Bomberman(std::string& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
+Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
 {
 	GameManager::getInstance().init(scene, gameNode, bufferObjects, shader);
 
