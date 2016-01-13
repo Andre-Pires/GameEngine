@@ -3,7 +3,7 @@
 #include "Bomb.h"
 #include "Animations.h"
 
-Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1), bomb_on_player_(nullptr)
+Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), total_walk_time_(WALK_ANIMATION_DURATION), total_rotation_time_(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1), bomb_on_player_(nullptr)
 {
 	GameManager::getInstance().init(scene, gameNode, bufferObjects, shader);
 
@@ -26,15 +26,9 @@ void Bomberman::playerWalk()
 {
 	if (_playerActive) return;
 
-	auto playerOrientation2D = angleTo2D(-_playerOrientation);
-	unsigned rowAhead = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
-	unsigned colAhead = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
-
-	if (_gridMap->isClear(rowAhead, colAhead))
+	if (isClearAhead())
 	{
-		_playerActive = true;
-		_startingFoot = -_startingFoot;
-		_totalWalkTime = 0;
+		initWalk();
 	}
 }
 
@@ -43,7 +37,7 @@ void Bomberman::rotatePlayerLeft()
 	if (_playerActive) return;
 
 	_playerActive = true;
-	_totalRotationTime = 0;
+	total_rotation_time_ = 0;
 	_rotationDirection = -1;
 }
 
@@ -52,7 +46,7 @@ void Bomberman::rotatePlayerRight()
 	if (_playerActive) return;
 
 	_playerActive = true;
-	_totalRotationTime = 0;
+	total_rotation_time_ = 0;
 	_rotationDirection = 1;
 }
 
@@ -236,49 +230,9 @@ void Bomberman::explode(unsigned row, unsigned col)
 	}
 }
 
-void Bomberman::animationsUpdate(unsigned elapsedTime)
+void Bomberman::animationsUpdate(unsigned elapsed_time)
 {
-	_playerActive = false;
-
-	unsigned walkTime;
-	if (_totalWalkTime + elapsedTime >= WALK_ANIMATION_DURATION)
-	{
-		walkTime = WALK_ANIMATION_DURATION - _totalWalkTime;
-	}
-	else
-	{
-		walkTime = elapsedTime;
-	}
-
-	if (walkTime > 0)
-	{
-		_playerActive = true;
-
-		_totalWalkTime += walkTime;
-		float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
-		movePlayerForward(percentageOfAnimation);
-		wavePlayerMembers(sin(float(_totalWalkTime) / WALK_ANIMATION_DURATION * PI) * _startingFoot);
-	}
-
-	unsigned rotationTime;
-	if (_totalRotationTime + elapsedTime >= ROTATE_ANIMATION_DURATION)
-	{
-		rotationTime = ROTATE_ANIMATION_DURATION - _totalRotationTime;
-	}
-	else
-	{
-		rotationTime = elapsedTime;
-	}
-
-	if (rotationTime > 0)
-	{
-		_playerActive = true;
-
-		_totalRotationTime += rotationTime;
-		float percentageOfAnimation = float(rotationTime) / ROTATE_ANIMATION_DURATION;
-		auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
-		rotatePlayer(frameAngle);
-	}
+	playerUpdate(elapsed_time);
 
 	for (auto &bomb : _bombs)
 	{
@@ -296,6 +250,66 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 				bomb->setDroppedTime(0);
 		}
 	}
+}
+
+void Bomberman::playerUpdate(unsigned elapsed_time)
+{
+	auto should_walk = false;
+	auto rotation_finished = (total_rotation_time_ == ROTATE_ANIMATION_DURATION);
+	
+	if (!rotation_finished)
+	{
+		unsigned rotationTime;
+		if (total_rotation_time_ + elapsed_time >= ROTATE_ANIMATION_DURATION)
+		{
+			// This means the rotation is finishing, we should walk next
+			rotationTime = ROTATE_ANIMATION_DURATION - total_rotation_time_;
+			rotation_finished = true;
+		}
+		else
+		{
+			rotationTime = elapsed_time;
+		}
+		elapsed_time -= rotationTime;
+
+		if (rotationTime > 0)
+		{
+			total_rotation_time_ += rotationTime;
+			float percentageOfAnimation = float(rotationTime) / ROTATE_ANIMATION_DURATION;
+			auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
+			rotatePlayer(frameAngle);
+		}
+
+		// If rotation has just finished and the cell ahead is clear, we're walking next
+		if (rotation_finished && isClearAhead())
+		{
+			initWalk();
+		}
+	}
+
+	if (rotation_finished && elapsed_time > 0)
+	{
+		unsigned walkTime;
+		if (total_walk_time_ + elapsed_time >= WALK_ANIMATION_DURATION)
+		{
+			walkTime = WALK_ANIMATION_DURATION - total_walk_time_;
+		}
+		else
+		{
+			walkTime = elapsed_time;
+		}
+		elapsed_time -= walkTime;
+
+		if (walkTime > 0)
+		{
+			total_walk_time_ += walkTime;
+			float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
+			movePlayerForward(percentageOfAnimation);
+			wavePlayerMembers(sin(float(total_walk_time_) / WALK_ANIMATION_DURATION * PI) * _startingFoot);
+		}
+	}
+
+	_playerActive = (elapsed_time == 0);
 }
 
 void Bomberman::wavePlayerMembers(float harmonicPercentage)
@@ -328,6 +342,22 @@ void Bomberman::dropBomb()
 {
 	bomb_on_player_->setDroppedTime(getCurrentTime());
 	bomb_on_player_ = nullptr;
+}
+
+void Bomberman::initWalk()
+{
+	_playerActive = true;
+	_startingFoot = -_startingFoot;
+	total_walk_time_ = 0;
+}
+
+bool Bomberman::isClearAhead() const
+{
+	auto playerOrientation2D = angleTo2D(-_playerOrientation);
+	unsigned rowAhead = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
+	unsigned colAhead = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
+
+	return _gridMap->isClear(rowAhead, colAhead);
 }
 
 void Bomberman::debug()

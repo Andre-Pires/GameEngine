@@ -28,8 +28,8 @@ private:
 	float _playerOrientation;
 	GameEntity *_playerEntity;
 
-	unsigned _totalWalkTime;
-	unsigned _totalRotationTime;
+	unsigned total_walk_time_;
+	unsigned total_rotation_time_;
 	int _rotationDirection;
 	bool _playerActive;
 	int _startingFoot;
@@ -40,10 +40,14 @@ private:
 	void rotatePlayer(float angleDeg);
 	void explode(unsigned row, unsigned col);
 	void animationsUpdate(unsigned elapsedTime);
+	void playerUpdate(unsigned elapsed_time);
 	void wavePlayerMembers(float harmonicPercentage);
 	void animateBomb(SceneGraphNode* node, float percentage);
 
 	void dropBomb();
+
+	void initWalk();
+	bool isClearAhead() const;
 public:
 	Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
