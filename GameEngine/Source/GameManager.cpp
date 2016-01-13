@@ -88,11 +88,12 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 	int randomTexture = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / TEXTURE_NUMBER));
 	createFloor(x, y);
 
-	auto object = new Square(_bufferObjects, _scene);
+	auto object = new GeometricObject(_bufferObjects, _scene, cube_mesh_);
+	object->scale(Vector3f(0.8f));
 	object->changeColor(BROWN);
 	object->changeShininess(0.7f);
 	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures[std::string("wood" + randomTexture)], this->normals[std::string("wood")]);
-	node->translate(Vector3f(x, y, 0));
+	node->translate(Vector3f(x + 0.5f, y + 0.5f, 0.5f));
 	_gameNode->add(node);
 
 	return new GameEntity(node, true);
