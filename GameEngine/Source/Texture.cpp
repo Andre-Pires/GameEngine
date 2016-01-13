@@ -39,7 +39,7 @@ void Texture::prepareTexture(GLenum type, int size1, int size2) {
 	glGenTextures(1, &textureID);
 	this->textureID = textureID;
 
-	bind(type);
+	glBindTexture(type, textureID);
 
 	if (type == GL_TEXTURE_2D)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size1, size2, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -54,15 +54,22 @@ void Texture::prepareTexture(GLenum type, int size1, int size2) {
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	unbind(type);
-}
-
-void Texture::bind(GLenum type) {
-	glBindTexture(type, textureID);
-}
-
-void Texture::unbind(GLenum type) {
 	glBindTexture(type, 0);
+}
+
+void Texture::bind(Shader* shader, GLenum activeIndex, GLint uniform, int type, GLint index) {
+	glActiveTexture(activeIndex);
+	if(textureType == 1){
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glUniform1i(getTexUniform(shader, type), index);
+	}
+	else if (textureType == 2 || textureType == 3){
+		glBindTexture(GL_TEXTURE_3D, textureID);
+		glUniform1i(getTexUniform(shader, PROCEDURAL), index);
+	}
+	if(type != TANGENTS){
+		glUniform1i(uniform, textureType);
+	}
 }
 
 GLuint Texture::getTextureID() {

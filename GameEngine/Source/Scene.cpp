@@ -69,20 +69,8 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		//texturas
 		if (texture != nullptr)
 		{
-			glActiveTexture(GL_TEXTURE0);
-			if (texture->textureType == 1) {
-				glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-				glUniform1i(texture->getTexUniform(shader, TEXCOORDS), 0);
-				glUniform1i(textureTypeUnif, 1);
-			}
-			else if (texture->textureType == 2 || texture->textureType == 3) {
-				glBindTexture(GL_TEXTURE_3D, texture->getTextureID());
-				glUniform1i(texture->getTexUniform(shader, PROCEDURAL), 0);
-				glUniform1i(textureTypeUnif, texture->textureType);
-			}
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, normalMap->getTextureID());
-			glUniform1i(normalMap->getTexUniform(shader, TANGENTS), 1);
+			texture->bind(shader, GL_TEXTURE0, textureTypeUnif, TEXCOORDS, 0);
+			normalMap->bind(shader, GL_TEXTURE1, textureTypeUnif, TANGENTS, 1);
 		}
 		else
 		{

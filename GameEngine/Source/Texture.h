@@ -21,8 +21,7 @@ public:
 public:
 	Texture(Shader* shader, char* filename);
 	Texture(Shader* shader);
-	void bind(GLenum type);
-	void unbind(GLenum type);
+	void bind(Shader* shader, GLenum activeIndex, GLint uniform, int type, GLint index);
 	GLuint getTextureID();
 	GLint getTexUniform(Shader* shader, int type);
 	void setTextureType(int type);
