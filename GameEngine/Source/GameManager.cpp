@@ -209,11 +209,14 @@ GameEntity* GameManager::createBomb(float x, float y)
 		bomb->add(node);
 	}
 
-	auto nodeWrapper = new SceneGraphNode(_scene);
-	nodeWrapper->add(bomb);
-	nodeWrapper->translate(Vector3f(x + 0.5f, y + 0.5f, 0.35f));
+	auto position_fix_node = new SceneGraphNode(_scene);
+	position_fix_node->add(bomb);
+	position_fix_node->translate(Vector3f(x + 0.5f, y + 0.5f, 1.5f));
 
-	_gameNode->add(nodeWrapper);
+	auto translation_node_wrapper = new SceneGraphNode(_scene);
+	translation_node_wrapper->add(position_fix_node);
 
-	return new GameEntity(bomb, false);
+	_gameNode->add(translation_node_wrapper);
+
+	return new GameEntity(bomb, false, bomb, translation_node_wrapper);
 }

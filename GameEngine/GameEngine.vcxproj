@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Animations.cpp" />
     <ClCompile Include="Source\Bomb.cpp" />
     <ClCompile Include="Source\GameEntity.cpp" />
     <ClCompile Include="Source\GameManager.cpp" />
@@ -52,6 +53,7 @@
     <ClCompile Include="Source\Vector4f.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Animations.h" />
     <ClInclude Include="Source\Bomb.h" />
     <ClInclude Include="Source\GameEntity.h" />
     <ClInclude Include="Source\GameManager.h" />

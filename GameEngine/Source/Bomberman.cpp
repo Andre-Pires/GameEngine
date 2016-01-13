@@ -1,8 +1,9 @@
 #include "Bomberman.h"
 #include "GameManager.h"
 #include "Bomb.h"
+#include "Animations.h"
 
-Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1)
+Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), _totalWalkTime(WALK_ANIMATION_DURATION), _totalRotationTime(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1), bomb_on_player_(nullptr)
 {
 	GameManager::getInstance().init(scene, gameNode, bufferObjects, shader);
 
@@ -54,6 +55,21 @@ void Bomberman::rotatePlayerRight()
 	_rotationDirection = 1;
 }
 
+void Bomberman::liftArms()
+{
+	GameManager::getInstance().getRightHand()->clearTransformations();
+	GameManager::getInstance().getRightHand()->translate(Vector3f(0, 0, 0.5f));
+
+	GameManager::getInstance().getLeftHand()->clearTransformations();
+	GameManager::getInstance().getLeftHand()->translate(Vector3f(0, 0, 0.5f));
+}
+
+void Bomberman::lowerArms()
+{
+	GameManager::getInstance().getRightHand()->clearTransformations();
+	GameManager::getInstance().getLeftHand()->clearTransformations();
+}
+
 bool Bomberman::update(unsigned elapsedTime)
 {
 	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); )
@@ -61,6 +77,13 @@ bool Bomberman::update(unsigned elapsedTime)
 		if ((*bomb)->getExplosionTime() <= getCurrentTime())
 		{
 			explode((*bomb)->getRow(), (*bomb)->getCol());
+
+			if (*bomb == bomb_on_player_)
+			{
+				bomb_on_player_ = nullptr;
+				lowerArms();
+			}
+
 			delete (*bomb)->getEntity();
 			_gridMap->setEntity((*bomb)->getRow(), (*bomb)->getCol(), nullptr);
 			bomb = _bombs.erase(bomb);
@@ -90,19 +113,17 @@ unsigned Bomberman::getCurrentTime()
 
 void Bomberman::placeBomb()
 {
-	if (_playerActive) return;
+	if (_playerActive || bomb_on_player_ != nullptr) return;
 
-	auto playerOrientation2D = angleTo2D(-_playerOrientation);
-	unsigned bombRow = _gridMap->getPlayerRow() - round(playerOrientation2D.y);
-	unsigned bombCol = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
+	auto bombRow = _gridMap->getPlayerRow();
+	auto bombCol = _gridMap->getPlayerCol();
 
-	if (_gridMap->isClear(bombRow, bombCol))
-	{
-		auto bombEntity = GameManager::getInstance().createBomb(bombCol, -float(bombRow));
-		_gridMap->setEntity(bombRow, bombCol, bombEntity);
+	liftArms();
 
-		_bombs.push_back(new Bomb(bombEntity, getCurrentTime() + BOMB_EXPLOSION_TIME, bombRow, bombCol));
-	}
+	auto bomb_entity = GameManager::getInstance().createBomb(bombCol, -float(bombRow));
+	_gridMap->setEntity(bombRow, bombCol, bomb_entity);
+	bomb_on_player_ = new Bomb(bomb_entity, getCurrentTime() + BOMB_EXPLOSION_TIME, bombRow, bombCol);
+	_bombs.push_back(bomb_on_player_);
 }
 
 bool Bomberman::movePlayerForward(float distance)
@@ -125,7 +146,6 @@ bool Bomberman::movePlayerForward(float distance)
 
 		if (valid)
 		{
-			_gridMap->moveEntity(oldRow, oldCol, newRow, newCol);
 			_gridMap->setPlayerRow(newRow);
 			_gridMap->setPlayerCol(newCol);
 		}
@@ -133,6 +153,7 @@ bool Bomberman::movePlayerForward(float distance)
 
 	if (valid)
 	{
+		if (bomb_on_player_ != nullptr) dropBomb();
 		_playerEntity->getNode()->translate(Vector3f(deltaPos.x, -deltaPos.y, 0));
 		_playerPosition += Vector2f(deltaPos.x, deltaPos.y);
 	}
@@ -258,11 +279,21 @@ void Bomberman::animationsUpdate(unsigned elapsedTime)
 		rotatePlayer(frameAngle);
 	}
 
-	for (auto bomb = _bombs.begin(); bomb < _bombs.end(); ++bomb)
+	for (auto &bomb : _bombs)
 	{
-		auto timeUntillExplosion = (*bomb)->getExplosionTime() - getCurrentTime();
+		auto timeUntillExplosion = bomb->getExplosionTime() - getCurrentTime();
 		auto timeSincePlaced = BOMB_EXPLOSION_TIME - timeUntillExplosion;
-		animateBomb((*bomb)->getEntity()->getNode(), float(timeSincePlaced) / BOMB_EXPLOSION_TIME);
+		animateBomb(bomb->getEntity()->getScalingNode(), float(timeSincePlaced) / BOMB_EXPLOSION_TIME);
+
+		if (bomb->getDroppedTime() > 0)
+		{
+			auto time_since_dropped = getCurrentTime() - bomb->getDroppedTime();
+			auto percentage_animation = time_since_dropped / float(BOMB_FALL_TIME);
+			if (percentage_animation < 1)
+				Animations::freeFalling(bomb->getEntity()->getTranslationNode(), -1.3f, percentage_animation);
+			else
+				bomb->setDroppedTime(0);
+		}
 	}
 }
 
@@ -290,6 +321,12 @@ void Bomberman::animateBomb(SceneGraphNode* node, float percentage)
 
 	node->clearTransformations();
 	node->scale(Vector3f(scale, scale, scale));
+}
+
+void Bomberman::dropBomb()
+{
+	bomb_on_player_->setDroppedTime(getCurrentTime());
+	bomb_on_player_ = nullptr;
 }
 
 void Bomberman::debug()

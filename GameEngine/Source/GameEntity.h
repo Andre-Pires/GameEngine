@@ -3,13 +3,20 @@
 
 class GameEntity
 {
-	SceneGraphNode *_node;
-	bool _isDestructible;
+	SceneGraphNode *node_;
+	SceneGraphNode *scaling_node_;
+	SceneGraphNode *translation_node_;
+	bool is_destructible_;
 
 public:
-	GameEntity(SceneGraphNode*, bool);
+	GameEntity(SceneGraphNode* node, bool is_destrcutible, SceneGraphNode* scaling_node, SceneGraphNode* translation_node);
+	GameEntity(SceneGraphNode* node, bool is_destructible);
 	~GameEntity();
-	bool isDestructible() const;
+
 	SceneGraphNode* getNode() const;
+	SceneGraphNode* getScalingNode() const;
+	SceneGraphNode* getTranslationNode() const;
+
+	bool isDestructible() const;
 };
 

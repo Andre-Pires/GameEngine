@@ -19,6 +19,8 @@ private:
 	const unsigned WALK_ANIMATION_DURATION = 500;
 	const unsigned ROTATE_ANIMATION_DURATION = 400;
 	const unsigned BOMB_EXPLOSION_TIME = 3000;
+	const unsigned BOMB_FALL_TIME = 500;
+
 
 	GridMap *_gridMap;
 	std::vector<Bomb*> _bombs;
@@ -31,6 +33,7 @@ private:
 	bool _playerActive;
 	int _startingFoot;
 	CallbackType _activateFlash;
+	Bomb* bomb_on_player_;
 
 	bool movePlayerForward(float distance);
 	void rotatePlayer(float angleDeg);
@@ -38,6 +41,8 @@ private:
 	void animationsUpdate(unsigned elapsedTime);
 	void wavePlayerMembers(float harmonicPercentage);
 	void animateBomb(SceneGraphNode* node, float percentage);
+
+	void dropBomb();
 public:
 	Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash);
 	~Bomberman();
@@ -47,6 +52,9 @@ public:
 
 	void rotatePlayerLeft();
 	void rotatePlayerRight();
+
+	void liftArms();
+	void lowerArms();
 
 	void placeBomb();
 	bool update(unsigned elapsedTime);
