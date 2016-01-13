@@ -7,6 +7,7 @@ class Vector3f
 public:
 	float x, y, z;
 	Vector3f(float x, float y, float z);
+	explicit Vector3f(float f);
 	Vector3f();
 	~Vector3f();
 	float operator[](const int& index);

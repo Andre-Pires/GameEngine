@@ -8,7 +8,11 @@ Vector3f::Vector3f(float x, float y, float z)
 	this->z = z;
 }
 
-Vector3f::Vector3f()
+Vector3f::Vector3f(float f) : Vector3f(f,f,f)
+{
+}
+
+Vector3f::Vector3f() : Vector3f(0, 0, 0)
 {
 }
 
