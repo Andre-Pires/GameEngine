@@ -26,6 +26,7 @@ private:
 	std::vector<Bomb*> _bombs;
 	Vector2f _playerPosition;
 	float _playerOrientation;
+	GameEntity *_playerEntity;
 
 	unsigned _totalWalkTime;
 	unsigned _totalRotationTime;

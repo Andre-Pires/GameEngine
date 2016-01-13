@@ -89,7 +89,7 @@ GameEntity* GridMap::parseChar(char c, unsigned row, unsigned col)
 		_playerRow = row;
 		_playerCol = col;
 		_playerEntity = GameManager::getInstance().createPlayer(col, -float(row));
-		return nullptr;
+		return _playerEntity;
 	case 'x':
 		return GameManager::getInstance().createBomb(col, -float(row));
 	default:
