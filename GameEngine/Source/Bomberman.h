@@ -4,9 +4,9 @@
 #include <string>
 #include <fstream>
 #include <cassert>
-#include "Square.h"
+#include "Cube.h"
 #include "Diamond.h"
-#include "Triangle.h"
+#include "TriangularPrism.h"
 #include "GridMap.h"
 #include "Bomb.h"
 
@@ -28,7 +28,6 @@ private:
 
 	const float HEAD_REST_ANGLE_Z = 0;
 	const float HEAD_REST_ANGLE_X = 0;
-
 
 	GridMap *_gridMap;
 	std::vector<Bomb*> _bombs;

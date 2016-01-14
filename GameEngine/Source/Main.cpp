@@ -15,8 +15,8 @@
 #include "Utilities.h"
 #include "GeometricObject.h"
 #include "BufferObjects.h"
-#include "Triangle.h"
-#include "Square.h"
+#include "TriangularPrism.h"
+#include "Cube.h"
 #include "Diamond.h"
 #include "Camera.h"
 #include "Plane.h"
@@ -64,8 +64,9 @@ int startX, startY, tracking = 0;
 // Camera Spherical Coordinates
 float alpha = 0.0f, beta = 0.0f;
 float r = 5.25f;
-float rotateX, rotateY = 0.0f;
-float zoom = 3.0f;
+float rotateX = 0.0f;
+float rotateY = 20.0f;
+float zoom = 3.37f;
 
 SceneGraphNode* gameNode;
 SceneGraphNode* sceneGraph;
@@ -94,7 +95,7 @@ void activateFlash();
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman("Assets/layouts/1.txt", scene, gameNode, bufferObjects, shader, &activateFlash);
+	bomberman = new Bomberman("Assets/layouts/activeMap.txt", scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
@@ -416,7 +417,6 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'W':
 		centerY += 0.25;
 		break;
-
 	case 'a':
 	case 'A':
 		centerX -= 0.25;
@@ -468,6 +468,10 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'z':
 		bomberman->debug();
+		break;
+	case 'q':
+		Vector2f playerPosition = bomberman->getPlayerPosition();
+		cout << "cam " << rotateX << ", " << rotateY << ", " << zoom << Vector3f(-playerPosition.x, playerPosition.y, centerZ) << endl;
 		break;
 	}
 }

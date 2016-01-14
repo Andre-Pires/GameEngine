@@ -59,15 +59,15 @@ void Texture::prepareTexture(GLenum type, int size1, int size2) {
 
 void Texture::bind(Shader* shader, GLenum activeIndex, GLint uniform, int type, GLint index) {
 	glActiveTexture(activeIndex);
-	if(textureType == 1){
+	if (textureType == 1) {
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUniform1i(getTexUniform(shader, type), index);
 	}
-	else if (textureType == 2 || textureType == 3){
+	else if (textureType == 2 || textureType == 3) {
 		glBindTexture(GL_TEXTURE_3D, textureID);
 		glUniform1i(getTexUniform(shader, PROCEDURAL), index);
 	}
-	if(type != TANGENTS){
+	if (type != TANGENTS) {
 		glUniform1i(uniform, textureType);
 	}
 }

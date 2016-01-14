@@ -1,6 +1,6 @@
-﻿#include "Triangle.h"
+﻿#include "TriangularPrism.h"
 
-Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
+TriangularPrism::TriangularPrism(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
 {
 	//number of vertices and indexes needed to draw triangle
 	this->indicesCount = 24;
@@ -49,7 +49,7 @@ Triangle::Triangle(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer
 	updateBuffer();
 }
 
-void Triangle::shadeColor()
+void TriangularPrism::shadeColor()
 {
 	float shadeStrength = 0.3;
 

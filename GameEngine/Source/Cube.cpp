@@ -1,6 +1,6 @@
-﻿#include "Square.h"
+﻿#include "Cube.h"
 
-Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
+Cube::Cube(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, scene)
 {
 	//number of vertices and indexes needed to draw square
 	this->indicesCount = 36;
@@ -162,7 +162,7 @@ Square::Square(BufferObjects* buffer, Scene* scene) : GeometricObject(buffer, sc
 	updateBuffer();
 }
 
-void Square::shadeColor()
+void Cube::shadeColor()
 {
 	float shadeStrength = 0.3;
 

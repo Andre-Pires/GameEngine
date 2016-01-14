@@ -44,9 +44,9 @@
     <ClCompile Include="Source\SceneGraphNode.cpp" />
     <ClCompile Include="Source\Shader.cpp" />
     <ClCompile Include="Source\ShadowRenderer.cpp" />
-    <ClCompile Include="Source\Square.cpp" />
+    <ClCompile Include="Source\Cube.cpp" />
     <ClCompile Include="Source\Texture.cpp" />
-    <ClCompile Include="Source\Triangle.cpp" />
+    <ClCompile Include="Source\TriangularPrism.cpp" />
     <ClCompile Include="Source\Utilities.cpp" />
     <ClCompile Include="Source\Vector2f.cpp" />
     <ClCompile Include="Source\Vector3f.cpp" />
@@ -77,9 +77,9 @@
     <ClInclude Include="Source\SceneGraphNode.h" />
     <ClInclude Include="Source\Shader.h" />
     <ClInclude Include="Source\ShadowRenderer.h" />
-    <ClInclude Include="Source\Square.h" />
+    <ClInclude Include="Source\Cube.h" />
     <ClInclude Include="Source\Texture.h" />
-    <ClInclude Include="Source\Triangle.h" />
+    <ClInclude Include="Source\TriangularPrism.h" />
     <ClInclude Include="Source\Utilities.h" />
     <ClInclude Include="Source\Vector2f.h" />
     <ClInclude Include="Source\Vector3f.h" />

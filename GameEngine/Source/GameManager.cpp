@@ -1,6 +1,6 @@
 #include "GameManager.h"
 #include "GameEntity.h"
-#include "Square.h"
+#include "Cube.h"
 
 #include <cassert>
 
@@ -72,7 +72,7 @@ void GameManager::createFloor(float x, float y)
 
 GameEntity* GameManager::createStaticWall(float x, float y)
 {
-	auto object = new Square(_bufferObjects, _scene);
+	auto object = new Cube(_bufferObjects, _scene);
 	object->changeColor(GREY);
 	//object->repeatTexture(2.0);
 	object->changeShininess(0.3f);
@@ -92,7 +92,7 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 
 	auto object = new GeometricObject(_bufferObjects, _scene, cube_mesh_);
 	object->scale(Vector3f(scale));
-	object->translate(Vector3f(0, 0, -(1-scale)));
+	object->translate(Vector3f(0, 0, -(1 - scale)));
 	object->changeColor(BROWN);
 	object->changeShininess(0.7f);
 	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures[std::string("wood" + randomTexture)], this->normals[std::string("wood")]);
@@ -108,7 +108,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 
 	SceneGraphNode * character = new SceneGraphNode(_gameNode, _scene);
 
-	const auto cube = new Square(_bufferObjects, _scene);
+	const auto cube = new Cube(_bufferObjects, _scene);
 	cube->changeColor(BLUE);
 	cube->changeShininess(0.3f);
 	cube->translate(Vector3f(-0.5f, -0.5f, -0.5f));
@@ -124,7 +124,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 	}
 
 	{
-		auto object = new Square(_bufferObjects, _scene);
+		auto object = new Cube(_bufferObjects, _scene);
 		object->changeColor(BLUE);
 		object->changeShininess(0.3f);
 		object->scale(Vector3f(0.15f, 0.15f, 0.4f));
@@ -135,7 +135,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 	}
 
 	{
-		auto object = new Square(_bufferObjects, _scene);
+		auto object = new Cube(_bufferObjects, _scene);
 		object->changeColor(BLUE);
 		object->changeShininess(0.3f);
 		object->scale(Vector3f(0.125f, 0.125f, 0.125f));
@@ -146,7 +146,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 	}
 
 	{
-		auto object = new Square(_bufferObjects, _scene);
+		auto object = new Cube(_bufferObjects, _scene);
 		object->changeColor(BLUE);
 		object->changeShininess(0.3f);
 		object->scale(Vector3f(0.125f, 0.125f, 0.125f));
@@ -157,7 +157,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 	}
 
 	{
-		auto object = new Square(_bufferObjects, _scene);
+		auto object = new Cube(_bufferObjects, _scene);
 		object->changeColor(BLUE);
 		object->changeShininess(0.3f);
 		object->scale(Vector3f(0.13f, 0.13f, 0.13f));
@@ -167,7 +167,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 	}
 
 	{
-		auto object = new Square(_bufferObjects, _scene);
+		auto object = new Cube(_bufferObjects, _scene);
 		object->changeColor(BLUE);
 		object->changeShininess(0.3f);
 		object->scale(Vector3f(0.13f, 0.13f, 0.13f));
