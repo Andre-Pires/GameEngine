@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "SceneGraphNode.h"
-#define SHADOW_MAP_RATIO 0.5
+#define SHADOW_MAP_RATIO 1.0
 
 class ShadowRenderer
 {

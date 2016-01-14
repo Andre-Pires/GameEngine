@@ -105,9 +105,9 @@ float random(vec3 seed, int i){
 float calculateShadow(int lightIndex){
 
     float visibility=1.0;
-    float bias = 0.00005;
+    float bias = 0.0001;
 
-    for (int i=0;i<12;i++){
+    for (int i=0;i<6;i++){
 
 		//  - Always the same samples.
 		//    Gives a fixed pattern in the shadow, but no noise
@@ -123,7 +123,7 @@ float calculateShadow(int lightIndex){
 
         shadowCoordW.xy += poissonDisk[index]/500.0;
         shadowCoordW.z -= bias;
-        visibility -= 0.08*(1.0 - textureProj(shadowMap[lightIndex],shadowCoordW));
+        visibility -= 0.167*(1.0 - textureProj(shadowMap[lightIndex],shadowCoordW));
     }
 
     if(visibility > 0.0){
