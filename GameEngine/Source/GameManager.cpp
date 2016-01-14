@@ -26,6 +26,7 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	_floorObject->scale(Vector3f(0.5f, 0.5f, 0.5f));
 	_floorObject->rotate(90, Vector3f(0, 0, 1));
 	_floorObject->changeColor(GREY);
+	_floorObject->changeShininess(0.05);
 
 	//Floor
 	this->normals["marble"] = new Texture(_shader, "Assets/textures/floorNormal.png");
