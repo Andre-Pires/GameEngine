@@ -723,6 +723,8 @@ int main(int argc, char* argv[])
 {
 	std::cout << std::boolalpha;
 	srand(static_cast <unsigned> (time(0)));
+	Utilities::randomize();
+
 	init(argc, argv);
 	glutMainLoop();
 	exit(EXIT_SUCCESS);

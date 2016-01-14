@@ -3,7 +3,14 @@
 #include "Bomb.h"
 #include "Animations.h"
 
-Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : _playerPosition(1, 1), _playerOrientation(0), total_walk_time_(WALK_ANIMATION_DURATION), total_rotation_time_(ROTATE_ANIMATION_DURATION), _rotationDirection(0), _playerActive(false), _startingFoot(-1), bomb_on_player_(nullptr)
+Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, 
+	BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : 
+	_playerPosition(1, 1), _playerOrientation(0), total_walk_time_(WALK_ANIMATION_DURATION), 
+	total_rotation_time_(ROTATE_ANIMATION_DURATION), _rotationDirection(0), player_active_(false), 
+	_startingFoot(-1), bomb_on_player_(nullptr), player_inactive_since_(0), 
+	idle_last_iteration_time_(0), idle_iteration_duration_(0), head_angle_z_from_(0), 
+	head_angle_z_current_(0), head_angle_z_to_(0), head_angle_x_from_(0), head_angle_x_current_(0),
+	head_angle_x_to_(0)
 {
 	GameManager::getInstance().init(scene, gameNode, bufferObjects, shader);
 
@@ -24,7 +31,7 @@ Vector2f Bomberman::getPlayerPosition()
 
 void Bomberman::playerWalk()
 {
-	if (_playerActive) return;
+	if (player_active_) return;
 
 	if (isClearAhead())
 	{
@@ -34,18 +41,18 @@ void Bomberman::playerWalk()
 
 void Bomberman::rotatePlayerLeft()
 {
-	if (_playerActive) return;
+	if (player_active_) return;
 
-	_playerActive = true;
+	setPlayerActivity(true);
 	total_rotation_time_ = 0;
 	_rotationDirection = -1;
 }
 
 void Bomberman::rotatePlayerRight()
 {
-	if (_playerActive) return;
+	if (player_active_) return;
 
-	_playerActive = true;
+	setPlayerActivity(true);
 	total_rotation_time_ = 0;
 	_rotationDirection = 1;
 }
@@ -108,7 +115,7 @@ unsigned Bomberman::getCurrentTime()
 
 void Bomberman::placeBomb()
 {
-	if (_playerActive || bomb_on_player_ != nullptr) return;
+	if (player_active_ || bomb_on_player_ != nullptr) return;
 
 	auto bombRow = _gridMap->getPlayerRow();
 	auto bombCol = _gridMap->getPlayerCol();
@@ -119,6 +126,24 @@ void Bomberman::placeBomb()
 	_gridMap->setEntity(bombRow, bombCol, bomb_entity);
 	bomb_on_player_ = new Bomb(bomb_entity, getCurrentTime() + BOMB_EXPLOSION_TIME, bombRow, bombCol);
 	_bombs.push_back(bomb_on_player_);
+}
+
+void Bomberman::setPlayerActivity(bool activity)
+{
+	if (!player_active_ && activity) // activating
+	{
+		// Starting head movement (reset), from current to rest
+		head_angle_z_from_ = head_angle_z_current_;
+		head_angle_x_from_ = head_angle_x_current_;
+	}
+	else if (player_active_ && !activity) // disactivating
+	{
+		player_inactive_since_ = getCurrentTime();
+		idle_last_iteration_time_ = 0;
+		total_head_reset_time_ = 0;
+	}
+
+	player_active_ = activity;
 }
 
 bool Bomberman::movePlayerForward(float distance)
@@ -252,66 +277,132 @@ void Bomberman::animationsUpdate(unsigned elapsed_time)
 	}
 }
 
+void Bomberman::rotateHead(float z_from, float z_to, float x_from, float x_to, float anim_percent_cummulative)
+{
+	head_angle_z_current_ = Animations::lerp(z_from, z_to, anim_percent_cummulative);
+	//head_angle_x_current_ = Animations::lerp(x_from, x_to, anim_percent_cummulative);
+
+	GameManager::getInstance().getHead()->clearTransformations();
+	GameManager::getInstance().getHead()->rotate(head_angle_z_current_, Vector3f(0, 0, 1));
+	//GameManager::getInstance().getHead()->rotate(head_angle_x_current_, Vector3f(1, 0, 0));
+}
+
 void Bomberman::playerUpdate(unsigned elapsed_time)
 {
-	auto rotation_finished = (total_rotation_time_ == ROTATE_ANIMATION_DURATION);
-	
-	if (!rotation_finished)
+	if (player_active_)
 	{
-		unsigned rotationTime;
-		if (total_rotation_time_ + elapsed_time >= ROTATE_ANIMATION_DURATION)
-		{
-			// This means the rotation is finishing, we should walk next
-			rotationTime = ROTATE_ANIMATION_DURATION - total_rotation_time_;
-			rotation_finished = true;
-		}
-		else
-		{
-			rotationTime = elapsed_time;
-		}
-		elapsed_time -= rotationTime;
+		auto head_reset_finished = (total_head_reset_time_ == HEAD_RESET_ANIMATION_DURATION);
 
-		if (rotationTime > 0)
+		if (!head_reset_finished)
 		{
-			total_rotation_time_ += rotationTime;
-			float percentageOfAnimation = float(rotationTime) / ROTATE_ANIMATION_DURATION;
-			auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
-			rotatePlayer(frameAngle);
+			unsigned anim_time;
+			if (total_head_reset_time_ + elapsed_time >= HEAD_RESET_ANIMATION_DURATION)
+			{
+				// This means the rotation is finishing, we should walk next
+				anim_time = HEAD_RESET_ANIMATION_DURATION - total_head_reset_time_;
+				head_reset_finished = true;
+			}
+			else
+			{
+				anim_time = elapsed_time;
+			}
+
+			if (anim_time > 0)
+			{
+				total_head_reset_time_ += anim_time;
+				auto anim_percent_cummulative = total_head_reset_time_ / float(HEAD_RESET_ANIMATION_DURATION);
+
+				rotateHead(head_angle_z_from_, HEAD_REST_ANGLE_Z, head_angle_x_from_, HEAD_REST_ANGLE_X, anim_percent_cummulative);
+			}
 		}
 
-		// If rotation has just finished and the cell ahead is clear, we're walking next
-		if (rotation_finished && isClearAhead())
+
+		auto rotation_finished = (total_rotation_time_ == ROTATE_ANIMATION_DURATION);
+
+		if (!rotation_finished)
 		{
-			initWalk();
+			unsigned rotationTime;
+			if (total_rotation_time_ + elapsed_time >= ROTATE_ANIMATION_DURATION)
+			{
+				// This means the rotation is finishing, we should walk next
+				rotationTime = ROTATE_ANIMATION_DURATION - total_rotation_time_;
+				rotation_finished = true;
+			}
+			else
+			{
+				rotationTime = elapsed_time;
+			}
+			elapsed_time -= rotationTime;
+
+			if (rotationTime > 0)
+			{
+				total_rotation_time_ += rotationTime;
+				float percentageOfAnimation = float(rotationTime) / ROTATE_ANIMATION_DURATION;
+				auto frameAngle = percentageOfAnimation * 90 * _rotationDirection;
+				rotatePlayer(frameAngle);
+			}
+
+			// If rotation has just finished and the cell ahead is clear, we're walking next
+			if (rotation_finished && isClearAhead())
+			{
+				initWalk();
+			}
+		}
+
+		auto walking_finished = (total_walk_time_ == WALK_ANIMATION_DURATION);
+
+		if (rotation_finished && !walking_finished && elapsed_time > 0)
+		{
+			unsigned walkTime;
+			if (total_walk_time_ + elapsed_time >= WALK_ANIMATION_DURATION)
+			{
+				walkTime = WALK_ANIMATION_DURATION - total_walk_time_;
+				walking_finished = true;
+			}
+			else
+			{
+				walkTime = elapsed_time;
+			}
+			elapsed_time -= walkTime;
+
+			if (walkTime > 0)
+			{
+				total_walk_time_ += walkTime;
+				float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
+				movePlayerForward(percentageOfAnimation);
+				wavePlayerMembers(sin(float(total_walk_time_) / WALK_ANIMATION_DURATION * PI) * _startingFoot);
+			}
+		}
+
+		setPlayerActivity(!rotation_finished || !walking_finished);
+	}
+	else
+	{
+		auto duration_of_inactivity = getCurrentTime() - player_inactive_since_;
+		if (duration_of_inactivity >= IDLE_AFTER_TIME)
+		{
+			//auto total_animation_time = duration_of_inactivity - IDLE_AFTER_TIME;
+			auto time_since_last_iteration = getCurrentTime() - idle_last_iteration_time_;
+
+			if (time_since_last_iteration > idle_iteration_duration_)
+			{
+				head_angle_z_from_ = head_angle_z_current_;
+				head_angle_x_from_ = head_angle_x_current_;
+
+				//head_angle_z_to_ = std::max(-30.0f, std::min(30.0f, Utilities::random_normal(head_angle_z_current_, 5)));
+				head_angle_z_to_ = Utilities::random_uniform(-30.0f, 30.0f);
+				//head_angle_x_to_ = Utilities::random_normal(-15.0f, 15.0f);
+
+				idle_last_iteration_time_ = getCurrentTime();
+				time_since_last_iteration = 0;
+				idle_iteration_duration_ = Utilities::random_uniform(3000, 5000);
+			}
+
+			auto anim_percent_cummulative = std::min(1.0f, time_since_last_iteration / float(IDLE_ANIMATION_DURATION));
+
+			rotateHead(head_angle_z_from_, head_angle_z_to_, head_angle_x_from_, head_angle_x_to_, anim_percent_cummulative);
 		}
 	}
-
-	auto walking_finished = (total_walk_time_ == WALK_ANIMATION_DURATION);
-
-	if (rotation_finished && !walking_finished && elapsed_time > 0)
-	{
-		unsigned walkTime;
-		if (total_walk_time_ + elapsed_time >= WALK_ANIMATION_DURATION)
-		{
-			walkTime = WALK_ANIMATION_DURATION - total_walk_time_;
-			walking_finished = true;
-		}
-		else
-		{
-			walkTime = elapsed_time;
-		}
-		elapsed_time -= walkTime;
-
-		if (walkTime > 0)
-		{
-			total_walk_time_ += walkTime;
-			float percentageOfAnimation = float(walkTime) / WALK_ANIMATION_DURATION;
-			movePlayerForward(percentageOfAnimation);
-			wavePlayerMembers(sin(float(total_walk_time_) / WALK_ANIMATION_DURATION * PI) * _startingFoot);
-		}
-	}
-
-	_playerActive = !rotation_finished || !walking_finished;
 }
 
 void Bomberman::wavePlayerMembers(float harmonicPercentage)
@@ -348,7 +439,7 @@ void Bomberman::dropBomb()
 
 void Bomberman::initWalk()
 {
-	_playerActive = true;
+	setPlayerActivity(true);
 	_startingFoot = -_startingFoot;
 	total_walk_time_ = 0;
 }

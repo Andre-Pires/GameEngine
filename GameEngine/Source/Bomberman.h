@@ -20,6 +20,14 @@ private:
 	const unsigned ROTATE_ANIMATION_DURATION = 400;
 	const unsigned BOMB_EXPLOSION_TIME = 3000;
 	const unsigned BOMB_FALL_TIME = 500;
+	const unsigned IDLE_AFTER_TIME = 2000;
+	const unsigned IDLE_ANIMATION_DURATION = 300;
+	const unsigned IDLE_ITERATION_DURATION_MEAN = 4000;
+	const unsigned IDLE_ITERATION_DURATION_STDDEV = 1000;
+	const unsigned HEAD_RESET_ANIMATION_DURATION = 300;
+
+	const float HEAD_REST_ANGLE_Z = 0;
+	const float HEAD_REST_ANGLE_X = 0;
 
 
 	GridMap *_gridMap;
@@ -30,16 +38,33 @@ private:
 
 	unsigned total_walk_time_;
 	unsigned total_rotation_time_;
+	unsigned total_head_reset_time_;
+
 	int _rotationDirection;
-	bool _playerActive;
+	bool player_active_;
 	int _startingFoot;
 	CallbackType _activateFlash;
 	Bomb* bomb_on_player_;
 
+	unsigned player_inactive_since_;
+	unsigned idle_last_iteration_time_;
+	int idle_iteration_duration_;
+	float head_angle_z_from_;
+	float head_angle_z_current_;
+	float head_angle_z_to_;
+	float head_angle_x_from_;
+	float head_angle_x_current_;
+	float head_angle_x_to_;
+
+	void setPlayerActivity(bool activity);
+
 	bool movePlayerForward(float distance);
 	void rotatePlayer(float angleDeg);
+	void rotateHead(float z_from, float z_to, float x_from, float x_to, float anim_percent_cummulative);
+
 	void explode(unsigned row, unsigned col);
 	void animationsUpdate(unsigned elapsedTime);
+
 	void playerUpdate(unsigned elapsed_time);
 	void wavePlayerMembers(float harmonicPercentage);
 	void animateBomb(SceneGraphNode* node, float percentage);

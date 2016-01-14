@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 //shader locations
 const GLuint UBO_BP = 0;
@@ -100,10 +101,17 @@ enum AnimationState { ANIMATION_STANDARD, ANIMATION_REVERSE, ANIMATION_OFF, ANIM
 enum LightType { POINT_LIGHT, SPOTLIGHT, DIRECTIONAL_LIGHT };
 enum ShaderType { MAIN_SHADER, SHADOW_SHADER, POSTPROCESS_SHADER };
 
-class Utilities
+namespace Utilities
 {
-public:
+	GLchar* loadFile(char* path);
 
-	static float lerp(float val1, float val2, float ratio);
-	static GLchar* loadFile(char* path);
+	std::default_random_engine& global_urng();
+
+	void randomize();
+
+	int random_uniform(int from, int thru);
+
+	float random_uniform(float from, float upto);
+
+	float random_normal(float mean, float stddev);
 };

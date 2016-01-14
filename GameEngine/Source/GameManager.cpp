@@ -108,15 +108,19 @@ GameEntity* GameManager::createPlayer(float x, float y)
 
 	SceneGraphNode * character = new SceneGraphNode(_gameNode, _scene);
 
+	const auto cube = new Square(_bufferObjects, _scene);
+	cube->changeColor(BLUE);
+	cube->changeShininess(0.3f);
+	cube->translate(Vector3f(-0.5f, -0.5f, -0.5f));
+
 	{
-		auto object = new Square(_bufferObjects, _scene);
-		object->changeColor(BLUE);
-		object->changeShininess(0.3f);
-		object->scale(Vector3f(0.2f, 0.2f, 0.2f));
-		object->rotate(5, Vector3f(1, 0, 0));
-		object->translate(Vector3f(-0.25f, -0.275f, 0));
-		SceneGraphNode * head = new SceneGraphNode(_gameNode, object, _scene);
-		character->add(head);
+		head_ = new SceneGraphNode(_gameNode, cube, _scene);
+		head_->rotate(5, Vector3f(1, 0, 0));
+		auto head_wrapper = new SceneGraphNode(_scene);
+		head_wrapper->scale(Vector3f(0.2f, 0.2f, 0.2f));
+		head_wrapper->translate(Vector3f(-0.15f, -0.175f, 0.1f));
+		head_wrapper->add(head_);
+		character->add(head_wrapper);
 	}
 
 	{

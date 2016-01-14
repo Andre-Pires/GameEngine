@@ -7,3 +7,8 @@ void Animations::freeFalling(SceneGraphNode* node, float final_height, float per
 	node->clearTransformations();
 	node->translate(Vector3f(0, 0, height_diff));
 }
+
+float Animations::lerp(float from, float to, float percent)
+{
+	return (1 - percent) * from + percent * to;
+}

@@ -11,6 +11,8 @@ class GameManager
 	BufferObjects *_bufferObjects;
 	std::map<std::string, Texture *> textures;
 	std::map<std::string, Texture *> normals;
+
+	SceneGraphNode* head_;
 	SceneGraphNode *_rightHand;
 	SceneGraphNode *_leftHand;
 	SceneGraphNode *_rightFoot;
@@ -28,6 +30,7 @@ class GameManager
 public:
 	GameManager(GameManager const&) = delete;
 	void operator=(GameManager const&) = delete;
+
 	static GameManager& getInstance();
 
 	void init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bufferObjects, Shader* shader);
@@ -41,6 +44,7 @@ public:
 	GameEntity* createPlayer(float x, float y);
 	GameEntity* createBomb(float x, float y);
 
+	SceneGraphNode* getHead() const { return head_; }
 	SceneGraphNode* getRightHand() const { return _rightHand; }
 	SceneGraphNode* getLeftHand() const { return _leftHand; }
 	SceneGraphNode* getRightFoot() const { return _rightFoot; }
