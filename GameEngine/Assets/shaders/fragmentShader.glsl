@@ -180,7 +180,7 @@ vec4 calculateLight(int index){
 			spot = clamp((lightToSurfaceAngle - outerConeAngle) / falloffAngle, 0.0, 1.0);
 
 
-			//NOTE: allows to see the spotlight soft edges really clearly
+			//NOTE: Useful for debug, allows to see the spotlight soft edges really clearly
 			/*if(spot > 0.7){
 				return vec4(1.0,0.0,0.0,1.0);
 			}else if(spot > 0.4){
@@ -188,7 +188,6 @@ vec4 calculateLight(int index){
 			}else{
 				return vec4(0,0.0,1.0,1.0);
 			}*/
-            //return mix(vec4(0.9,0.0,0.0,0.0),vec4(0.0,0.9,0.0,0.0), spot);
 		}
 	}
 
@@ -201,18 +200,16 @@ vec4 calculateLight(int index){
 		vec3 halfDir = normalize(lightDir  + viewDir);
 
         //Blinn-Phong
-        //materialShininess = 32.0;
+        //good Shininess value: 32.0
 		//float specAngle = max(dot(halfDir, mappedNormal), 0.0);
 		//specularCoefficient = pow(specAngle, materialShininess);
 
         //Gaussian
-        //materialShininess = 0.3;
+        //good Shininess value: 0.3
         float NdotH = clamp(dot(mappedNormal, halfDir), 0.0, 1.0);
         float angle = acos(NdotH);
         specularCoefficient = exp(- pow (angle/ materialShininess, 2));
 	}
-
-    //return mix(vec4(0.9,0.0,0.0,1.0),vec4(0.0,0.9,0.0,1.0), specularCoefficient);
 
 	vec4 lightIntensity = light.ambientColor * materialAmbient + spot  *  attenuation * (diffuseCoefficient * light.diffuseColor * materialDiffuse + specularCoefficient * light.specularColor * materialSpecular);
 
@@ -273,7 +270,6 @@ vec4 generateMarbleTexture(){
     vec3 a = mix(MarbleColor, VeinColor, intensity);
     vec3 b = mix(colortemp, VeinColor, 0.7);
     vec3 color = mix(a, colortemp, 0.3);
-    //vec3 color = mix(MarbleColor, VeinColor, intensity);
 
     return vec4(color, 1.0);
 }

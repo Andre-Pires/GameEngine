@@ -92,6 +92,7 @@ GameEntity* GameManager::createDestructibleWall(float x, float y)
 
 	auto object = new GeometricObject(_bufferObjects, _scene, cube_mesh_);
 	object->scale(Vector3f(scale));
+	object->rotate(90, Vector3f(0.0, 1.0, 0.0));
 	object->translate(Vector3f(0, 0, -(1 - scale)));
 	object->changeColor(BROWN);
 	object->changeShininess(0.7f);
