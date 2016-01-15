@@ -287,18 +287,18 @@ void createProgram()
 	createGameScene();
 
 	//NOTE: code for the point light
-	pointLight->position = Vector4f(6, 0.5, 7.0, 1.0);
+	pointLight->position = Vector4f(5.9, -1.2, 7.0, 1.0);
 	pointLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 	pointLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
 	pointLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
-	pointLight->lightRange = 20.0f;
+	pointLight->lightRange = 10.0f;
 
 	//NOTE: code for the spotlight
 	spotLight->position = Vector4f(bomberman->getPlayerPosition().x, bomberman->getPlayerPosition().y, 4.0, 1.0);
-	spotLight->ambientColor = Vector4f(0.05, 0.05, 0.05, 1.0);
+	spotLight->ambientColor = Vector4f(0.00, 0.00, 0.00, 1.0);
 	spotLight->diffuseColor = Vector4f(0.8, 0.8, 0.8, 1.0);
 	spotLight->specularColor = Vector4f(1.0, 1.0, 1.0, 1.0);
-	spotLight->lightRange = 25.0f;
+	spotLight->lightRange = 20.0f;
 	spotLight->coneAngle = 30.00f;
 	spotLight->coneFalloffAngle = 3.0f;
 	spotLight->coneDirection = Vector4f(0.3, 0.0, -1.0, 1.0);
@@ -415,46 +415,29 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case 'w':
 	case 'W':
-		centerY += 0.25;
-		break;
-	case 'a':
-	case 'A':
-		centerX -= 0.25;
-		break;
-
-	case 's':
-	case 'S':
-		centerY -= 0.25;
-		break;
-	case 'd':
-	case 'D':
-		centerX += 0.25;
-		break;
-	case '+':
 		sceneLights[controllableLight]->position.y += 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
-	case '-':
+	case 's':
+	case 'S':
 		sceneLights[controllableLight]->position.y -= 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
-	case 'h':
-	case 'H':
+	case 'a':
+	case 'A':
 		sceneLights[controllableLight]->position.x -= 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
-	case 'j':
-	case 'J':
+	case 'd':
+	case 'D':
 		sceneLights[controllableLight]->position.x += 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
-	case 'k':
-	case 'K':
+	case '+':
 		sceneLights[controllableLight]->position.z += 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
-	case 'l':
-	case 'L':
+	case '-':
 		sceneLights[controllableLight]->position.z -= 0.1f;
 		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
 		break;
@@ -465,13 +448,6 @@ void processKeys(unsigned char key, int xx, int yy)
 		break;
 	case ' ':
 		bomberman->placeBomb();
-		break;
-	case 'z':
-		bomberman->debug();
-		break;
-	case 'q':
-		Vector2f playerPosition = bomberman->getPlayerPosition();
-		cout << "cam " << rotateX << ", " << rotateY << ", " << zoom << Vector3f(-playerPosition.x, playerPosition.y, centerZ) << endl;
 		break;
 	}
 }
@@ -484,7 +460,8 @@ void processSpecialKeys(int key, int xx, int yy)
 		bomberman->playerWalk();
 		break;
 	case GLUT_KEY_DOWN:
-		bomberman->playerWalkBackwards();
+		//uncomment for debug purposes
+		//bomberman->playerWalkBackwards();
 		break;
 	case GLUT_KEY_LEFT:
 		bomberman->rotatePlayerLeft();

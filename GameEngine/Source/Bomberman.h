@@ -90,5 +90,4 @@ public:
 
 	static Vector2f angleTo2D(float angleDeg);
 	static unsigned getCurrentTime();
-	void debug();
 };

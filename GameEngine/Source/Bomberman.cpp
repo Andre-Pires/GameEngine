@@ -3,12 +3,12 @@
 #include "Bomb.h"
 #include "Animations.h"
 
-Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode, 
-	BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) : 
-	_playerPosition(1, 1), _playerOrientation(0), total_walk_time_(WALK_ANIMATION_DURATION), 
-	total_rotation_time_(ROTATE_ANIMATION_DURATION), _rotationDirection(0), player_active_(false), 
-	_startingFoot(-1), bomb_on_player_(nullptr), player_inactive_since_(0), 
-	idle_last_iteration_time_(0), idle_iteration_duration_(0), head_angle_z_from_(0), 
+Bomberman::Bomberman(std::string&& filename, Scene* scene, SceneGraphNode* gameNode,
+	BufferObjects* bufferObjects, Shader* shader, CallbackType activateFlash) :
+	_playerPosition(1, 1), _playerOrientation(0), total_walk_time_(WALK_ANIMATION_DURATION),
+	total_rotation_time_(ROTATE_ANIMATION_DURATION), _rotationDirection(0), player_active_(false),
+	_startingFoot(-1), bomb_on_player_(nullptr), player_inactive_since_(0),
+	idle_last_iteration_time_(0), idle_iteration_duration_(0), head_angle_z_from_(0),
 	head_angle_z_current_(0), head_angle_z_to_(0), head_angle_x_from_(0), head_angle_x_current_(0),
 	head_angle_x_to_(0)
 {
@@ -316,7 +316,6 @@ void Bomberman::playerUpdate(unsigned elapsed_time)
 			}
 		}
 
-
 		auto rotation_finished = (total_rotation_time_ == ROTATE_ANIMATION_DURATION);
 
 		if (!rotation_finished)
@@ -425,7 +424,7 @@ void Bomberman::wavePlayerMembers(float harmonicPercentage)
 
 void Bomberman::animateBomb(SceneGraphNode* node, float percentage)
 {
-	auto scale = 1 -sin(percentage * 1.1f * PI) * percentage*percentage;
+	auto scale = 1 - sin(percentage * 1.1f * PI) * percentage*percentage;
 
 	node->clearTransformations();
 	node->scale(Vector3f(scale, scale, scale));
@@ -451,9 +450,4 @@ bool Bomberman::isClearAhead() const
 	unsigned colAhead = _gridMap->getPlayerCol() + round(playerOrientation2D.x);
 
 	return _gridMap->isClear(rowAhead, colAhead);
-}
-
-void Bomberman::debug()
-{
-	explode(_gridMap->getPlayerRow(), _gridMap->getPlayerCol());
 }

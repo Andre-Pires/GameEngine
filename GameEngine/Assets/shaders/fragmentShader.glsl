@@ -106,7 +106,8 @@ float calculateShadow(int lightIndex){
 
     float visibility=1.0;
     float bias = 0.0001;
-
+    int samplesInLight = 0;
+    float sampleResult;
     for (int i=0;i<6;i++){
 
 		//  - Always the same samples.
@@ -123,7 +124,19 @@ float calculateShadow(int lightIndex){
 
         shadowCoordW.xy += poissonDisk[index]/500.0;
         shadowCoordW.z -= bias;
-        visibility -= 0.167*(1.0 - textureProj(shadowMap[lightIndex],shadowCoordW));
+        sampleResult = textureProj(shadowMap[lightIndex],shadowCoordW);
+        visibility -= 0.167 * (1.0 - sampleResult);
+
+        // Early bailing - if there's no shadow on 3 samples then
+        // we assume the vertex is lit
+        if(sampleResult == 1.0){
+            samplesInLight++;
+        }
+        if(samplesInLight >= 3)
+        {
+            break;
+        }
+
     }
 
     if(visibility > 0.0){
