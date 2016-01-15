@@ -125,7 +125,7 @@ void SceneGraphNode::rotate(float angle, Vector3f axis)
 
 void SceneGraphNode::clearBuffer()
 {
-	if (object != NULL)
+	if (object != nullptr)
 		object->clearObjectFromBuffer();
 
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)

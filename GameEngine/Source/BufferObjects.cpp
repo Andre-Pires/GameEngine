@@ -93,6 +93,12 @@ void BufferObjects::updateCamera(GLuint * camVboId, Matrix4f view, Matrix4f proj
 
 void BufferObjects::destroyBufferObjects(GLuint * VboId, GLuint VaoId)
 {
+	if (*VboId == -1 || VaoId == -1)
+	{
+		//object's buffers were already destroyed (several nodes might share an object)
+		return;
+	}
+
 	glBindVertexArray(VaoId);
 	glDisableVertexAttribArray(VERTICES);
 	glDisableVertexAttribArray(NORMALS);
@@ -103,6 +109,10 @@ void BufferObjects::destroyBufferObjects(GLuint * VboId, GLuint VaoId)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	//mark buffers has having been destroyed
+	*VboId = -1;
+	VaoId = -1;
 
 	Shader::checkGenericOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
 }

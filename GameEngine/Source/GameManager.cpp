@@ -75,7 +75,6 @@ GameEntity* GameManager::createStaticWall(float x, float y)
 {
 	auto object = new Cube(_bufferObjects, _scene);
 	object->changeColor(GREY);
-	//object->repeatTexture(2.0);
 	object->changeShininess(0.3f);
 	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["stone"], this->normals["stone"]);
 	node->translate(Vector3f(x, y, 0));
