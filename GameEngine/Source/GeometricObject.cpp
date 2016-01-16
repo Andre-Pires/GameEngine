@@ -51,9 +51,9 @@ GeometricObject::GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh)
 	updateBuffer();
 }
 
-void GeometricObject::draw(Matrix4f parentNodeTransformations, Texture* texture, Texture* normalMap)
+void GeometricObject::draw(Matrix4f parentNodeTransformations, Texture* texture, Texture* normalMap, Texture* channel)
 {
-	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors, materialShininess, texture, normalMap);
+	scene->draw(indicesCount, VaoId, parentNodeTransformations * transformations, MaterialColors, materialShininess, texture, normalMap, channel);
 }
 
 void GeometricObject::updateBuffer()

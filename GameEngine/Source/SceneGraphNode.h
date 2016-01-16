@@ -16,9 +16,11 @@ private:
 	Scene * scene;
 	Texture * texture;
 	Texture * normalMap;
+	Texture * channel;
 
 public:
 	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap);
+	SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap, Texture * channel);
 	SceneGraphNode(SceneGraphNode* parent, GeometricObject* object, Scene* scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene);
 	SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * tex, Texture * normalMap);

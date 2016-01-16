@@ -10,14 +10,14 @@ Scene::Scene(Shader * shader, Camera * camera, char * modelName, char * normalNa
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap)
+void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap, Texture* channel)
 {
 	if (shader != nullptr)
 	{
 		switch (shader->getShaderType())
 		{
 		case MAIN_SHADER:
-			standardDraw(vertices, vao, modelMatrix, materialColors, materialShininess, texture, normalMap);
+			standardDraw(vertices, vao, modelMatrix, materialColors, materialShininess, texture, normalMap, channel);
 			break;
 		case SHADOW_SHADER:
 			drawShadowMap(vertices, vao, modelMatrix);
@@ -32,7 +32,7 @@ void Scene::draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materi
 	}
 }
 
-void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap)
+void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap, Texture* channel)
 {
 	if (shader != nullptr)
 	{
@@ -71,6 +71,9 @@ void Scene::standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Materia
 		{
 			texture->bind(shader, GL_TEXTURE0, textureTypeUnif, TEXCOORDS, 0);
 			normalMap->bind(shader, GL_TEXTURE1, textureTypeUnif, TANGENTS, 1);
+			if (texture->textureType == 1) {
+				channel->bind(shader, GL_TEXTURE2, textureTypeUnif, CHANNEL, 2);
+			}
 		}
 		else
 		{

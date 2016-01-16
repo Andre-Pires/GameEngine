@@ -20,17 +20,6 @@ Texture::Texture(Shader* shader, char* filename) {
 
 //Contructor for 3D Textures - generated using procedural calculations
 Texture::Texture(Shader* shader) {
-	int size = 32;
-	float persistence = 0.5;
-	int octaves = 4;
-	PerlinNoise tempNoise = PerlinNoise(persistence, octaves);
-	tempNoise.calculateNoise(size);
-	for (int x = 0; x < size*size*size; x++) {
-		noise[x] = tempNoise.noise[x];
-	}
-	//3D texture only need the size, thefore the use of 0
-	prepareTexture(GL_TEXTURE_3D, size, 0);
-
 	//default - wood texture
 	textureType = 2;
 }
@@ -59,13 +48,17 @@ void Texture::prepareTexture(GLenum type, int size1, int size2) {
 
 void Texture::bind(Shader* shader, GLenum activeIndex, GLint uniform, int type, GLint index) {
 	glActiveTexture(activeIndex);
-	if (textureType == 1) {
+	if (textureType == 1 && type != CHANNEL) {
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUniform1i(getTexUniform(shader, type), index);
-	}
+	} 
 	else if (textureType == 2 || textureType == 3) {
 		glBindTexture(GL_TEXTURE_3D, textureID);
 		glUniform1i(getTexUniform(shader, PROCEDURAL), index);
+	}
+	else if (type == CHANNEL) {
+		glBindTexture(GL_TEXTURE_3D, textureID);
+		glUniform1i(getTexUniform(shader, type), index);
 	}
 	if (type != TANGENTS) {
 		glUniform1i(uniform, textureType);
@@ -85,6 +78,9 @@ GLint Texture::getTexUniform(Shader * shader, int type) {
 	else if (type == PROCEDURAL) {
 		return shader->getUniformLocation("NoiseSampler");
 	}
+	else if (type == CHANNEL) {
+		return shader->getUniformLocation("NoiseSampler");
+	}
 	else
 	{
 		std::cerr << "ERROR: No texture type corresponds to this value!" << std::endl;
@@ -93,4 +89,8 @@ GLint Texture::getTexUniform(Shader * shader, int type) {
 
 void Texture::setTextureType(int type) {
 	textureType = type;
+}
+
+void Texture::setTextureNoise(float noise, int index) {
+	this->noise[index] = noise;
 }

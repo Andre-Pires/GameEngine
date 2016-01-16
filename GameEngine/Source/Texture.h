@@ -25,8 +25,9 @@ public:
 	GLuint getTextureID();
 	GLint getTexUniform(Shader* shader, int type);
 	void setTextureType(int type);
+	void setTextureNoise(float noise, int index);
+	void prepareTexture(GLenum type, int size1, int size2);
 private:
 	unsigned char *data;
 	float noise[32 * 32 * 32];
-	void prepareTexture(GLenum type, int size1, int size2);
 };

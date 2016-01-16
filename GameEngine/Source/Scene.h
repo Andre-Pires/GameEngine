@@ -16,8 +16,8 @@ class Scene
 	Camera* camera;
 public:
 	Scene(Shader* shader, Camera * camera, char * modelName, char * normalName);
-	void draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap);
-	void standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap);
+	void draw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap, Texture* channel);
+	void standardDraw(int vertices, GLuint vao, Matrix4f modelMatrix, Material materialColors, float materialShininess, Texture* texture, Texture* normalMap, Texture* channel);
 	void drawShadowMap(int vertices, GLuint vao, Matrix4f modelMatrix);
 	void drawPostProcess(int vertices, GLuint vao);
 	void setActiveShader(Shader* shader);

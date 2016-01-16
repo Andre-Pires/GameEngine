@@ -152,8 +152,8 @@ void ShadowRenderer::renderShadows()
 	shader->useShaderProgram();
 
 	glUniformMatrix4fv(lightViewMatrixId, 1, GL_FALSE, (biasMatrix * depthMVP).getMatrix());
-	//Note: texture starts at 2 since index 0 & 1 are already in use
-	glActiveTexture(GL_TEXTURE2 + lightIndex);
+	//Note: texture starts at 3 since index 0 & 1 are already in use
+	glActiveTexture(GL_TEXTURE3 + lightIndex);
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
 	glUniform1i(shadowMapId, 2 + lightIndex);
 

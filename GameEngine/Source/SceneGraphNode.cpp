@@ -10,6 +10,20 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, 
 	this->shader = nullptr;
 	this->texture = texture;
 	this->normalMap = normalMap;
+	this->channel = nullptr;
+}
+
+//standard node - with parent, draw content and texture and channel
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap, Texture * channel)
+{
+	this->parent = parent;
+	this->object = object;
+	this->transformations = MatrixFactory::Identity4();
+	this->scene = scene;
+	this->shader = nullptr;
+	this->texture = texture;
+	this->normalMap = normalMap;
+	this->channel = channel;
 }
 
 //standard node - with parent and draw content
@@ -22,6 +36,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, 
 	this->shader = nullptr;
 	this->texture = parent->texture;
 	this->normalMap = parent->normalMap;
+	this->channel = parent->channel;
 }
 
 //struture node - no object associated (draws childs only)
@@ -34,6 +49,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
 	this->shader = nullptr;
 	this->texture = nullptr;
 	this->normalMap = nullptr;
+	this->channel = nullptr;
 }
 
 //struture node - no object associated (draws childs only) with texture associated
@@ -46,6 +62,7 @@ SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * 
 	this->shader = nullptr;
 	this->texture = texture;
 	this->normalMap = normalMap;
+	this->channel = nullptr;
 }
 
 //root node - no parent or objects
@@ -58,6 +75,7 @@ SceneGraphNode::SceneGraphNode(Scene * scene)
 	this->shader = nullptr;
 	this->texture = nullptr;
 	this->normalMap = nullptr;
+	this->channel = nullptr;
 }
 
 SceneGraphNode::SceneGraphNode(GeometricObject *object)
@@ -69,6 +87,7 @@ SceneGraphNode::SceneGraphNode(GeometricObject *object)
 	this->shader = nullptr;
 	this->texture = nullptr;
 	this->normalMap = nullptr;
+	this->channel = nullptr;
 }
 
 SceneGraphNode::~SceneGraphNode()
@@ -100,7 +119,7 @@ void SceneGraphNode::draw(Matrix4f parentTransformations)
 	finalTransformation = parentTransformations * this->transformations;
 
 	if (object != nullptr)
-		object->draw(finalTransformation, texture, normalMap);
+		object->draw(finalTransformation, texture, normalMap, channel);
 
 	for (auto it = childNodes.begin(); it != childNodes.end(); ++it)
 	{

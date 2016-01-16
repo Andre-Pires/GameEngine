@@ -93,6 +93,9 @@ const float NoiseFactor = 0.8;
 const float PositionFactor = 10;
 const float IntensityFactor = 14;
 
+//For moss effect
+const vec3 mossColor = vec3(0.18, 0.3, 0.06);
+
 layout(location = 0) out vec4 color;
 
 //NOTE: Returns a random number based on a vec3 and an int.
@@ -274,6 +277,22 @@ vec4 generateMarbleTexture(){
     return vec4(color, 1.0);
 }
 
+float generateMoss(){
+    vec3 wcPosition = vec3(ModelMatrix * ex_mcPosition);
+
+    vec3 p = wcPosition * 0.5 + 0.5;
+    float moss = (texture(NoiseSampler, p).r * 0.5 + 0.5);
+    if(moss < 0.8){
+      moss-= 0.4;
+    } if(moss == 0.9){
+      moss-= 0.35;
+    } if(moss == 1){
+      moss-= 0.3;
+    } 
+    return max(moss, 0.0);
+
+}
+
 //calculate new normal
 vec3 calculateBumpedNormal()
 {
@@ -320,7 +339,10 @@ void main(void)
           colorResult = textureResult * lightColorResult;
         //else it is an image texture
         }else{
-          colorResult = texture( TextureSampler, ex_UV ) * lightColorResult;
+          float moss = generateMoss();
+          vec3 texture = texture(TextureSampler, ex_UV).rgb;
+          vec4 colorTemp = vec4(mix(mossColor, texture, (1-moss)), 1.0);
+          colorResult = colorTemp * lightColorResult;
         }
     }else{
         colorResult = lightColorResult;

@@ -15,6 +15,7 @@ const GLuint UBO_BP = 0;
 #define TEXCOORDS 2
 #define TANGENTS 3
 #define PROCEDURAL 4
+#define CHANNEL 5
 
 // angle unit conversion
 #define DEGREES_TO_RADIANS 0.01745329251994329547

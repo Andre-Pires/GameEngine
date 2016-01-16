@@ -29,7 +29,7 @@ protected:
 public:
 
 	GeometricObject(BufferObjects* buffer, Scene* scene, Mesh mesh);
-	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr, Texture* normalMap = nullptr);
+	void draw(Matrix4f parentNodeTransformations, Texture* texture = nullptr, Texture* normalMap = nullptr, Texture* channel = nullptr);
 	void updateBuffer();
 	void translate(Vector3f translation);
 	void rotate(float angle, Vector3f rotation);

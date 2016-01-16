@@ -32,16 +32,36 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 	this->normals["marble"] = new Texture(_shader, "Assets/textures/floorNormal.png");
 
 	//Walls
-	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture.png");
-	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_wall_texture_normal_map.png");
+	this->textures["stone"] = new Texture(_shader, "Assets/textures/stone_blocks.jpg");
+	this->normals["stone"] = new Texture(_shader, "Assets/textures/stone_blocks_normal.png");
+
+	//For noise calculation
+	int size = 32;
+	float persistence = 0.5;
+	int octaves = 4;
 
 	//NOTE: creating "TEXTURE_NUMBER" different noise textures for wood and marble to introduce variety in scene
 	for (int i = 0; i < TEXTURE_NUMBER; i++)
 	{
+		//Calculate noise
+		PerlinNoise* tempNoise = new PerlinNoise(persistence, octaves);
+		tempNoise->calculateNoise(size);
 		this->textures[std::string("wood" + i)] = new Texture(_shader); // perlin noise texture
 		this->textures[std::string("wood" + i)]->setTextureType(2);
+
 		this->textures[std::string("marble" + i)] = new Texture(_shader);
 		this->textures[std::string("marble" + i)]->setTextureType(3);
+		
+		this->channels[std::string("moss" + i)] = new Texture(_shader);
+		this->channels[std::string("moss" + i)]->setTextureType(1);
+		for (int j = 0; j < size * size * size; j++) {
+			this->textures[std::string("wood" + i)]->setTextureNoise(tempNoise->noise[j], j);
+			this->textures[std::string("marble" + i)]->setTextureNoise(tempNoise->noise[j], j);
+			this->channels[std::string("moss" + i)]->setTextureNoise(tempNoise->noise[j], j);
+		}
+		this->textures[std::string("wood" + i)]->prepareTexture(GL_TEXTURE_3D, size, 0);
+		this->textures[std::string("marble" + i)]->prepareTexture(GL_TEXTURE_3D, size, 0);
+		this->channels[std::string("moss" + i)]->prepareTexture(GL_TEXTURE_3D, size, 0);
 	}
 	//Boxes
 	this->normals[std::string("wood")] = new Texture(_shader, "Assets/textures/boxNormal.png");
@@ -73,10 +93,11 @@ void GameManager::createFloor(float x, float y)
 
 GameEntity* GameManager::createStaticWall(float x, float y)
 {
+	int randomTexture = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / TEXTURE_NUMBER));
 	auto object = new Cube(_bufferObjects, _scene);
 	object->changeColor(GREY);
 	object->changeShininess(0.3f);
-	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["stone"], this->normals["stone"]);
+	auto node = new SceneGraphNode(_gameNode, object, _scene, this->textures["stone"], this->normals["stone"], this->channels[std::string("moss" + randomTexture)]);
 	node->translate(Vector3f(x, y, 0));
 	_gameNode->add(node);
 

@@ -11,6 +11,7 @@ class GameManager
 	BufferObjects *_bufferObjects;
 	std::map<std::string, Texture *> textures;
 	std::map<std::string, Texture *> normals;
+	std::map<std::string, Texture *> channels;
 
 	SceneGraphNode* head_;
 	SceneGraphNode *_rightHand;
