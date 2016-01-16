@@ -155,7 +155,7 @@ void ShadowRenderer::renderShadows()
 	//Note: texture starts at 3 since index 0 & 1 are already in use
 	glActiveTexture(GL_TEXTURE3 + lightIndex);
 	glBindTexture(GL_TEXTURE_2D, depthTextureId);
-	glUniform1i(shadowMapId, 2 + lightIndex);
+	glUniform1i(shadowMapId, 3 + lightIndex);
 
 	// Render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

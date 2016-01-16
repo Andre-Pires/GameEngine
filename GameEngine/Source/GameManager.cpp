@@ -51,9 +51,10 @@ void GameManager::init(Scene* scene, SceneGraphNode* gameNode, BufferObjects* bu
 
 		this->textures[std::string("marble" + i)] = new Texture(_shader);
 		this->textures[std::string("marble" + i)]->setTextureType(3);
-		
+
 		this->channels[std::string("moss" + i)] = new Texture(_shader);
 		this->channels[std::string("moss" + i)]->setTextureType(1);
+
 		for (int j = 0; j < size * size * size; j++) {
 			this->textures[std::string("wood" + i)]->setTextureNoise(tempNoise->noise[j], j);
 			this->textures[std::string("marble" + i)]->setTextureNoise(tempNoise->noise[j], j);

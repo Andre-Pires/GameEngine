@@ -1,68 +1,34 @@
 ﻿#include "SceneGraphNode.h"
 
 //standard node - with parent, draw content and texture
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap) : SceneGraphNode(parent, scene, texture, normalMap)
 {
-	this->parent = parent;
 	this->object = object;
-	this->transformations = MatrixFactory::Identity4();
-	this->scene = scene;
-	this->shader = nullptr;
-	this->texture = texture;
-	this->normalMap = normalMap;
-	this->channel = nullptr;
 }
 
 //standard node - with parent, draw content and texture and channel
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap, Texture * channel)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene, Texture * texture, Texture * normalMap, Texture * channel) : SceneGraphNode(parent, object, scene, texture, normalMap)
 {
-	this->parent = parent;
-	this->object = object;
-	this->transformations = MatrixFactory::Identity4();
-	this->scene = scene;
-	this->shader = nullptr;
-	this->texture = texture;
-	this->normalMap = normalMap;
 	this->channel = channel;
 }
 
 //standard node - with parent and draw content
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, GeometricObject *object, Scene * scene) : SceneGraphNode(parent, scene)
 {
-	this->parent = parent;
 	this->object = object;
-	this->transformations = MatrixFactory::Identity4();
-	this->scene = scene;
-	this->shader = nullptr;
-	this->texture = parent->texture;
-	this->normalMap = parent->normalMap;
-	this->channel = parent->channel;
 }
 
 //struture node - no object associated (draws childs only)
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene) : SceneGraphNode(scene)
 {
 	this->parent = parent;
-	this->object = nullptr;
-	this->transformations = MatrixFactory::Identity4();
-	this->scene = scene;
-	this->shader = nullptr;
-	this->texture = nullptr;
-	this->normalMap = nullptr;
-	this->channel = nullptr;
 }
 
 //struture node - no object associated (draws childs only) with texture associated
-SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * texture, Texture * normalMap)
+SceneGraphNode::SceneGraphNode(SceneGraphNode *parent, Scene * scene, Texture * texture, Texture * normalMap) : SceneGraphNode(parent, scene)
 {
-	this->parent = parent;
-	this->object = nullptr;
-	this->transformations = MatrixFactory::Identity4();
-	this->scene = scene;
-	this->shader = nullptr;
 	this->texture = texture;
 	this->normalMap = normalMap;
-	this->channel = nullptr;
 }
 
 //root node - no parent or objects
