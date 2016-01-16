@@ -34,7 +34,7 @@
 #define CAPTION "Game Engine"
 #define ANIMATION_RATE 1000 / 60
 
-int WinX = 1024, WinY = 576;
+int WinX = 1366, WinY = 768;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 float viewportRatio = 1.33;
@@ -67,6 +67,7 @@ float r = 5.25f;
 float rotateX = 0.0f;
 float rotateY = 20.0f;
 float zoom = 3.37f;
+bool controllableCamera = false;
 
 SceneGraphNode* gameNode;
 SceneGraphNode* sceneGraph;
@@ -368,83 +369,91 @@ void processKeys(unsigned char key, int xx, int yy)
 {
 	switch (key)
 	{
-	case '1':
-		cameraType = ORTHOGRAPHIC;
-		updateCamera();
-		cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
-		break;
-
-	case '2':
-		cameraType = PERSPECTIVE;
-		updateCamera();
-		cout << "Camera status: " << endl << " - Perspective camera active." << endl;
-		break;
-
-	case '3':
-		cameraType = CONTROLLED_PERSP;
-		updateCamera();
-		cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
-		break;
-	case 'p':
-	case 'P':
-		if (cameraType == ORTHOGRAPHIC || cameraType == PERSPECTIVE)
-		{
-			cameraType = CONTROLLED_PERSP;
-			cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
-		}
-		else if (cameraType == CONTROLLED_PERSP)
-		{
-			cameraType = ORTHOGRAPHIC;
-			cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
-		}
-		updateCamera();
-		break;
+		//NOTE: these commands are commented for delivery but kept due their usefulness in debugging
+		//	case '1':
+		//		cameraType = ORTHOGRAPHIC;
+		//		updateCamera();
+		//		cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
+		//		break;
+		//
+		//	case '2':
+		//		cameraType = PERSPECTIVE;
+		//		updateCamera();
+		//		cout << "Camera status: " << endl << " - Perspective camera active." << endl;
+		//		break;
+		//
+		//	case '3':
+		//		cameraType = CONTROLLED_PERSP;
+		//		updateCamera();
+		//		cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
+		//		break;
+		//	case 'p':
+		//	case 'P':
+		//		if (cameraType == ORTHOGRAPHIC || cameraType == PERSPECTIVE)
+		//		{
+		//			cameraType = CONTROLLED_PERSP;
+		//			cout << "Camera status: " << endl << " - Controllable perspective camera active." << endl;
+		//		}
+		//		else if (cameraType == CONTROLLED_PERSP)
+		//		{
+		//			cameraType = ORTHOGRAPHIC;
+		//			cout << "Camera status: " << endl << " - Ortographic camera active." << endl;
+		//		}
+		//		updateCamera();
+		//		break;
+		//	case 'c':
+		//	case 'C':
+		//		if (gimbalState == GIMBAL_LOCK_ON)
+		//		{
+		//			gimbalState = GIMBAL_LOCK_OFF;
+		//			cout << "Gimbal status: " << endl << " - Camera isn't gimbal locked." << endl;
+		//		}
+		//		else if (gimbalState == GIMBAL_LOCK_OFF)
+		//		{
+		//			gimbalState = GIMBAL_LOCK_ON;
+		//			cout << "Gimbal status: " << endl << " - Camera is gimbal locked." << endl;
+		//		}
+		//		updateCamera();
+		//		break;
+		//	case 'w':
+		//	case 'W':
+		//		sceneLights[controllableLight]->position.y += 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case 's':
+		//	case 'S':
+		//		sceneLights[controllableLight]->position.y -= 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case 'a':
+		//	case 'A':
+		//		sceneLights[controllableLight]->position.x -= 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case 'd':
+		//	case 'D':
+		//		sceneLights[controllableLight]->position.x += 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case '+':
+		//		sceneLights[controllableLight]->position.z += 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case '-':
+		//		sceneLights[controllableLight]->position.z -= 0.1f;
+		//		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
+		//		break;
+		//	case '\\':
+		//	case '|':
+		//		controllableLight = (controllableLight + 1) % sceneLights.size();
+		//		cout << "Controlling light number: " << controllableLight << endl;
+		//		break;
 	case 'c':
 	case 'C':
-		if (gimbalState == GIMBAL_LOCK_ON)
-		{
-			gimbalState = GIMBAL_LOCK_OFF;
-			cout << "Gimbal status: " << endl << " - Camera isn't gimbal locked." << endl;
-		}
-		else if (gimbalState == GIMBAL_LOCK_OFF)
-		{
-			gimbalState = GIMBAL_LOCK_ON;
-			cout << "Gimbal status: " << endl << " - Camera is gimbal locked." << endl;
-		}
-		updateCamera();
-		break;
-	case 'w':
-	case 'W':
-		sceneLights[controllableLight]->position.y += 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case 's':
-	case 'S':
-		sceneLights[controllableLight]->position.y -= 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case 'a':
-	case 'A':
-		sceneLights[controllableLight]->position.x -= 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case 'd':
-	case 'D':
-		sceneLights[controllableLight]->position.x += 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case '+':
-		sceneLights[controllableLight]->position.z += 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case '-':
-		sceneLights[controllableLight]->position.z -= 0.1f;
-		cout << "Light " << controllableLight << ", pos: " << sceneLights[controllableLight]->position << endl;
-		break;
-	case '\\':
-	case '|':
-		controllableLight = (controllableLight + 1) % sceneLights.size();
-		cout << "Controlling light number: " << controllableLight << endl;
+		controllableCamera ? controllableCamera = false : controllableCamera = true;
+		cout << "Camera controll active: " << controllableCamera;
+		if (controllableCamera) cout << " (some visual artifacts might occur).";
+		cout << endl;
 		break;
 	case ' ':
 		bomberman->placeBomb();
@@ -469,9 +478,6 @@ void processSpecialKeys(int key, int xx, int yy)
 	case GLUT_KEY_RIGHT:
 		bomberman->rotatePlayerRight();
 		break;
-	case GLUT_KEY_F1:
-		shadowRenderingActive = shadowRenderingActive ? false : true;
-		break;
 	}
 }
 
@@ -482,6 +488,12 @@ void processSpecialKeys(int key, int xx, int yy)
 
 void processMouseButtons(int button, int state, int xx, int yy)
 {
+	if (!controllableCamera)
+	{
+		//if camera input disable return
+		return;
+	}
+
 	// start tracking the mouse
 	if (state == GLUT_DOWN)
 	{
@@ -517,6 +529,12 @@ void processMouseButtons(int button, int state, int xx, int yy)
 
 void processMouseMotion(int xx, int yy)
 {
+	if (!controllableCamera)
+	{
+		//if camera input disable return
+		return;
+	}
+
 	if (cameraType == CONTROLLED_PERSP && tracking != 0)
 	{
 		int deltaX, deltaY;
