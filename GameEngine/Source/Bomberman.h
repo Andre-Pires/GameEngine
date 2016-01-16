@@ -20,7 +20,7 @@ private:
 	const unsigned ROTATE_ANIMATION_DURATION = 400;
 	const unsigned BOMB_EXPLOSION_TIME = 3000;
 	const unsigned BOMB_FALL_TIME = 500;
-	const unsigned IDLE_AFTER_TIME = 2000;
+	const unsigned IDLE_AFTER_TIME = 0;
 	const unsigned IDLE_ANIMATION_DURATION = 300;
 	const unsigned IDLE_ITERATION_DURATION_MEAN = 4000;
 	const unsigned IDLE_ITERATION_DURATION_STDDEV = 1000;
