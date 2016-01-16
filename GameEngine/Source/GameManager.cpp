@@ -129,8 +129,9 @@ GameEntity* GameManager::createPlayer(float x, float y)
 {
 	createFloor(x, y);
 
-	SceneGraphNode * character = new SceneGraphNode(_gameNode, _scene);
-
+	auto character = new SceneGraphNode(_gameNode, _scene);
+	body_ = new SceneGraphNode(_scene);
+	
 	const auto cube = new Cube(_bufferObjects, _scene);
 	cube->changeColor(BLUE);
 	cube->changeShininess(0.3f);
@@ -143,7 +144,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 		head_wrapper->scale(Vector3f(0.2f, 0.2f, 0.2f));
 		head_wrapper->translate(Vector3f(-0.15f, -0.175f, 0.1f));
 		head_wrapper->add(head_);
-		character->add(head_wrapper);
+		body_->add(head_wrapper);
 	}
 
 	{
@@ -154,7 +155,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 		object->rotate(5, Vector3f(1, 0, 0));
 		object->translate(Vector3f(-0.225f, -0.225f, -0.5));
 		SceneGraphNode * body = new SceneGraphNode(_gameNode, object, _scene);
-		character->add(body);
+		body_->add(body);
 	}
 
 	{
@@ -165,7 +166,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 		object->rotate(10, Vector3f(1, 0, 0));
 		object->translate(Vector3f(-0.45f, -0.235f, -0.35));
 		_rightHand = new SceneGraphNode(_gameNode, object, _scene);
-		character->add(_rightHand);
+		body_->add(_rightHand);
 	}
 
 	{
@@ -176,7 +177,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 		object->rotate(10, Vector3f(1, 0, 0));
 		object->translate(Vector3f(0.05f, -0.235f, -0.35));
 		_leftHand = new SceneGraphNode(_gameNode, object, _scene);
-		character->add(_leftHand);
+		body_->add(_leftHand);
 	}
 
 	{
@@ -199,6 +200,7 @@ GameEntity* GameManager::createPlayer(float x, float y)
 		character->add(_leftFoot);
 	}
 
+	character->add(body_);
 	// Fix anchor point and rotation
 	character->translate(Vector3f(0.1f, 0.175f, 0.8));
 	character->rotate(90, Vector3f(0, 0, 1));

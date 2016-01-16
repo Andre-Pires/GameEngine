@@ -13,11 +13,12 @@ class GameManager
 	std::map<std::string, Texture *> normals;
 	std::map<std::string, Texture *> channels;
 
+	SceneGraphNode* body_;
 	SceneGraphNode* head_;
-	SceneGraphNode *_rightHand;
-	SceneGraphNode *_leftHand;
-	SceneGraphNode *_rightFoot;
-	SceneGraphNode *_leftFoot;
+	SceneGraphNode* _rightHand;
+	SceneGraphNode* _leftHand;
+	SceneGraphNode* _rightFoot;
+	SceneGraphNode* _leftFoot;
 
 	GeometricObject *_floorObject;
 
@@ -45,6 +46,7 @@ public:
 	GameEntity* createPlayer(float x, float y);
 	GameEntity* createBomb(float x, float y);
 
+	SceneGraphNode* getBody() const { return body_; }
 	SceneGraphNode* getHead() const { return head_; }
 	SceneGraphNode* getRightHand() const { return _rightHand; }
 	SceneGraphNode* getLeftHand() const { return _leftHand; }

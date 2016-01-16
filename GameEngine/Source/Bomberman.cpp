@@ -116,6 +116,7 @@ unsigned Bomberman::getCurrentTime()
 void Bomberman::placeBomb()
 {
 	if (player_active_ || bomb_on_player_ != nullptr) return;
+	setPlayerActivity(true);
 
 	auto bombRow = _gridMap->getPlayerRow();
 	auto bombCol = _gridMap->getPlayerCol();
@@ -141,6 +142,7 @@ void Bomberman::setPlayerActivity(bool activity)
 		player_inactive_since_ = getCurrentTime();
 		idle_last_iteration_time_ = 0;
 		total_head_reset_time_ = 0;
+		GameManager::getInstance().getBody()->clearTransformations();
 	}
 
 	player_active_ = activity;
@@ -378,8 +380,16 @@ void Bomberman::playerUpdate(unsigned elapsed_time)
 	else
 	{
 		auto duration_of_inactivity = getCurrentTime() - player_inactive_since_;
-		if (duration_of_inactivity >= IDLE_AFTER_TIME)
+		if (duration_of_inactivity > IDLE_AFTER_TIME)
 		{
+			auto idle_time = duration_of_inactivity - IDLE_AFTER_TIME;
+
+			// TODO
+			auto ammount = sin(idle_time*0.005f)*0.04f;
+			GameManager::getInstance().getBody()->clearTransformations();
+			GameManager::getInstance().getBody()->translate(Vector3f(0, 0, ammount));
+
+
 			//auto total_animation_time = duration_of_inactivity - IDLE_AFTER_TIME;
 			auto time_since_last_iteration = getCurrentTime() - idle_last_iteration_time_;
 
