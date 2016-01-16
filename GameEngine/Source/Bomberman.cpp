@@ -57,6 +57,15 @@ void Bomberman::rotatePlayerRight()
 	_rotationDirection = 1;
 }
 
+void Bomberman::rotatePlayerBack()
+{
+	if (player_active_) return;
+
+	setPlayerActivity(true);
+	total_rotation_time_ = -int(ROTATE_ANIMATION_DURATION);
+	_rotationDirection = 1;
+}
+
 void Bomberman::liftArms()
 {
 	GameManager::getInstance().getRightHand()->clearTransformations();
@@ -323,7 +332,8 @@ void Bomberman::playerUpdate(unsigned elapsed_time)
 		if (!rotation_finished)
 		{
 			unsigned rotationTime;
-			if (total_rotation_time_ + elapsed_time >= ROTATE_ANIMATION_DURATION)
+			int test = total_rotation_time_ + int(elapsed_time);
+			if (test >= int(ROTATE_ANIMATION_DURATION))
 			{
 				// This means the rotation is finishing, we should walk next
 				rotationTime = ROTATE_ANIMATION_DURATION - total_rotation_time_;

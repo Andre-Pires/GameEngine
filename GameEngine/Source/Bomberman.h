@@ -36,7 +36,7 @@ private:
 	GameEntity *_playerEntity;
 
 	unsigned total_walk_time_;
-	unsigned total_rotation_time_;
+	int total_rotation_time_; // TODO
 	unsigned total_head_reset_time_;
 
 	int _rotationDirection;
@@ -81,6 +81,7 @@ public:
 
 	void rotatePlayerLeft();
 	void rotatePlayerRight();
+	void rotatePlayerBack();
 
 	void liftArms();
 	void lowerArms();

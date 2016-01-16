@@ -471,6 +471,7 @@ void processSpecialKeys(int key, int xx, int yy)
 	case GLUT_KEY_DOWN:
 		//uncomment for debug purposes
 		//bomberman->playerWalkBackwards();
+		bomberman->rotatePlayerBack();
 		break;
 	case GLUT_KEY_LEFT:
 		bomberman->rotatePlayerLeft();
