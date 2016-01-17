@@ -96,7 +96,6 @@ void ShadowRenderer::generateShadowFBO(int viewX, int viewY)
 void ShadowRenderer::destroyShadowFBO()
 {
 	glDeleteTextures(1, &depthTextureId);
-	//glDeleteRenderbuffers(1, &depth_rb);
 	//Bind 0, which means render to back buffer, as a result, fb is unbound
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fboId);

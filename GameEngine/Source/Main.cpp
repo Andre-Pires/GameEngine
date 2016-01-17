@@ -260,6 +260,8 @@ void createProgram()
 	sceneLights.push_back(pointLight);
 
 	//NOTE: code for the direccional light
+	//Uncomment in case a directional light is needed
+
 //	Light * directionalLight = new Light(shader, sceneLights.size(), DIRECTIONAL_LIGHT);
 //	sceneLights.push_back(directionalLight);
 
@@ -305,6 +307,8 @@ void createProgram()
 	spotLight->coneDirection = Vector4f(0.3, 0.0, -1.0, 1.0);
 
 	//NOTE: code for the directional light
+	//Uncomment in case a directional light is needed
+
 //	directionalLight->position = Vector4f(-9.6, 0, 10.0, 1.0);
 //	directionalLight->ambientColor = Vector4f(0.1, 0.1, 0.1, 1.0);
 //	directionalLight->diffuseColor = Vector4f(0.85, 0.85, 0.85, 1.0);
@@ -469,8 +473,6 @@ void processSpecialKeys(int key, int xx, int yy)
 		bomberman->playerWalk();
 		break;
 	case GLUT_KEY_DOWN:
-		//uncomment for debug purposes
-		//bomberman->playerWalkBackwards();
 		bomberman->rotatePlayerBack();
 		break;
 	case GLUT_KEY_LEFT:
