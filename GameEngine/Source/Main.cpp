@@ -455,7 +455,7 @@ void processKeys(unsigned char key, int xx, int yy)
 	case 'c':
 	case 'C':
 		controllableCamera ? controllableCamera = false : controllableCamera = true;
-		cout << "Camera controll active: " << controllableCamera;
+		cout << "Camera control active: " << controllableCamera;
 		if (controllableCamera) cout << " (some visual artifacts might occur).";
 		cout << endl;
 		break;
