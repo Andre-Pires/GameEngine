@@ -17,36 +17,36 @@ GridMap::~GridMap()
 
 bool GridMap::isValid(unsigned row, unsigned col) const
 {
-	return _grid.size() > row && _grid[row].size() > col;
+	return grid_.size() > row && grid_[row].size() > col;
 }
 
 bool GridMap::isClear(unsigned row, unsigned col) const
 {
-	return isValid(row, col) && _grid[row][col] == nullptr;
+	return isValid(row, col) && grid_[row][col] == nullptr;
 }
 
 void GridMap::clear(unsigned row, unsigned col)
 {
-	delete _grid[row][col];
-	_grid[row][col] = nullptr;
+	delete grid_[row][col];
+	grid_[row][col] = nullptr;
 }
 
 bool GridMap::isDestructible(unsigned row, unsigned col)
 {
-	return isValid(row, col) && _grid[row][col] != nullptr && _grid[row][col]->isDestructible();
+	return isValid(row, col) && grid_[row][col] != nullptr && grid_[row][col]->isDestructible();
 }
 
 void GridMap::setEntity(unsigned row, unsigned col, GameEntity* gameEntity)
 {
-	_grid[row][col] = gameEntity;
+	grid_[row][col] = gameEntity;
 }
 
 void GridMap::moveEntity(unsigned row, unsigned col, unsigned newRow, unsigned newCol)
 {
 	assert(isClear(newRow, newCol));
 
-	_grid[newRow][newCol] = _grid[row][col];
-	_grid[row][col] = nullptr;
+	grid_[newRow][newCol] = grid_[row][col];
+	grid_[row][col] = nullptr;
 }
 
 void GridMap::parseFile(std::string filename)
@@ -57,7 +57,7 @@ void GridMap::parseFile(std::string filename)
 	while (ifile.good()) {
 		std::string line;
 		std::getline(ifile, line);
-		_grid.push_back(parseLine(line, row++));
+		grid_.push_back(parseLine(line, row++));
 	}
 }
 
@@ -86,9 +86,9 @@ GameEntity* GridMap::parseChar(char c, unsigned row, unsigned col)
 	case '+':
 		return GameManager::getInstance().createDestructibleWall(col, -float(row));
 	case '1':
-		_playerRow = row;
-		_playerCol = col;
-		_playerEntity = GameManager::getInstance().createPlayer(col, -float(row));
+		player_row_ = row;
+		player_col_ = col;
+		player_entity_ = GameManager::getInstance().createPlayer(col, -float(row));
 		return nullptr;
 	case 'x':
 		return GameManager::getInstance().createBomb(col, -float(row));

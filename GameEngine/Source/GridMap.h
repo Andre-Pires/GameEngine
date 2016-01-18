@@ -4,10 +4,10 @@
 
 class GridMap
 {
-	std::vector<std::vector<GameEntity*>> _grid;
-	unsigned _playerRow;
-	unsigned _playerCol;
-	GameEntity *_playerEntity;
+	std::vector<std::vector<GameEntity*>> grid_;
+	unsigned player_row_;
+	unsigned player_col_;
+	GameEntity *player_entity_;
 
 	void parseFile(std::string filename);
 	std::vector<GameEntity*> parseLine(std::string line, unsigned row);
@@ -26,12 +26,12 @@ public:
 	void moveEntity(unsigned row, unsigned col, unsigned newRow, unsigned newCol);
 
 
-	unsigned getPlayerRow() const { return _playerRow; }
-	unsigned getPlayerCol() const { return _playerCol; }
+	unsigned getPlayerRow() const { return player_row_; }
+	unsigned getPlayerCol() const { return player_col_; }
 	
-	void setPlayerRow(unsigned row) { _playerRow = row; }
-	void setPlayerCol(unsigned col) { _playerCol = col; }
+	void setPlayerRow(unsigned row) { player_row_ = row; }
+	void setPlayerCol(unsigned col) { player_col_ = col; }
 
-	GameEntity* getPlayerEntity() const { return _playerEntity; }
+	GameEntity* getPlayerEntity() const { return player_entity_; }
 };
 
