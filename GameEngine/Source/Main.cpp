@@ -32,7 +32,6 @@
 #include "..\Dependencies\freeglut\freeglut.h"
 
 #define CAPTION "Game Engine"
-#define ANIMATION_RATE 1000 / 60
 
 int WinX = 1366, WinY = 768;
 int WindowHandle = 0;
@@ -83,14 +82,16 @@ std::vector<ShadowRenderer *> shadowRenderers;
 
 //Post Process Flash
 PostProcessRenderer * postProcessRenderer;
-bool flashActive = false;
-std::clock_t flashStart;
+bool flash_active = false;
+unsigned flash_start;
 typedef void(*CallbackType)();
 
 unsigned _lastUpdateTime = 0;
 
 const std::string default_map = "Assets/layouts/activeMap.txt";
 std::string custom_map;
+
+const float FLASH_EFFECT_DURATION = 1500;
 void activateFlash();
 
 /////////////////////////////////////////////////////////////////////// SCENE
@@ -112,30 +113,25 @@ void createGameScene()
 
 void activateFlash()
 {
-	flashActive = true;
-	flashStart = std::clock();
+	flash_active = true;
+	flash_start = glutGet(GLUT_ELAPSED_TIME);
 }
 
-void flashTimer(int value)
+void flashTimer(unsigned current_time)
 {
-	float totalDuration = 1500;
-	float timeElapsed = (std::clock() - flashStart) / (double)(CLOCKS_PER_SEC / 1000);
-	if (flashActive)
+	auto elapsed_time = (current_time - flash_start);
+
+	if (elapsed_time < FLASH_EFFECT_DURATION)
 	{
-		if (timeElapsed < totalDuration)
-		{
-			float ratio = (1 * timeElapsed) / totalDuration;
+		auto ratio = elapsed_time / float(FLASH_EFFECT_DURATION);
 
-			postProcessingShader->useShaderProgram();
-			glUniform1f(postProcessingShader->getUniformLocation(std::string("flashRatio")), ratio);
-		}
-		else
-		{
-			flashActive = false;
-		}
+		postProcessingShader->useShaderProgram();
+		glUniform1f(postProcessingShader->getUniformLocation("flashRatio"), ratio);
 	}
-
-	glutTimerFunc(ANIMATION_RATE, flashTimer, 0);
+	else
+	{
+		flash_active = false;
+	}
 }
 
 void updateCamera()
@@ -210,8 +206,9 @@ void drawScene()
 		}
 	}
 
-	if (flashActive)
+	if (flash_active)
 	{
+		flashTimer(currentUpdateTime);
 		postProcessRenderer->renderFlash();
 
 		scene->setActiveShader(postProcessingShader);
@@ -663,7 +660,6 @@ void setupCallbacks()
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0, timer, 0);
 	glutTimerFunc(0, timedRedisplay, 0);
-	glutTimerFunc(0, flashTimer, 0);
 }
 
 void setupOpenGL()
