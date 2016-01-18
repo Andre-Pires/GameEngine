@@ -89,6 +89,8 @@ typedef void(*CallbackType)();
 
 unsigned _lastUpdateTime = 0;
 
+const std::string default_map = "Assets/layouts/activeMap.txt";
+std::string custom_map;
 void activateFlash();
 
 /////////////////////////////////////////////////////////////////////// SCENE
@@ -96,7 +98,9 @@ void activateFlash();
 void createGameScene()
 {
 	gameNode = new SceneGraphNode(sceneGraph, scene);
-	bomberman = new Bomberman("Assets/layouts/activeMap.txt", scene, gameNode, bufferObjects, shader, &activateFlash);
+
+	auto map = custom_map.empty() ? default_map : custom_map;
+	bomberman = new Bomberman(std::move(map), scene, gameNode, bufferObjects, shader, &activateFlash);
 
 	sceneGraph->add(gameNode);
 
@@ -726,6 +730,11 @@ int main(int argc, char* argv[])
 	std::cout << std::boolalpha;
 	srand(static_cast <unsigned> (time(0)));
 	Utilities::randomize();
+
+	if (argc > 1)
+	{
+		custom_map = argv[1];
+	}
 
 	init(argc, argv);
 	glutMainLoop();
