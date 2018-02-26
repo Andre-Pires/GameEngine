@@ -119,7 +119,7 @@ void ShadowRenderer::renderShadows()
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		// offset by two units equal to smallest value of change in the shadow map
 		// and offset by two units depending on the slope of the polygon
-		glPolygonOffset(2.0f, 2.0f);
+		glPolygonOffset(3, 3);
 		camera->ortho(-20.0f + lightPos.x, 20.0f + lightPos.x, -20.0f + lightPos.y, 20.0f + lightPos.y, -100.0f + lightPos.z, 100.0f + lightPos.z);
 		camera->lookAt(lightPos, center, Vector3f(0, 1, 0));
 	}
